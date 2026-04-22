@@ -167,6 +167,23 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
     <span id="phase-chip" class="phase-chip join"><span class="blink b"></span>참여시간</span>
   </div>
   <div id="pg-home">
+    <!-- 봉사 알림 배너 (봉사 있을 때만 표시) -->
+    <div id="service-banner" style="display:none;margin:12px 14px 0">
+      <div id="service-banner-inner" style="border-radius:var(--r);padding:14px 16px;border:2px solid">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="font-size:22px" id="sv-icon">🚨</span>
+          <div>
+            <div style="font-size:14px;font-weight:700" id="sv-title"></div>
+            <div style="font-size:12px;margin-top:2px;opacity:.85" id="sv-desc"></div>
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,.06);border-radius:var(--r3);padding:10px 12px;font-size:12px;line-height:1.65" id="sv-guide">
+          참여 등록 후 완료 체크를 하면 봉사 1회이 차감됩니다.
+        </div>
+        <div style="margin-top:8px;font-size:11px;font-weight:700;text-align:right" id="sv-deadline"></div>
+      </div>
+    </div>
+
     <div class="week-hero">
       <div class="user-status-row">
         <div class="user-left">
@@ -180,7 +197,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
       </div>
       <div class="week-counts">
         <div class="wc-box"><span class="wc-icon">📅</span><div><div class="wc-label">이번 주 참여</div><div class="wc-val neutral" id="wc-join">-</div></div></div>
-        <div class="wc-box"><span class="wc-icon">🚨</span><div><div class="wc-label">봉사 누적</div><div class="wc-val neutral" id="wc-sv">-</div></div></div>
+        <div class="wc-box"><span class="wc-icon">🚨</span><div><div class="wc-label">봉사 누적(회)</div><div class="wc-val neutral" id="wc-sv">-</div></div></div>
       </div>
       <div class="wk-label">요일별 참여 현황</div>
       <div class="wk-grid" id="wk-grid"></div>
@@ -247,8 +264,8 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
       <div class="ri"><span class="rn">⑤</span>주 2회 이상 참여 필수</div>
     </div>
     <div class="rule-block"><div class="rb-head green">봉사 규칙</div>
-      <div class="ri"><span class="rn">①</span>주 0회 → 봉사 2일 / 주 1회 → 봉사 1일 (매주 일요일 자동)</div>
-      <div class="ri"><span class="rn">②</span>완료 미등록 → 봉사 1일 자동 부여</div>
+      <div class="ri"><span class="rn">①</span>주 0회 → 봉사 2회 / 주 1회 → 봉사 1회 (매주 일요일 자동)</div>
+      <div class="ri"><span class="rn">②</span>완료 미등록 → 봉사 1회 자동 부여</div>
       <div class="ri"><span class="rn">③</span>봉사 발생 후 3일 이내 미처리 시 계정 자동 잠금 (운영진 해제 필요)</div>
       <div class="ri"><span class="rn">④</span>해태/무임승차/먹튀 → 연계방 전체 차단 (1,500명+)</div>
     </div>
@@ -264,7 +281,6 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
   <div class="bnav-row">
     <button class="nb on" onclick="switchPg('home',0)"><span class="nb-icon">🏠</span><span class="nb-label">홈</span></button>
     <button class="nb" onclick="switchPg('rules',1)"><span class="nb-icon">📋</span><span class="nb-label">규칙</span></button>
-    <a class="nb" href="dashboard.html"><span class="nb-icon">📊</span><span class="nb-label">현황</span></a>
   </div>
 </nav>
 <div class="overlay" id="ov-join" onclick="bgClose(event,'ov-join')">
@@ -343,7 +359,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
   </div>
 </div>
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbye4ow2zpUfq6kkMjcCHwbsEjsrVxXVW8kmcC5dPZ0tpGN0GIsw8inNKMl5iT2JfEBkrA/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxImu1SCQM-4cma8Kx8RoHsM_MsX3eHYoK_7-NU5GHw_QoxVms2toh7c_up-X4CrupZig/exec';
 const DAYS=['월','화','수','목','금','토','일'];
 let user=null,settings={},myWeek=null;
 async function api(action,p={}){const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,...p})});return r.json();}
@@ -370,7 +386,7 @@ async function crewLogin(){
 async function loadMain(){
   const[s,st]=await Promise.all([api('getSettings').catch(()=>({ok:false})),api('myStatus',{nickname:user.nick,instagramId:user.id}).catch(()=>({ok:false}))]);
   if(s.ok)settings=s.settings;
-  if(st.ok){user={...user,...st.member};myWeek=st.thisWeek;}
+  if(st.ok){user={...user,...st.member};myWeek=st.thisWeek;user.serviceInfo=st.serviceInfo||null;}
   document.getElementById('ht-text').textContent=settings.hashtag||'#해시태그 없음';
   loadVanLinks();
   renderAll();renderPhase();
@@ -398,10 +414,64 @@ function renderAll(){
   let t='';
   if(user.isHonor)t+='<span class="etag etag-honor">🏅 명예회원</span>';
   if(user.onVacation)t+='<span class="etag etag-vac">✈️ 휴가 중</span>';
-  if(sv>0)t+=`<span class="etag etag-sv">봉사 ${sv}일 누적</span>`;
+  if(sv>0)t+=`<span class="etag etag-sv">봉사 ${sv}회 누적</span>`;
   tags.innerHTML=t;tags.style.display=t?'flex':'none';
+  renderServiceBanner();
   renderWeekGrid();
   renderActionArea();
+}
+
+function renderServiceBanner(){
+  const banner=document.getElementById('service-banner');
+  const inner=document.getElementById('service-banner-inner');
+  if(!banner||!inner)return;
+  const sv=Number(user.service||0);
+  const status=user.status;
+  const si=user.serviceInfo;
+
+  if(status==='locked'){
+    banner.style.display='block';
+    inner.style.background='var(--red-bg)';
+    inner.style.borderColor='var(--red-text)';
+    document.getElementById('sv-icon').textContent='🔒';
+    document.getElementById('sv-title').style.color='var(--red-text)';
+    document.getElementById('sv-title').textContent='계정이 잠금 상태입니다';
+    document.getElementById('sv-desc').style.color='var(--red-text)';
+    document.getElementById('sv-desc').textContent='봉사 처리 기한을 초과했습니다. 운영진에게 문의해주세요.';
+    document.getElementById('sv-guide').textContent='카카오톡방 운영진에게 잠금 해제를 요청해주세요.';
+    document.getElementById('sv-deadline').style.color='var(--red-text)';
+    document.getElementById('sv-deadline').textContent='';
+    return;
+  }
+
+  if(sv<=0){banner.style.display='none';return;}
+
+  const isUrgent=si&&si.isUrgent;
+  banner.style.display='block';
+
+  if(isUrgent){
+    inner.style.background='var(--red-bg)';
+    inner.style.borderColor='var(--red-text)';
+    document.getElementById('sv-icon').textContent='🚨';
+    document.getElementById('sv-title').style.color='var(--red-text)';
+    document.getElementById('sv-title').textContent=`봉사 ${sv}회 — 오늘 처리하지 않으면 잠금!`;
+    document.getElementById('sv-desc').style.color='var(--red-text)';
+    document.getElementById('sv-desc').textContent='지금 바로 참여 등록 후 완료 체크를 해주세요';
+    document.getElementById('sv-guide').textContent='참여 등록 → 완료 체크 1회 완료 시 봉사 1회 자동 차감됩니다.';
+    document.getElementById('sv-deadline').style.color='var(--red-text)';
+    document.getElementById('sv-deadline').textContent=si?`⏰ 처리 기한: ${si.deadline}까지 (${si.daysLeft}일 남음)`:'';
+  } else {
+    inner.style.background='var(--amber-bg)';
+    inner.style.borderColor='var(--amber-text)';
+    document.getElementById('sv-icon').textContent='⚠️';
+    document.getElementById('sv-title').style.color='var(--amber-text)';
+    document.getElementById('sv-title').textContent=`봉사 ${sv}회 처리 필요`;
+    document.getElementById('sv-desc').style.color='var(--amber-text)';
+    document.getElementById('sv-desc').textContent='참여 등록 후 완료 체크를 하면 1일 차감됩니다';
+    document.getElementById('sv-guide').textContent='참여 등록 → 완료 체크 1회 완료 시 봉사 1회 자동 차감. 3일 내 미처리 시 계정이 잠깁니다.';
+    document.getElementById('sv-deadline').style.color='var(--amber-text)';
+    document.getElementById('sv-deadline').textContent=si?`⏰ 처리 기한: ${si.deadline}까지 (${si.daysLeft}일 남음)`:'';
+  }
 }
 
 function renderActionArea(){

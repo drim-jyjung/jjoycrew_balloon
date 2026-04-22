@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --navy:#0d1117;--navy2:#161b22;--navy3:#21262d;--navy4:#2d333b;
+  --navy:#0d1117;--navy2:#161b22;--navy3:#21262d;
   --border:#30363d;--border2:#444c56;
   --text:#e6edf3;--text2:#8b949e;--text3:#484f58;
   --accent:#58a6ff;--accent-bg:rgba(88,166,255,.1);--accent-border:rgba(88,166,255,.3);
@@ -15,105 +15,90 @@
   --amber:#d29922;--amber-bg:rgba(210,153,34,.1);--amber-border:rgba(210,153,34,.3);
   --red:#f85149;--red-bg:rgba(248,81,73,.1);--red-border:rgba(248,81,73,.3);
   --purple:#bc8cff;--purple-bg:rgba(188,140,255,.1);--purple-border:rgba(188,140,255,.3);
-  --orange:#f0883e;--orange-bg:rgba(240,136,62,.1);
-  --sidebar:240px;--r:8px;--r2:6px;
+  --orange:#f0883e;--orange-bg:rgba(240,136,62,.1);--orange-border:rgba(240,136,62,.3);
+  --sidebar:220px;--r:8px;--r2:6px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--navy);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;font-size:14px}
-a{color:var(--accent);text-decoration:none}
 
-/* ── 로그인 ── */
-#login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--navy)}
+/* 로딩 프로그레스바 */
+#progress-bar{position:fixed;top:0;left:0;width:0;height:3px;background:var(--accent);z-index:9999;transition:width .3s,opacity .4s;opacity:0}
+#progress-bar.on{opacity:1}
+
+/* 로그인 */
+#login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center}
 .login-box{width:380px;background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:32px 28px}
 .login-logo{text-align:center;margin-bottom:28px}
 .login-logo .icon{font-size:36px;display:block;margin-bottom:8px}
-.login-logo h1{font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px}
+.login-logo h1{font-size:18px;font-weight:700;margin-bottom:4px}
 .login-logo p{font-size:12px;color:var(--text2)}
 .lf{margin-bottom:14px}
 .lf label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px}
 .lf input{width:100%;padding:9px 12px;background:var(--navy3);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);font-size:14px;outline:none;transition:.15s;font-family:inherit}
 .lf input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
-.btn-login{width:100%;padding:10px;font-size:14px;font-weight:700;border:none;border-radius:var(--r2);background:var(--accent);color:#0d1117;cursor:pointer;margin-top:4px;font-family:inherit;transition:.15s}
+.btn-login{width:100%;padding:10px;font-size:14px;font-weight:700;border:none;border-radius:var(--r2);background:var(--accent);color:#0d1117;cursor:pointer;margin-top:4px;font-family:inherit}
 .btn-login:hover{opacity:.88}
 .err{font-size:12px;color:var(--red);margin-top:8px;display:none}
 .err.on{display:block}
 
-/* ── 앱 레이아웃 ── */
-#app{display:none;min-height:100vh;display:flex;flex-direction:column}
+/* 앱 레이아웃 */
+#app{display:none;min-height:100vh;flex-direction:column}
 .appbar{background:var(--navy2);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-shrink:0}
-.appbar-left{display:flex;align-items:center;gap:12px}
-.app-logo{font-size:15px;font-weight:900;color:var(--text);display:flex;align-items:center;gap:6px}
-.app-logo-icon{font-size:20px}
+.app-logo{font-size:15px;font-weight:900;display:flex;align-items:center;gap:8px}
 .admin-pill{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700}
-.appbar-right{display:flex;align-items:center;gap:12px}
-.admin-who{font-size:12px;color:var(--text2)}
-.btn-logout{padding:5px 12px;font-size:12px;background:transparent;border:1px solid var(--border2);border-radius:var(--r2);color:var(--text2);cursor:pointer;font-family:inherit;transition:.15s}
-.btn-logout:hover{border-color:var(--red);color:var(--red)}
-
+.btn-logout{padding:5px 12px;font-size:12px;background:transparent;border:1px solid var(--border2);border-radius:var(--r2);color:var(--text2);cursor:pointer;font-family:inherit}
+.btn-logout:hover{color:var(--red);border-color:var(--red)}
 .body-wrap{display:flex;flex:1;overflow:hidden}
 
-/* ── 사이드바 ── */
-.sidebar{width:var(--sidebar);background:var(--navy2);border-right:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto}
-.nav-section{padding:16px 12px 6px}
-.nav-section-label{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:0 8px;margin-bottom:4px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--r2);cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:.12s;border:1px solid transparent;margin-bottom:2px;background:none;width:100%;text-align:left;font-family:inherit}
+/* 사이드바 */
+.sidebar{width:var(--sidebar);background:var(--navy2);border-right:1px solid var(--border);flex-shrink:0;overflow-y:auto;padding:12px 10px}
+.nav-sec-label{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:0 8px;margin:12px 0 4px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r2);cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;border:1px solid transparent;margin-bottom:2px;background:none;width:100%;text-align:left;font-family:inherit;transition:.12s}
 .nav-item:hover{background:var(--navy3);color:var(--text)}
 .nav-item.on{background:var(--navy3);color:var(--accent);border-color:var(--border)}
 .nav-item .ni{font-size:16px;flex-shrink:0}
-.nav-item .nd{font-size:10px;color:var(--text3);margin-top:1px;line-height:1.4}
+.nav-item .nd{font-size:10px;color:var(--text3);margin-top:1px}
 
-/* ── 콘텐츠 영역 ── */
-.content{flex:1;overflow-y:auto;padding:24px 28px;min-height:0}
+/* 콘텐츠 */
+.content{flex:1;overflow-y:auto;padding:24px 28px}
 .page{display:none}.page.on{display:block}
-.page-header{margin-bottom:20px}
-.page-header h2{font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px}
-.page-header p{font-size:13px;color:var(--text2)}
+.page-hd{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.page-hd h2{font-size:18px;font-weight:700}
+.page-hd p{font-size:13px;color:var(--text2);margin-top:3px}
 
 /* 카드 */
 .card{background:var(--navy2);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
-.card-title{font-size:13px;font-weight:700;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.card-title-left{display:flex;align-items:center;gap:8px}
-.card-desc{font-size:11px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;margin-top:2px}
+.card-title{font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 
-/* 그리드 */
+/* 통계 그리드 */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.stat-card{background:var(--navy3);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.stat-card{background:var(--navy3);border:1px solid var(--border);border-radius:var(--r);padding:16px}
 .stat-label{font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:500}
-.stat-val{font-size:28px;font-weight:900;line-height:1}
+.stat-val{font-size:28px;font-weight:900}
 .stat-val.blue{color:var(--accent)}.stat-val.green{color:var(--green)}.stat-val.amber{color:var(--amber)}.stat-val.red{color:var(--red)}
 
-/* 필드 */
-.field-row{display:grid;gap:12px;margin-bottom:12px}
-.field-row.c2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-.field-row.c3{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}
-.field-row.c4{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}
-.field{display:flex;flex-direction:column;gap:5px}
-.field label{font-size:12px;font-weight:500;color:var(--text2)}
-.field input,.field select{padding:8px 12px;background:var(--navy3);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);font-size:13px;outline:none;transition:.15s;font-family:inherit;-webkit-appearance:none;min-width:0;width:100%}
-.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
-.field input::placeholder{color:var(--text3)}
+/* 배지 */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;white-space:nowrap}
+.bg{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.ba{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.br{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.bb{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border)}
+.bp{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+.bo{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-border)}
+.bgray{background:var(--navy3);color:var(--text2);border:1px solid var(--border)}
 
 /* 버튼 */
-.btn{padding:8px 16px;font-size:13px;font-weight:600;border:1px solid transparent;border-radius:var(--r2);cursor:pointer;font-family:inherit;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.btn{padding:7px 14px;font-size:12px;font-weight:600;border:1px solid transparent;border-radius:var(--r2);cursor:pointer;font-family:inherit;transition:.15s;display:inline-flex;align-items:center;gap:5px}
 .btn:hover{opacity:.85}.btn:active{transform:scale(.98)}
 .btn-accent{background:var(--accent);color:#0d1117;border-color:var(--accent)}
 .btn-green{background:var(--green);color:#0d1117;border-color:var(--green)}
 .btn-red{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
 .btn-amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border)}
+.btn-purple{background:var(--purple-bg);color:var(--purple);border-color:var(--purple-border)}
 .btn-ghost{background:transparent;color:var(--text2);border-color:var(--border2)}
 .btn-ghost:hover{color:var(--text);border-color:var(--text2)}
-.btn-purple{background:var(--purple-bg);color:var(--purple);border-color:var(--purple-border)}
 .btn-sm{padding:4px 10px;font-size:11px}
 .btn-w{width:100%;justify-content:center}
-
-/* 배지 */
-.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;white-space:nowrap}
-.badge-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
-.badge-amber{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
-.badge-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
-.badge-blue{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border)}
-.badge-purple{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
-.badge-gray{background:var(--navy3);color:var(--text2);border:1px solid var(--border)}
 
 /* 알림 */
 .alert{padding:10px 14px;border-radius:var(--r2);font-size:12px;line-height:1.6;margin-bottom:12px;border:1px solid;display:none}
@@ -123,56 +108,73 @@ a{color:var(--accent);text-decoration:none}
 .alert-amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border)}
 .alert-blue{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-border)}
 
+/* 필드 */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:12px;font-weight:500;color:var(--text2)}
+.field input,.field select{padding:8px 12px;background:var(--navy3);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);font-size:13px;outline:none;font-family:inherit;-webkit-appearance:none;min-width:0;width:100%}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
+.field input::placeholder{color:var(--text3)}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.row3{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:10px}
+
 /* 테이블 */
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{font-size:11px;font-weight:600;color:var(--text2);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--navy3)}
-td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
-tr:hover td{background:rgba(255,255,255,.02)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
 tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
 
 /* 주간현황 그룹 */
-.week-group{margin-bottom:20px}
-.wg-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:var(--r2) var(--r2) 0 0;border:1px solid;border-bottom:none}
-.wg-header.red{background:var(--red-bg);border-color:var(--red-border)}
-.wg-header.amber{background:var(--amber-bg);border-color:var(--amber-border)}
-.wg-header.purple{background:var(--purple-bg);border-color:var(--purple-border)}
-.wg-header.green{background:var(--green-bg);border-color:var(--green-border)}
-.wg-header.gold{background:rgba(240,136,62,.1);border-color:rgba(240,136,62,.3)}
+.wg{margin-bottom:16px;border-radius:var(--r);overflow:hidden;border:1px solid}
+.wg.red{border-color:var(--red-border)}.wg.amber{border-color:var(--amber-border)}
+.wg.purple{border-color:var(--purple-border)}.wg.green{border-color:var(--green-border)}
+.wg.gold{border-color:var(--orange-border)}.wg.gray{border-color:var(--border)}
+.wg-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid}
+.wg.red .wg-hd{background:var(--red-bg);border-color:var(--red-border)}
+.wg.amber .wg-hd{background:var(--amber-bg);border-color:var(--amber-border)}
+.wg.purple .wg-hd{background:var(--purple-bg);border-color:var(--purple-border)}
+.wg.green .wg-hd{background:var(--green-bg);border-color:var(--green-border)}
+.wg.gold .wg-hd{background:var(--orange-bg);border-color:var(--orange-border)}
+.wg.gray .wg-hd{background:var(--navy3);border-color:var(--border)}
 .wg-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
-.wg-title.red{color:var(--red)}.wg-title.amber{color:var(--amber)}.wg-title.purple{color:var(--purple)}.wg-title.green{color:var(--green)}.wg-title.gold{color:var(--orange)}
-.wg-sub{font-size:11px;color:var(--text2);margin-left:4px;font-weight:400}
+.wg.red .wg-title{color:var(--red)}.wg.amber .wg-title{color:var(--amber)}
+.wg.purple .wg-title{color:var(--purple)}.wg.green .wg-title{color:var(--green)}
+.wg.gold .wg-title{color:var(--orange)}.wg.gray .wg-title{color:var(--text2)}
+.wg-sub{font-size:11px;color:var(--text2);font-weight:400}
 .wg-right{display:flex;align-items:center;gap:8px}
-.wg-body{border:1px solid;border-radius:0 0 var(--r2) var(--r2);overflow:hidden;max-height:260px;overflow-y:auto}
-.wg-body.red{border-color:var(--red-border)}.wg-body.amber{border-color:var(--amber-border)}.wg-body.purple{border-color:var(--purple-border)}.wg-body.green{border-color:var(--green-border)}.wg-body.gold{border-color:rgba(240,136,62,.3)}
-.wg-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--navy2)}
+.wg-body{max-height:260px;overflow-y:auto;background:var(--navy2)}
+.wg-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)}
 .wg-row:last-child{border-bottom:none}
 .wg-row:hover{background:var(--navy3)}
-.wg-empty{padding:16px 14px;font-size:12px;color:var(--text3);background:var(--navy2)}
 .wg-name{font-weight:700;font-size:13px}
 .wg-id{font-size:11px;color:var(--text2);margin-top:2px}
+.wg-empty{padding:14px;font-size:12px;color:var(--text3)}
 .wg-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
 
 /* 복사 박스 */
-.copy-box{background:var(--navy3);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);line-height:1.7;white-space:pre-wrap;word-break:break-all;margin-bottom:10px;min-height:60px;max-height:200px;overflow-y:auto}
-.copy-box.has-content{color:var(--text)}
+.copy-box{background:var(--navy3);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);white-space:pre-wrap;word-break:break-all;margin-bottom:10px;max-height:200px;overflow-y:auto;line-height:1.7}
+.copy-box.has{color:var(--text)}
 
 /* 해시태그 미리보기 */
 .ht-display{background:var(--navy3);border:1px solid var(--accent-border);border-radius:var(--r2);padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;color:var(--accent);margin-bottom:12px;word-break:break-all}
 
+/* 필터바 */
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter-bar input{flex:1;min-width:160px;padding:7px 11px;background:var(--navy3);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);font-size:13px;outline:none;font-family:inherit}
+.filter-bar input:focus{border-color:var(--accent)}
+.filter-bar select{padding:7px 10px;background:var(--navy3);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);font-size:12px;outline:none;font-family:inherit;-webkit-appearance:none}
+
 /* 로그 */
-.log-row{display:flex;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.log-row{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
 .log-row:last-child{border-bottom:none}
 .log-time{color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px;min-width:60px;flex-shrink:0}
 .log-type{font-size:10px;padding:1px 6px;border-radius:4px;background:var(--navy3);color:var(--text2);min-width:38px;text-align:center;flex-shrink:0}
 .log-msg{color:var(--text2);flex:1;line-height:1.5}
 
-/* 빈 상태 */
-.empty-state{padding:32px;text-align:center;color:var(--text3);font-size:13px}
-.empty-state .ei{font-size:28px;display:block;margin-bottom:8px}
-
-/* 구분선 */
-hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+/* 빈상태 */
+.empty{padding:28px;text-align:center;color:var(--text3);font-size:13px}
+.empty .ei{font-size:28px;display:block;margin-bottom:8px}
 
 /* 토스트 */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--navy2);border:1px solid var(--border);color:var(--text);padding:12px 18px;border-radius:var(--r);font-size:13px;font-weight:500;opacity:0;transition:.25s;z-index:1000;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.4)}
@@ -183,18 +185,14 @@ hr{border:none;border-top:1px solid var(--border);margin:16px 0}
 
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* 검색/필터 바 */
-.filter-bar{display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
-.filter-bar input{flex:1;min-width:160px;padding:7px 11px;background:var(--navy3);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);font-size:13px;outline:none;font-family:inherit}
-.filter-bar input:focus{border-color:var(--accent)}
-.filter-bar select{padding:7px 10px;background:var(--navy3);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);font-size:12px;outline:none;font-family:inherit;-webkit-appearance:none}
+hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 </style>
 </head>
 <body>
+<div id="progress-bar"></div>
 <div class="toast" id="toast"></div>
 
-<!-- ══ 로그인 ══ -->
+<!-- 로그인 -->
 <div id="login-wrap">
   <div class="login-box">
     <div class="login-logo">
@@ -209,51 +207,27 @@ hr{border:none;border-top:1px solid var(--border);margin:16px 0}
   </div>
 </div>
 
-<!-- ══ 앱 ══ -->
+<!-- 앱 -->
 <div id="app" style="display:none;flex-direction:column">
   <div class="appbar">
-    <div class="appbar-left">
-      <div class="app-logo"><span class="app-logo-icon">🎈</span>열기구 방</div>
-      <span class="admin-pill">운영자</span>
-    </div>
-    <div class="appbar-right">
-      <span class="admin-who" id="admin-who"></span>
+    <div class="app-logo">🎈 열기구 방 <span class="admin-pill">운영자</span></div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font-size:12px;color:var(--text2)" id="admin-who"></span>
       <button class="btn-logout" onclick="doLogout()">로그아웃</button>
     </div>
   </div>
-
   <div class="body-wrap">
     <!-- 사이드바 -->
     <nav class="sidebar">
-      <div class="nav-section">
-        <div class="nav-section-label">현황</div>
-        <button class="nav-item on" onclick="sw('home',this)">
-          <span class="ni">🏠</span>
-          <div><div>오늘 현황</div><div class="nd">참여/완료 요약 + 해시태그</div></div>
-        </button>
-        <button class="nav-item" onclick="sw('week',this)">
-          <span class="ni">📊</span>
-          <div><div>주간 현황</div><div class="nd">경고/봉사/명예 전체 보기</div></div>
-        </button>
-      </div>
-      <div class="nav-section">
-        <div class="nav-section-label">관리</div>
-        <button class="nav-item" onclick="sw('member',this)">
-          <span class="ni">👥</span>
-          <div><div>멤버 관리</div><div class="nd">추가·조회·명예회원 지정</div></div>
-        </button>
-        <button class="nav-item" onclick="sw('report',this)">
-          <span class="ni">🚨</span>
-          <div><div>신고 / 휴가</div><div class="nd">신고 처리 + 휴가 승인</div></div>
-        </button>
-      </div>
-      <div class="nav-section">
-        <div class="nav-section-label">도구</div>
-        <button class="nav-item" onclick="sw('logs',this)">
-          <span class="ni">📋</span>
-          <div><div>활동 로그</div><div class="nd">전체 처리 기록 조회</div></div>
-        </button>
-      </div>
+      <div class="nav-sec-label">현황</div>
+      <button class="nav-item on" onclick="sw('home',this)"><span class="ni">🏠</span><div><div>오늘 현황</div><div class="nd">참여/완료 + 해시태그</div></div></button>
+      <button class="nav-item" onclick="sw('week',this)"><span class="ni">📊</span><div><div>주간 현황</div><div class="nd">6개 그룹 상태 보기</div></div></button>
+      <div class="nav-sec-label">관리</div>
+      <button class="nav-item" onclick="sw('member',this)"><span class="ni">👥</span><div><div>멤버 관리</div><div class="nd">추가·봉사·잠금 처리</div></div></button>
+      <button class="nav-item" onclick="sw('report',this)"><span class="ni">🚨</span><div><div>신고 / 휴가</div><div class="nd">신고 처리 + 휴가 명단</div></div></button>
+      <div class="nav-sec-label">도구</div>
+      <button class="nav-item" onclick="sw('sheet',this)"><span class="ni">📅</span><div><div>주차 시트 생성</div><div class="nd">매주 새 시트 만들기</div></div></button>
+      <button class="nav-item" onclick="sw('logs',this)"><span class="ni">📋</span><div><div>활동 로그</div><div class="nd">전체 처리 기록</div></div></button>
     </nav>
 
     <!-- 콘텐츠 -->
@@ -261,9 +235,9 @@ hr{border:none;border-top:1px solid var(--border);margin:16px 0}
 
       <!-- ① 홈 -->
       <div class="page on" id="pg-home">
-        <div class="page-header">
-          <h2>오늘 현황</h2>
-          <p>오늘 참여/완료 요약과 해시태그를 설정합니다</p>
+        <div class="page-hd">
+          <div><h2>오늘 현황</h2><p>참여/완료 요약과 해시태그 설정</p></div>
+          <button class="btn btn-ghost" onclick="loadHome()">새로고침</button>
         </div>
         <div class="stats-grid">
           <div class="stat-card"><div class="stat-label">오늘 참여</div><div class="stat-val blue" id="h-join">-</div></div>
@@ -271,164 +245,67 @@ hr{border:none;border-top:1px solid var(--border);margin:16px 0}
           <div class="stat-card"><div class="stat-label">완료 대기</div><div class="stat-val amber" id="h-undone">-</div></div>
           <div class="stat-card"><div class="stat-label">봉사 대상</div><div class="stat-val red" id="h-sv">-</div></div>
         </div>
-
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-          <!-- 오늘 참여자 -->
           <div class="card">
-            <div class="card-title">
-              <div class="card-title-left">오늘 참여자<span class="badge badge-blue" id="today-cnt">0명</span></div>
-              <button class="btn btn-ghost btn-sm" onclick="loadHome()">새로고침</button>
-            </div>
-            <div id="today-list"><div class="empty-state"><span class="ei">👋</span>아직 참여자 없음</div></div>
+            <div class="card-title">오늘 참여자 <span id="today-cnt" class="badge bb">0명</span></div>
+            <div id="today-list"><div class="empty"><span class="ei">👋</span>아직 참여자 없음</div></div>
           </div>
-
-          <!-- 해시태그 설정 -->
           <div class="card">
-            <div class="card-title">해시태그 설정<span class="badge badge-green">즉시 반영</span></div>
-            <div class="ht-display" id="ht-current">#해시태그 불러오는 중...</div>
-            <div class="field" style="margin-bottom:10px"><label>새 해시태그 (# 포함)</label><input id="ht-input" placeholder="#오늘의해시태그" style="font-family:'JetBrains Mono',monospace;font-size:15px"/></div>
+            <div class="card-title">해시태그 설정 <span class="badge bg">즉시 반영</span></div>
+            <div class="ht-display" id="ht-current">#불러오는 중...</div>
+            <div class="field"><label>새 해시태그 (# 포함)</label><input id="ht-input" placeholder="#오늘의해시태그" style="font-family:'JetBrains Mono',monospace;font-size:15px"/></div>
             <div class="alert" id="ht-alert"></div>
             <button class="btn btn-accent btn-w" onclick="setHashtag()">저장하기</button>
           </div>
         </div>
       </div>
 
-      <!-- ② 주간 현황 -->
+      <!-- ② 주간현황 — 상태 표시만 -->
       <div class="page" id="pg-week">
-        <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
-          <div>
-            <h2>주간 현황</h2>
-            <p>이번 주 전체 크루 참여 현황 — 봉사 대상자 명단을 복사해서 카카오톡에 공유하세요</p>
-          </div>
+        <div class="page-hd">
+          <div><h2>주간 현황</h2><p>이번 주 전체 크루 상태 — 봉사 부여/잠금은 멤버 관리 탭에서</p></div>
           <div style="display:flex;gap:8px">
             <button class="btn btn-ghost" onclick="loadWeek()">새로고침</button>
-            <button class="btn btn-amber" onclick="runClose()">주간 마감 실행</button>
+            <button class="btn btn-amber" onclick="runClose()">주간 마감</button>
           </div>
         </div>
         <div class="alert" id="close-alert"></div>
 
-        <!-- 봉사 대상 복사 박스 -->
-        <div class="card" style="margin-bottom:16px">
-          <div class="card-title">
-            <div class="card-title-left">
-              봉사 대상자 명단 복사
-              <span class="badge badge-amber">카카오톡 공유용</span>
-            </div>
-            <button class="btn btn-amber" onclick="copyServiceList()">📋 명단 전체 복사</button>
+        <!-- 봉사 대상자 복사 박스 -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:10px">
+            봉사 대상자 명단 <span class="badge ba">카카오톡 공유용</span>
+            <button class="btn btn-amber btn-sm" onclick="copyServiceList()" style="margin-left:auto">📋 전체 복사</button>
           </div>
-          <div class="copy-box" id="service-copy-box">봉사 대상자를 불러오는 중...</div>
-          <div style="font-size:11px;color:var(--text3)">봉사 기준: 주 2회 미참여(주단위) · 완료투표 미처리(일단위) · 허위 밴 등록 신고</div>
+          <div class="copy-box" id="service-copy-box">불러오는 중...</div>
+          <div style="font-size:11px;color:var(--text3)">봉사 기준: 주 2회 미완료(주단위) · 완료투표 미처리(일단위) · 허위 밴 신고 / 봉사 처리 = 봉사참여 유형으로 참여+완료체크</div>
         </div>
 
-        <!-- 경고 (주 0회) -->
-        <div class="week-group">
-          <div class="wg-header red">
-            <div class="wg-title red">❌ 경고 대상 <span class="wg-sub">— 주 0회 참여 · 봉사 2일</span></div>
-            <div class="wg-right">
-              <span class="badge badge-red" id="cnt-warn">0명</span>
-              <button class="btn btn-ghost btn-sm" onclick="copyGroup('warn','❌ 경고 대상 (봉사 2일)')">📋 복사</button>
-            </div>
-          </div>
-          <div class="wg-body red" id="list-warn"></div>
-        </div>
-
-        <!-- 주의 (주 1회) -->
-        <div class="week-group">
-          <div class="wg-header amber">
-            <div class="wg-title amber">⚠️ 주의 대상 <span class="wg-sub">— 주 1회 참여 · 봉사 1일</span></div>
-            <div class="wg-right">
-              <span class="badge badge-amber" id="cnt-caution">0명</span>
-              <button class="btn btn-ghost btn-sm" onclick="copyGroup('caution','⚠️ 주의 대상 (봉사 1일)')">📋 복사</button>
-            </div>
-          </div>
-          <div class="wg-body amber" id="list-caution"></div>
-        </div>
-
-        <!-- 완료 미처리 -->
-        <div class="week-group">
-          <div class="wg-header amber">
-            <div class="wg-title amber">🕐 완료 미처리 <span class="wg-sub">— 참여 후 완료투표 안 함 · 봉사 1일</span></div>
-            <div class="wg-right">
-              <span class="badge badge-amber" id="cnt-nodone">0명</span>
-              <button class="btn btn-ghost btn-sm" onclick="copyGroup('nodone','🕐 완료 미처리 (봉사 1일)')">📋 복사</button>
-            </div>
-          </div>
-          <div class="wg-body amber" id="list-nodone"></div>
-        </div>
-
-        <!-- 봉사 진행 중 -->
-        <div class="week-group">
-          <div class="wg-header purple">
-            <div class="wg-title purple">🔧 봉사 진행 중 <span class="wg-sub">— 봉사 차감 중인 크루 (3일 초과 시 자동 잠금)</span></div>
-            <div class="wg-right">
-              <span class="badge badge-purple" id="cnt-sv">0명</span>
-              <button class="btn btn-ghost btn-sm" onclick="copyGroup('sv','🔧 봉사 진행 중')">📋 복사</button>
-            </div>
-          </div>
-          <div class="wg-body purple" id="list-sv"></div>
-        </div>
-
-        <!-- 잠금 계정 -->
-        <div class="week-group">
-          <div class="wg-header red">
-            <div class="wg-title red">🔒 잠금 계정 <span class="wg-sub">— 봉사 +3일 초과 자동 잠금 · 로그인/참여 불가</span></div>
-            <div class="wg-right">
-              <span class="badge badge-red" id="cnt-locked">0명</span>
-              <button class="btn btn-ghost btn-sm" onclick="copyGroup('locked','🔒 잠금 계정')">📋 복사</button>
-            </div>
-          </div>
-          <div class="wg-body red" id="list-locked"></div>
-        </div>
-
-        <!-- 명예회원 -->
-        <div class="week-group">
-          <div class="wg-header gold">
-            <div class="wg-title gold">🏅 명예회원 <span class="wg-sub">— 좋아요 면제 · 1회 해시태그 활동 없이 가능</span></div>
-            <div class="wg-right">
-              <span class="badge" style="background:var(--orange-bg);color:var(--orange);border:1px solid rgba(240,136,62,.3)" id="cnt-honor">0명</span>
-              <button class="btn btn-ghost btn-sm" onclick="copyGroup('honor','🏅 명예회원')">📋 복사</button>
-            </div>
-          </div>
-          <div class="wg-body gold" id="list-honor"></div>
-        </div>
-
-        <!-- 정상 -->
-        <div class="week-group">
-          <div class="wg-header green">
-            <div class="wg-title green">✅ 정상 참여 <span class="wg-sub">— 주 2회 이상</span></div>
-            <div class="wg-right">
-              <span class="badge badge-green" id="cnt-ok">0명</span>
-              <button class="btn btn-ghost btn-sm" onclick="copyGroup('ok','✅ 정상 참여')">📋 복사</button>
-            </div>
-          </div>
-          <div class="wg-body green" id="list-ok"></div>
-        </div>
+        <!-- 6개 그룹 — 상태만, 버튼 없음 -->
+        <div id="week-groups"></div>
       </div>
 
-      <!-- ③ 멤버 -->
+      <!-- ③ 멤버 관리 -->
       <div class="page" id="pg-member">
-        <div class="page-header">
-          <h2>멤버 관리</h2>
-          <p>크루 추가·조회·강퇴 및 명예회원 지정</p>
-        </div>
-        <div style="display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start">
+        <div class="page-hd"><div><h2>멤버 관리</h2><p>크루 추가 · 봉사 부여 · 잠금 처리 · 명예회원 지정</p></div></div>
+        <div style="display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:start">
           <div>
             <!-- 멤버 추가 -->
             <div class="card">
               <div class="card-title">멤버 추가</div>
               <div class="alert" id="add-alert"></div>
-              <div class="field-row c2"><div class="field"><label>닉네임 *</label><input id="m-nick" placeholder="닉네임"/></div><div class="field"><label>아이디</label><input id="m-id" placeholder="@없이"/></div></div>
-              <div class="field" style="margin-bottom:12px"><label>번호 (선택 — 식별용, 프로그램 영향 없음)</label><input id="m-no" placeholder="예: 010"/></div>
+              <div class="row2"><div class="field" style="margin-bottom:0"><label>닉네임 *</label><input id="m-nick" placeholder="닉네임"/></div><div class="field" style="margin-bottom:0"><label>아이디</label><input id="m-id" placeholder="@없이"/></div></div>
+              <div class="field"><label>번호 (선택)</label><input id="m-no" placeholder="예: 010"/></div>
               <button class="btn btn-accent btn-w" onclick="addMember()">추가</button>
             </div>
             <!-- 명예회원 지정 -->
             <div class="card">
               <div class="card-title">명예회원 지정</div>
-              <div style="font-size:12px;color:var(--text2);background:var(--navy3);border-radius:var(--r2);padding:10px 12px;margin-bottom:12px;line-height:1.6">좋아요 없이 해시태그 1회 활동 가능.<br>주간 현황에서 🏅로 표시됩니다.</div>
+              <div style="font-size:12px;color:var(--text2);background:var(--navy3);border-radius:var(--r2);padding:10px 12px;margin-bottom:12px;line-height:1.6">좋아요 없이 해시태그 1회 활동 가능. 주간현황에 🏅로 표시.</div>
               <div class="alert" id="honor-alert"></div>
-              <div class="field-row c2" style="margin-bottom:10px"><div class="field"><label>닉네임</label><input id="hon-nick" placeholder="닉네임"/></div><div class="field"><label>아이디</label><input id="hon-id" placeholder="@없이"/></div></div>
+              <div class="row2" style="margin-bottom:10px"><div class="field" style="margin-bottom:0"><label>닉네임</label><input id="hon-nick" placeholder="닉네임"/></div><div class="field" style="margin-bottom:0"><label>아이디</label><input id="hon-id" placeholder="@없이"/></div></div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                <button class="btn btn-purple" onclick="setHonor('honor')">지정</button>
+                <button class="btn btn-accent" onclick="setHonor('honor')">지정</button>
                 <button class="btn btn-ghost" onclick="setHonor('remove_honor')">해제</button>
               </div>
             </div>
@@ -440,13 +317,18 @@ hr{border:none;border-top:1px solid var(--border);margin:16px 0}
               전체 멤버
               <button class="btn btn-ghost btn-sm" onclick="loadMembers()">새로고침</button>
             </div>
-            <div style="font-size:11px;color:var(--text3);margin-bottom:12px">강퇴 = 로그인 차단 (시트 기록 유지). 완전 삭제는 구글 시트에서 직접 하세요.</div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:10px">잠금 = 로그인/참여 차단 (기록 유지). 완전 삭제는 구글 시트에서 직접 하세요.</div>
             <div class="filter-bar">
               <input id="mem-search" placeholder="닉네임 또는 아이디 검색" oninput="filterMembers()"/>
-              <select id="mem-filter" onchange="filterMembers()"><option value="all">전체</option><option value="active">정상</option><option value="service">봉사</option><option value="locked">잠금</option><option value="kick">강퇴</option></select>
+              <select id="mem-filter" onchange="filterMembers()">
+                <option value="all">전체</option>
+                <option value="active">정상</option>
+                <option value="service">봉사</option>
+                <option value="locked">잠금</option>
+              </select>
             </div>
             <div class="tbl-wrap">
-              <table><thead><tr><th>닉네임</th><th>아이디</th><th>번호</th><th>주참여</th><th>봉사누적</th><th>상태</th><th>관리</th></tr></thead>
+              <table><thead><tr><th>닉네임</th><th>아이디</th><th>번호</th><th>주완료</th><th>봉사</th><th>상태</th><th>관리</th></tr></thead>
               <tbody id="mem-tbody"></tbody></table>
             </div>
           </div>
@@ -455,48 +337,78 @@ hr{border:none;border-top:1px solid var(--border);margin:16px 0}
 
       <!-- ④ 신고/휴가 -->
       <div class="page" id="pg-report">
-        <div class="page-header">
-          <h2>신고 / 휴가</h2>
-          <p>크루 신고 처리 및 휴가 신청 승인</p>
-        </div>
+        <div class="page-hd"><div><h2>신고 / 휴가</h2><p>신고 처리 및 휴가 신청 명단</p></div></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div class="card">
-            <div class="card-title">
-              신고 처리
-              <button class="btn btn-ghost btn-sm" onclick="loadReports()">새로고침</button>
-            </div>
-            <div style="font-size:11px;color:var(--text3);margin-bottom:12px">허위 밴 등록 신고 처리 시 봉사가 자동 부여됩니다</div>
+            <div class="card-title">신고 처리 <button class="btn btn-ghost btn-sm" onclick="loadReports()" style="margin-left:auto">새로고침</button></div>
             <div id="report-list"></div>
           </div>
           <div class="card">
-            <div class="card-title">
-              휴가 신청 관리
-              <button class="btn btn-ghost btn-sm" onclick="loadVacation()">새로고침</button>
-            </div>
-            <div style="font-size:11px;color:var(--text3);margin-bottom:12px">승인하면 해당 기간 봉사가 자동 면제됩니다</div>
+            <div class="card-title">휴가 신청 명단 <button class="btn btn-ghost btn-sm" onclick="loadVacation()" style="margin-left:auto">새로고침</button></div>
             <div id="vac-list"></div>
           </div>
         </div>
       </div>
 
-      <!-- ⑤ 로그 -->
-      <div class="page" id="pg-logs">
-        <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
-          <div><h2>활동 로그</h2><p>모든 참여·완료·봉사 처리 기록</p></div>
-          <button class="btn btn-ghost" onclick="loadLogs()">새로고침</button>
+      <!-- ⑤ 주차 시트 생성 -->
+      <div class="page" id="pg-sheet">
+        <div class="page-hd"><div><h2>주차 시트 생성</h2><p>매주 새 참여 시트를 만듭니다. 멤버 추가 후에도 새 시트를 만들어야 참여 등록이 가능해요.</p></div></div>
+        <div class="card">
+          <div class="card-title">새 주차 시트</div>
+          <div style="background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--r2);padding:12px 14px;font-size:12px;color:var(--accent);margin-bottom:16px;line-height:1.7">
+            · 매주 월요일에 새 시트를 만드세요<br>
+            · 멤버 추가 후에는 새 시트를 만들거나 구글 시트에서 직접 행 추가<br>
+            · 시트명 예시: <code>5월첫째주</code>
+          </div>
+          <div class="row2" style="margin-bottom:12px">
+            <div class="field" style="margin-bottom:0"><label>시트명 *</label><input id="sheet-name" placeholder="예: 5월첫째주"/></div>
+            <div class="field" style="margin-bottom:0"><label>현재 주차로 설정</label>
+              <select id="sheet-set-current"><option value="yes">예 — 현재 주차로 설정</option><option value="no">아니요</option></select>
+            </div>
+          </div>
+          <div class="alert" id="sheet-alert"></div>
+          <button class="btn btn-accent btn-w" onclick="createSheet()">시트 생성하기</button>
         </div>
         <div class="card">
-          <div id="logs-list"></div>
+          <div class="card-title">현재 주차 확인/변경</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:12px">현재: <b style="color:var(--accent)" id="current-sheet-name">불러오는 중...</b></div>
+          <div class="field"><label>주차 시트명</label><input id="current-sheet-input" placeholder="예: 5월첫째주"/></div>
+          <div class="alert" id="current-sheet-alert"></div>
+          <button class="btn btn-ghost btn-w" onclick="setCurrentSheet()">현재 주차 변경</button>
         </div>
       </div>
 
+      <!-- ⑥ 로그 -->
+      <div class="page" id="pg-logs">
+        <div class="page-hd">
+          <div><h2>활동 로그</h2><p>모든 참여·완료·봉사 처리 기록</p></div>
+          <button class="btn btn-ghost" onclick="loadLogs()">새로고침</button>
+        </div>
+        <div class="card"><div id="logs-list"></div></div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbyxKFhEof28oTqw_iAzvh95O5kWi_tmLKPhdPg9oQjD27syvCXPhkZCi3lrS9sgLB0GUw/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxImu1SCQM-4cma8Kx8RoHsM_MsX3eHYoK_7-NU5GHw_QoxVms2toh7c_up-X4CrupZig/exec';
 let adminId=null, allMembers=[], weekCache={};
+
+// ── 로딩바 ──
+let _pTimer=null;
+function pStart(){
+  const b=document.getElementById('progress-bar');
+  b.style.width='0';b.classList.add('on');
+  let w=0;
+  clearInterval(_pTimer);
+  _pTimer=setInterval(()=>{w=Math.min(w+Math.random()*12,85);b.style.width=w+'%';},200);
+}
+function pEnd(){
+  clearInterval(_pTimer);
+  const b=document.getElementById('progress-bar');
+  b.style.width='100%';
+  setTimeout(()=>{b.classList.remove('on');b.style.width='0';},400);
+}
 
 async function api(action,p={}){
   const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,adminId,...p})});
@@ -511,19 +423,17 @@ function alert$(id,type,msg){
   const el=document.getElementById(id);if(!el)return;
   const m={green:'alert-green',red:'alert-red',amber:'alert-amber',blue:'alert-blue'};
   el.className='alert '+(m[type]||'alert-blue')+' on';el.innerHTML=msg;
-  if(type!=='blue')setTimeout(()=>{el.className='alert';el.innerHTML='';},5000);
+  if(type!=='blue')setTimeout(()=>{el.className='alert';},5000);
 }
-function badge$(type,txt){
-  const m={green:'badge-green',amber:'badge-amber',red:'badge-red',blue:'badge-blue',purple:'badge-purple',gray:'badge-gray'};
-  return`<span class="badge ${m[type]||'badge-gray'}">${txt}</span>`;
-}
+function bdg(cls,txt){return`<span class="badge ${cls}">${txt}</span>`;}
+
+// ── 탭 전환 ──
 function sw(name,el){
   document.querySelectorAll('.page').forEach(p=>p.className='page');
   document.getElementById('pg-'+name).className='page on';
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('on'));
   el.classList.add('on');
-  const loaders={home:loadHome,week:loadWeek,member:loadMembers,report:()=>{loadReports();loadVacation();},logs:loadLogs};
-  if(loaders[name])loaders[name]();
+  ({home:loadHome,week:loadWeek,member:loadMembers,report:()=>{loadReports();loadVacation();},sheet:loadSheetPage,logs:loadLogs})[name]?.();
 }
 
 // ── 로그인 ──
@@ -550,7 +460,9 @@ function doLogout(){
 
 // ── 홈 ──
 async function loadHome(){
+  pStart();
   const d=await api('getDashboard').catch(()=>null);
+  pEnd();
   if(!d?.ok)return;
   document.getElementById('h-join').textContent=d.stats.todayJoins;
   document.getElementById('h-done').textContent=d.stats.todayDone;
@@ -560,9 +472,9 @@ async function loadHome(){
   if(!document.getElementById('ht-input').value)document.getElementById('ht-input').value=d.hashtag||'';
   document.getElementById('today-cnt').textContent=(d.todayParticipants||[]).length+'명';
   const el=document.getElementById('today-list');
-  if(!d.todayParticipants?.length){el.innerHTML='<div class="empty-state"><span class="ei">👋</span>오늘 참여자 없음</div>';return;}
+  if(!d.todayParticipants?.length){el.innerHTML='<div class="empty"><span class="ei">👋</span>오늘 참여자 없음</div>';return;}
   el.innerHTML=`<table><thead><tr><th>닉네임</th><th>아이디</th><th>유형</th><th>완료</th></tr></thead><tbody>`+
-    d.todayParticipants.map(t=>`<tr><td style="font-weight:600">${t.nickname}</td><td style="color:var(--text2)">@${t.id||''}</td><td>${badge$('blue',t.type||'●')}</td><td>${t.done?badge$('green','완료'):badge$('amber','대기')}</td></tr>`).join('')+`</tbody></table>`;
+    d.todayParticipants.map(t=>`<tr><td style="font-weight:600">${t.nickname}</td><td style="color:var(--text2)">@${t.id||''}</td><td>${bdg('bb',t.type||'●')}</td><td>${t.done?bdg('bg','완료'):bdg('ba','대기')}</td></tr>`).join('')+`</tbody></table>`;
 }
 async function setHashtag(){
   const ht=document.getElementById('ht-input').value.trim();
@@ -575,145 +487,126 @@ async function setHashtag(){
 
 // ── 주간현황 ──
 async function loadWeek(){
+  pStart();
   const[wk,mems,honors]=await Promise.all([
     api('getWeekData').catch(()=>({ok:false})),
     api('getMembers').catch(()=>({ok:false})),
     api('getHonorList').catch(()=>({ok:false}))
   ]);
-  if(!wk.ok)return;
+  pEnd();
+  if(!wk.ok){toast('주간 데이터 로드 실패. 주차 시트 설정을 확인해주세요.','r');return;}
+
   const honorNicks=(honors.ok&&honors.honor)?honors.honor.map(h=>h.nickname):[];
   const memberMap={};(mems.members||[]).forEach(m=>{memberMap[m.nickname]=m;});
   const rows=(wk.data||[]).filter(r=>r.nickname);
 
-  const warn=[],caution=[],nodone=[],svActive=[],honorList=[],locked=[],ok=[];
+  const warn=[],caution=[],nodone=[],svActive=[],honorList=[],locked=[],ok2=[];
   rows.forEach(r=>{
     const m=memberMap[r.nickname]||{};
     const sv=Number(m.service||0);
     const wkJ=Number(r.weekJoin||0);
     const isDone=r.done;
     const isHonor=honorNicks.includes(r.nickname);
-    if(m.status==='locked'){locked.push({...r,...m});return;}
+    const status=m.status||'active';
+
+    if(status==='locked'){locked.push({...r,...m});return;}
     if(isHonor){honorList.push({...r,...m});return;}
+
+    // 봉사가 이미 있는 크루 → 봉사 진행 중 (이번 주 완료 여부와 무관)
+    if(sv>0){svActive.push({...r,...m});return;}
+
+    // 봉사 없는 크루만 이번 주 완료 기준으로 분류
     if(wkJ===0)warn.push({...r,...m});
     else if(wkJ===1)caution.push({...r,...m});
-    if(!isDone&&wkJ>0)nodone.push({...r,...m});
-    if(sv>0&&wkJ>=2)svActive.push({...r,...m});
-    if(wkJ>=2&&sv===0&&isDone)ok.push({...r,...m});
+    else if(!isDone&&wkJ>0)nodone.push({...r,...m});
+    else ok2.push({...r,...m});
   });
 
-  weekCache={warn,caution,nodone,svActive,locked,honorList,ok};
+  weekCache={warn,caution,nodone,svActive,locked,honorList,ok:ok2};
   buildServiceCopyBox(warn,caution,nodone);
 
-  document.getElementById('cnt-warn').textContent=warn.length+'명';
-  document.getElementById('cnt-caution').textContent=caution.length+'명';
-  document.getElementById('cnt-nodone').textContent=nodone.length+'명';
-  document.getElementById('cnt-sv').textContent=svActive.length+'명';
-  document.getElementById('cnt-locked').textContent=locked.length+'명';
-  document.getElementById('cnt-honor').textContent=honorList.length+'명';
-  document.getElementById('cnt-ok').textContent=ok.length+'명';
+  const groups=[
+    {key:'warn',color:'red',icon:'❌',title:'경고 대상',sub:'주 0회 완료 · 봉사 1회',list:warn,bdgCls:'br'},
+    {key:'caution',color:'amber',icon:'⚠️',title:'주의 대상',sub:'주 1회 완료 · 봉사 1회',list:caution,bdgCls:'ba'},
+    {key:'nodone',color:'amber',icon:'🕐',title:'완료 미처리',sub:'참여 후 완료투표 안 함 · 봉사 1회',list:nodone,bdgCls:'ba'},
+    {key:'sv',color:'purple',icon:'🔧',title:'봉사 진행 중',sub:'봉사 차감 중 (3회 초과 시 자동 잠금)',list:svActive,bdgCls:'bp'},
+    {key:'locked',color:'gray',icon:'🔒',title:'잠금 계정',sub:'로그인/참여 불가 · 멤버 관리에서 잠금 해제',list:locked,bdgCls:'br'},
+    {key:'honor',color:'gold',icon:'🏅',title:'명예회원',sub:'좋아요 면제 · 1회 해시태그 활동 가능',list:honorList,bdgCls:'bo'},
+    {key:'ok',color:'green',icon:'✅',title:'정상 참여',sub:'주 2회 이상 완료',list:ok2,bdgCls:'bg'},
+  ];
 
-  renderWarnRows('list-warn',warn,'red');
-  renderWarnRows('list-caution',caution,'amber');
-  renderNodoneRows('list-nodone',nodone);
-  renderSvRows('list-sv',svActive);
-  renderLockedRows('list-locked',locked);
-  renderHonorRows('list-honor',honorList);
-  renderOkRows('list-ok',ok);
+  document.getElementById('week-groups').innerHTML=groups.map(g=>`
+    <div class="wg ${g.color}" style="margin-bottom:14px">
+      <div class="wg-hd">
+        <div class="wg-title">${g.icon} ${g.title} <span class="wg-sub">— ${g.sub}</span></div>
+        <div class="wg-right">
+          <span class="badge ${g.bdgCls}">${g.list.length}명</span>
+          <button class="btn btn-ghost btn-sm" onclick="copyGroup('${g.key}','${g.icon} ${g.title}')">📋 복사</button>
+        </div>
+      </div>
+      <div class="wg-body">
+        ${g.list.length===0?`<div class="wg-empty">없음</div>`:g.list.map(r=>{
+          const sv=Number(r.service||0);
+          let extra='';
+          if(g.key==='sv'&&r.serviceDate){
+            const d=new Date(r.serviceDate);d.setDate(d.getDate()+3);
+            const diff=Math.ceil((d-new Date())/(1000*60*60*24));
+            extra=diff<=0?'<span style="color:var(--red);font-size:11px"> ⏰ 기한 초과</span>':diff===1?'<span style="color:var(--red);font-size:11px"> ⏰ 오늘까지!</span>':`<span style="color:var(--amber);font-size:11px"> ⏰ ${diff}일 남음</span>`;
+          }
+          return`<div class="wg-row"><div><div class="wg-name">${r.nickname}</div><div class="wg-id">@${r.id||''}${extra}</div></div><div>${sv>0?bdg('bp','봉사 '+sv+'회'):''}</div></div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
 }
 
 function buildServiceCopyBox(warn,caution,nodone){
-  const lines=[];
   const today=new Date();
   const dateStr=`${today.getMonth()+1}월 ${today.getDate()}일`;
-  lines.push(`🎈 열기구 방 봉사 대상자 명단 (${dateStr})`);
-  lines.push('');
-  if(warn.length){lines.push('❌ 봉사 2일 (주 0회 참여)');warn.forEach(r=>lines.push(`  · ${r.nickname} (@${r.id||''})`));lines.push('');}
-  if(caution.length){lines.push('⚠️ 봉사 1일 (주 1회 참여)');caution.forEach(r=>lines.push(`  · ${r.nickname} (@${r.id||''})`));lines.push('');}
-  if(nodone.length){lines.push('🕐 봉사 1일 (완료투표 미처리)');nodone.forEach(r=>lines.push(`  · ${r.nickname} (@${r.id||''})`));lines.push('');}
-  if(!warn.length&&!caution.length&&!nodone.length)lines.push('이번 주 봉사 대상자가 없습니다 ✅');
+  const lines=[`🎈 열기구 방 — 봉사 안내 (${dateStr})`,'','봉사 처리: 참여 유형 [봉사 참여] 선택 후 참여+완료 체크','기한: 봉사 부여일 포함 3일 이내 (초과 시 계정 잠금)',''];
+  if(warn.length){lines.push(`❌ 봉사 1회 대상 (주 0회 완료) — ${warn.length}명`);warn.forEach((r,i)=>lines.push(`  ${i+1}. ${r.nickname} (@${r.id||''})`));lines.push('');}
+  if(caution.length){lines.push(`⚠️ 봉사 1회 대상 (주 1회 완료) — ${caution.length}명`);caution.forEach((r,i)=>lines.push(`  ${i+1}. ${r.nickname} (@${r.id||''})`));lines.push('');}
+  if(nodone.length){lines.push(`🕐 봉사 1회 대상 (완료 미처리) — ${nodone.length}명`);nodone.forEach((r,i)=>lines.push(`  ${i+1}. ${r.nickname} (@${r.id||''})`));lines.push('');}
+  if(!warn.length&&!caution.length&&!nodone.length)lines.push('✅ 이번 주 봉사 대상자 없음!');
+  else lines.push(`총 ${warn.length+caution.length+nodone.length}명`);
   const box=document.getElementById('service-copy-box');
-  box.textContent=lines.join('\n');
-  box.className=lines.length>3?'copy-box has-content':'copy-box';
+  box.textContent=lines.join('\n');box.className=lines.length>4?'copy-box has':'copy-box';
 }
-
+function copyServiceList(){
+  navigator.clipboard.writeText(document.getElementById('service-copy-box').textContent).then(()=>toast('명단 복사됐어요! 카카오톡에 붙여넣기 하세요','g',3500)).catch(()=>toast('복사 실패','r'));
+}
 function copyGroup(key,label){
-  const today=new Date();
-  const dateStr=`${today.getMonth()+1}월 ${today.getDate()}일`;
   const map={warn:'warn',caution:'caution',nodone:'nodone',sv:'svActive',locked:'locked',honor:'honorList',ok:'ok'};
   const list=weekCache[map[key]]||[];
   if(!list.length){toast('복사할 명단이 없습니다','a');return;}
+  const today=new Date();
+  const dateStr=`${today.getMonth()+1}월 ${today.getDate()}일`;
   const lines=[`🎈 열기구 방 — ${label} (${dateStr})`,``];
-  list.forEach((r,i)=>lines.push(`  ${i+1}. ${r.nickname||r.name||'?'} (@${r.id||''})`));
-  lines.push(``,`총 ${list.length}명`);
-  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast(`${label} 명단 복사 완료 (${list.length}명)`,'g',3500)).catch(()=>toast('복사 실패','r'));
-}
-function copyServiceList(){
-  const text=document.getElementById('service-copy-box').textContent;
-  navigator.clipboard.writeText(text).then(()=>toast('명단 복사됐어요! 카카오톡에 붙여넣기 하세요','g',3500)).catch(()=>toast('복사 실패','r'));
-}
-
-function wRow(r,color,rightHtml){
-  return`<div class="wg-row"><div><div class="wg-name">${r.nickname}</div><div class="wg-id">@${r.id||''}</div></div><div class="wg-actions">${rightHtml}</div></div>`;
-}
-function renderWarnRows(id,list,color){
-  const el=document.getElementById(id);
-  if(!list.length){el.innerHTML='<div class="wg-empty">없음</div>';return;}
-  el.innerHTML=list.map(r=>wRow(r,color,`${color==='red'?badge$('red','봉사 2일'):badge$('amber','봉사 1일')}<button class="btn btn-ghost btn-sm" onclick="qSv('${r.nickname}',${color==='red'?2:1})">봉사 부여</button><button class="btn btn-red btn-sm" onclick="qKick('${r.nickname}')">강퇴</button>`)).join('');
-}
-function renderNodoneRows(id,list){
-  const el=document.getElementById(id);
-  if(!list.length){el.innerHTML='<div class="wg-empty">없음</div>';return;}
-  el.innerHTML=list.map(r=>wRow(r,'amber',`${badge$('amber','완료 미처리')}<button class="btn btn-ghost btn-sm" onclick="qSv('${r.nickname}',1)">봉사 1일</button>`)).join('');
-}
-function renderSvRows(id,list){
-  const el=document.getElementById(id);
-  if(!list.length){el.innerHTML='<div class="wg-empty">없음</div>';return;}
-  el.innerHTML=list.map(r=>wRow(r,'purple',`${badge$('purple','봉사'+r.service+'일')}<button class="btn btn-ghost btn-sm" onclick="qSv('${r.nickname}',-1)">차감</button><button class="btn btn-red btn-sm" onclick="qKick('${r.nickname}')">강퇴</button>`)).join('');
-}
-function renderHonorRows(id,list){
-  const el=document.getElementById(id);
-  if(!list.length){el.innerHTML='<div class="wg-empty">명예회원 없음 — 멤버 탭에서 지정하세요</div>';return;}
-  el.innerHTML=list.map(r=>wRow(r,'gold',`<span class="badge" style="background:var(--orange-bg);color:var(--orange);border:1px solid rgba(240,136,62,.3)">🏅 명예</span>`)).join('');
-}
-function renderLockedRows(id,list){
-  const el=document.getElementById(id);
-  if(!list||!list.length){el.innerHTML='<div class="wg-empty">잠금 계정 없음</div>';return;}
-  el.innerHTML=list.map(r=>wRow(r,'red',`<span class="badge badge-red">🔒 잠금</span><button class="btn btn-accent btn-sm" onclick="doUnlock('${r.nickname}')">잠금 해제</button><button class="btn btn-ghost btn-sm" onclick="qKick('${r.nickname}')">강퇴</button>`)).join('');
-}
-function renderOkRows(id,list){
-  const el=document.getElementById(id);
-  if(!list.length){el.innerHTML='<div class="wg-empty">없음</div>';return;}
-  el.innerHTML=list.map(r=>wRow(r,'green',badge$('green','정상'))).join('');
-}
-
-async function qSv(nickname,days){
-  const res=await api('giveService',{nickname,days,reason:'주간현황 처리'}).catch(()=>({ok:false}));
-  if(res.ok){toast(nickname+' 봉사 처리','g');loadWeek();}else toast('실패','r');
-}
-async function doUnlock(nickname){
-  if(!confirm(nickname+'의 잠금을 해제하시겠습니까?\n봉사가 처리된 경우에만 해제하세요.'))return;
-  const res=await api('unlockMember',{nickname}).catch(()=>({ok:false}));
-  if(res.ok){toast(nickname+' 잠금 해제','g');loadWeek();}else toast('실패','r');
-}
-async function qKick(nickname){
-  if(!confirm(nickname+'를 강퇴 처리하시겠습니까?'))return;
-  const res=await api('kickMember',{nickname,reason:'주간현황'}).catch(()=>({ok:false}));
-  if(res.ok){toast(nickname+' 강퇴','g');loadWeek();}else toast('실패','r');
+  list.forEach((r,i)=>{
+    const sv=r.service?` [봉사 ${r.service}회]`:'';
+    const lk=r.status==='locked'?' 🔒 잠금':'';
+    lines.push(`  ${i+1}. ${r.nickname} (@${r.id||''})${sv}${lk}`);
+  });
+  lines.push('',`총 ${list.length}명`);
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast(`${label} 명단 복사 완료`,'g',3000)).catch(()=>toast('복사 실패','r'));
 }
 async function runClose(){
-  if(!confirm('주간 마감을 실행하시겠습니까?\n주 2회 미만 참여자에게 봉사가 부여됩니다.'))return;
-  alert$('close-alert','blue','처리 중...');
+  if(!confirm('주간 마감을 실행하시겠습니까?\n완료 2회 미만 크루에게 봉사가 부여됩니다.'))return;
+  pStart();alert$('close-alert','blue','처리 중...');
   const res=await api('runWeeklyClose').catch(()=>({ok:false,msg:'오류'}));
+  pEnd();
   if(!res.ok){alert$('close-alert','red',res.msg);return;}
-  alert$('close-alert','green',`마감 완료! 정상 ${res.summary.normal}명 / 봉사1일 ${res.summary.miss1}명 / 봉사2일 ${res.summary.miss0}명`);
+  alert$('close-alert','green',`마감 완료! 정상 ${res.summary?.normal||0}명 / 봉사1회 ${(res.summary?.miss1||0)+(res.summary?.miss0||0)}명`);
   loadWeek();
 }
 
 // ── 멤버 ──
 async function loadMembers(){
+  pStart();
   const res=await api('getMembers').catch(()=>({ok:false}));
+  pEnd();
   if(!res.ok)return;
-  allMembers=res.members||[];filterMembers();
+  allMembers=res.members||[];
+  filterMembers();
 }
 function filterMembers(){
   const q=(document.getElementById('mem-search').value||'').toLowerCase();
@@ -723,15 +616,27 @@ function filterMembers(){
     if(f==='active'&&m.status!=='active')return false;
     if(f==='service'&&Number(m.service||0)<=0)return false;
     if(f==='locked'&&m.status!=='locked')return false;
-    if(f==='kick'&&m.status!=='kick')return false;
     return true;
   });
   const tbody=document.getElementById('mem-tbody');
-  if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="empty-state">검색 결과 없음</td></tr>';return;}
+  if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="empty">검색 결과 없음</td></tr>';return;}
   tbody.innerHTML=list.map(m=>{
     const sv=Number(m.service||0);
-    const sb=m.status==='locked'?badge$('red','🔒 잠금'):m.status==='kick'?badge$('red','강퇴'):sv>0?badge$('amber','봉사'+sv+'일'):badge$('green','정상');
-    return`<tr><td style="font-weight:600">${m.nickname}</td><td style="color:var(--text2)">@${m.id||''}</td><td style="color:var(--text2)">${m.no||'-'}</td><td>${m.weekJoin||0}회</td><td>${sv}일</td><td>${sb}</td><td style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm" onclick="qSv1('${m.nickname}')">봉사+1</button>${m.status!=='kick'?`<button class="btn btn-red btn-sm" onclick="qKick('${m.nickname}')">강퇴</button>`:''}</td></tr>`;
+    const isLocked=m.status==='locked';
+    const sb=isLocked?bdg('br','🔒 잠금'):sv>0?bdg('ba','봉사 '+sv+'회'):bdg('bg','정상');
+    const btns=isLocked
+      ?`<button class="btn btn-accent btn-sm" onclick="doUnlock('${m.nickname}')">🔓 잠금해제</button>`
+      :`<button class="btn btn-ghost btn-sm" onclick="qSv1('${m.nickname}')">봉사+1</button>
+        <button class="btn btn-amber btn-sm" onclick="doLock('${m.nickname}')">🔒 잠금</button>`;
+    return`<tr>
+      <td style="font-weight:600">${m.nickname}</td>
+      <td style="color:var(--text2)">@${m.id||''}</td>
+      <td style="color:var(--text2)">${m.no||'-'}</td>
+      <td>${m.weekJoin||0}회</td>
+      <td>${sv}회</td>
+      <td>${sb}</td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap">${btns}</td>
+    </tr>`;
   }).join('');
 }
 async function addMember(){
@@ -739,12 +644,38 @@ async function addMember(){
   const id=document.getElementById('m-id').value.trim().replace('@','');
   const no=document.getElementById('m-no').value.trim();
   if(!nick){alert$('add-alert','amber','닉네임을 입력해주세요.');return;}
-  alert$('add-alert','blue','추가 중...');
+  pStart();alert$('add-alert','blue','추가 중...');
   const res=await api('addMember',{nickname:nick,instagramId:id,no}).catch(()=>({ok:false,msg:'오류'}));
+  pEnd();
   alert$('add-alert',res.ok?'green':'red',res.ok?nick+' 추가 완료!':res.msg);
   if(res.ok){document.getElementById('m-nick').value='';document.getElementById('m-id').value='';document.getElementById('m-no').value='';loadMembers();}
 }
-async function qSv1(nickname){await api('giveService',{nickname,days:1,reason:'빠른'}).catch(()=>{});loadMembers();toast(nickname+' 봉사+1','g');}
+async function qSv1(nickname){
+  // 낙관적 업데이트 — 화면 먼저 변경
+  const m=allMembers.find(x=>x.nickname===nickname);
+  if(m){m.service=(Number(m.service||0)+1);filterMembers();}
+  const res=await api('giveService',{nickname,days:1,reason:'멤버관리 봉사+1'}).catch(()=>({ok:false}));
+  if(res.ok){toast(nickname+' 봉사+1','g');}else{toast('실패','r');loadMembers();}
+  setTimeout(loadMembers,2000); // 2초 후 서버에서 실제 값 재조회
+}
+async function doLock(nickname){
+  if(!confirm(nickname+'을 잠금 처리하시겠습니까?\n로그인/참여가 불가능해집니다.'))return;
+  // 낙관적 업데이트
+  const m=allMembers.find(x=>x.nickname===nickname);
+  if(m){m.status='locked';filterMembers();}
+  const res=await api('lockMember',{nickname,reason:'멤버관리 수동 잠금'}).catch(()=>({ok:false}));
+  if(res.ok){toast(nickname+' 잠금 처리','g');}else{toast('실패','r');loadMembers();}
+  setTimeout(loadMembers,2000);
+}
+async function doUnlock(nickname){
+  if(!confirm(nickname+'의 잠금을 해제하시겠습니까?'))return;
+  // 낙관적 업데이트
+  const m=allMembers.find(x=>x.nickname===nickname);
+  if(m){m.status='active';filterMembers();}
+  const res=await api('unlockMember',{nickname}).catch(()=>({ok:false}));
+  if(res.ok){toast(nickname+' 잠금 해제','g');}else{toast('실패','r');loadMembers();}
+  setTimeout(loadMembers,2000);
+}
 async function setHonor(status){
   const nick=document.getElementById('hon-nick').value.trim();
   const id=document.getElementById('hon-id').value.trim();
@@ -756,50 +687,113 @@ async function setHonor(status){
 
 // ── 신고/휴가 ──
 async function loadReports(){
+  pStart();
   const res=await api('getReports').catch(()=>({ok:false}));
+  pEnd();
   if(!res.ok)return;
   const el=document.getElementById('report-list');
   const list=res.reports||[];
-  if(!list.length){el.innerHTML='<div class="empty-state"><span class="ei">✅</span>처리할 신고 없음</div>';return;}
-  el.innerHTML=list.map(r=>`
+  if(!list.length){el.innerHTML='<div class="empty"><span class="ei">✅</span>처리할 신고 없음</div>';return;}
+  el.innerHTML=`<div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+    <button class="btn btn-ghost btn-sm" onclick="copyReportList()">📋 신고 명단 복사</button></div>`+
+  list.map(r=>`
     <div style="padding:12px;background:var(--navy3);border-radius:var(--r2);margin-bottom:8px;border:1px solid var(--border)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <span><b>${r.reporter}</b><span style="color:var(--text3)"> → </span><b style="color:var(--red)">${r.target}</b></span>
-        ${badge$('amber',r.type)}
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <div><b>${r.reporter}</b><span style="color:var(--text3)"> → </span><b style="color:var(--red)">${r.target}</b></div>
+        ${bdg('ba',r.type)}
       </div>
-      ${r.evidence?`<div style="font-size:12px;color:var(--text2);margin-bottom:8px">${r.evidence}</div>`:''}
+      ${r.evidence?`<div style="font-size:12px;color:var(--text2);margin-bottom:6px">${r.evidence}</div>`:''}
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${r.time||''}</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
-        ${badge$(r.status==='처리완료'?'green':'gray',r.status)}
+        ${bdg(r.status==='처리완료'?'bg':'bgray',r.status)}
         ${r.status!=='처리완료'?`<button class="btn btn-green btn-sm" onclick="resolveRep(${r.idx})">처리완료</button>`:''}
       </div>
     </div>`).join('');
+  window._reportList=list;
 }
-async function resolveRep(idx){const res=await api('resolveReport',{idx}).catch(()=>({ok:false}));if(res.ok){toast('처리 완료','g');loadReports();}}
+function copyReportList(){
+  const list=window._reportList||[];
+  const today=new Date();
+  const lines=[`🎈 신고 내역 (${today.getMonth()+1}월 ${today.getDate()}일)`,''];
+  list.filter(r=>r.status!=='처리완료').forEach((r,i)=>{
+    lines.push(`${i+1}. [${r.type}] ${r.reporter} → ${r.target}`);
+    if(r.evidence)lines.push(`   ${r.evidence}`);lines.push('');
+  });
+  if(lines.length<=2)lines.push('미처리 신고 없음');
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('신고 명단 복사','g')).catch(()=>toast('복사 실패','r'));
+}
+async function resolveRep(idx){
+  const res=await api('resolveReport',{idx}).catch(()=>({ok:false}));
+  if(res.ok){toast('처리 완료','g');loadReports();}
+}
 async function loadVacation(){
+  pStart();
   const res=await api('getVacationList').catch(()=>({ok:false}));
+  pEnd();
   if(!res.ok)return;
   const el=document.getElementById('vac-list');
   const list=res.list||[];
-  if(!list.length){el.innerHTML='<div class="empty-state"><span class="ei">✈️</span>신청된 휴가 없음</div>';return;}
-  el.innerHTML=list.map(v=>`
+  if(!list.length){el.innerHTML='<div class="empty"><span class="ei">✈️</span>신청된 휴가 없음</div>';return;}
+  window._vacList=list;
+  el.innerHTML=`<div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+    <button class="btn btn-ghost btn-sm" onclick="copyVacList()">📋 휴가 명단 복사</button></div>`+
+  list.map(v=>`
     <div style="padding:12px;background:var(--navy3);border-radius:var(--r2);margin-bottom:8px;border:1px solid var(--border)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <b>${v.nickname}</b>
-        ${badge$(v.status==='승인'?'green':v.status==='거절'?'red':'amber',v.status)}
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <div><b>${v.nickname}</b><span style="font-size:11px;color:var(--text3)"> @${v.id||''}</span></div>
       </div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">${v.start} ~ ${v.end}${v.reason?' · '+v.reason:''}</div>
-      ${v.status==='대기'?`<div style="display:flex;gap:6px"><button class="btn btn-green btn-sm" onclick="procVac(${v.idx},'승인')">승인</button><button class="btn btn-red btn-sm" onclick="procVac(${v.idx},'거절')">거절</button></div>`:''}
+      <div style="font-size:12px;color:var(--text2)">📅 ${v.start} ~ ${v.end}</div>
+      ${v.reason?`<div style="font-size:12px;color:var(--text2);margin-top:2px">💬 ${v.reason}</div>`:''}
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">신청: ${v.appliedAt||''}</div>
     </div>`).join('');
 }
-async function procVac(idx,status){const res=await api('processVacation',{idx,status}).catch(()=>({ok:false}));if(res.ok){toast(status,'g');loadVacation();}}
+function copyVacList(){
+  const list=window._vacList||[];
+  const today=new Date();
+  const lines=[`🎈 휴가 신청 현황 (${today.getMonth()+1}월 ${today.getDate()}일)`,''];
+  list.forEach((v,i)=>{lines.push(`${i+1}. ${v.nickname} (@${v.id||''})`);lines.push(`   기간: ${v.start} ~ ${v.end}`);if(v.reason)lines.push(`   사유: ${v.reason}`);lines.push('');});
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('휴가 명단 복사','g')).catch(()=>toast('복사 실패','r'));
+}
+
+// ── 주차 시트 ──
+async function loadSheetPage(){
+  const res=await api('getSettings').catch(()=>null);
+  if(res?.ok){
+    const cur=res.settings?.current_week_sheet||'설정 없음';
+    document.getElementById('current-sheet-name').textContent=cur;
+    if(cur!=='설정 없음')document.getElementById('current-sheet-input').value=cur;
+  }
+}
+async function createSheet(){
+  const name=document.getElementById('sheet-name').value.trim();
+  const setCurrent=document.getElementById('sheet-set-current').value;
+  if(!name){alert$('sheet-alert','amber','시트명을 입력해주세요.');return;}
+  pStart();alert$('sheet-alert','blue','생성 중...');
+  const res=await api('createWeekSheet',{sheetName:name}).catch(()=>({ok:false,msg:'오류'}));
+  if(!res.ok){pEnd();alert$('sheet-alert','red',res.msg);return;}
+  if(setCurrent==='yes')await api('setSetting',{key:'current_week_sheet',value:name}).catch(()=>{});
+  pEnd();
+  alert$('sheet-alert','green',`"${name}" 생성 완료!${setCurrent==='yes'?' 현재 주차로 설정됐어요.':''}`);
+  document.getElementById('sheet-name').value='';
+  document.getElementById('current-sheet-name').textContent=name;
+}
+async function setCurrentSheet(){
+  const name=document.getElementById('current-sheet-input').value.trim();
+  if(!name){alert$('current-sheet-alert','amber','시트명을 입력해주세요.');return;}
+  const res=await api('setSetting',{key:'current_week_sheet',value:name}).catch(()=>({ok:false,msg:'오류'}));
+  if(res.ok){document.getElementById('current-sheet-name').textContent=name;alert$('current-sheet-alert','green',`"${name}"으로 변경됐어요.`);}
+  else alert$('current-sheet-alert','red',res.msg||'오류');
+}
 
 // ── 로그 ──
 async function loadLogs(){
+  pStart();
   const res=await api('getLogs',{limit:100}).catch(()=>({ok:false}));
+  pEnd();
   if(!res.ok)return;
   const el=document.getElementById('logs-list');
   const list=res.logs||[];
-  if(!list.length){el.innerHTML='<div class="empty-state">로그 없음</div>';return;}
+  if(!list.length){el.innerHTML='<div class="empty">로그 없음</div>';return;}
   el.innerHTML=list.map(l=>`<div class="log-row"><span class="log-time">${l.time}</span><span class="log-type">${l.type}</span><span class="log-msg">${l.msg}</span></div>`).join('');
 }
 
