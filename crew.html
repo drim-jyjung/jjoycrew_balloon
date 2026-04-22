@@ -231,7 +231,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
       <!-- 상태 A: 오늘 미참여 → 참여등록 + 완료체크 -->
       <div id="action-before" class="main-btns">
         <button class="main-btn btn-join" onclick="openOv('join')"><span class="mb-icon">✋</span><span class="mb-title">참여 등록</span><span class="mb-time">10:00 ~ 21:59</span></button>
-        <button class="main-btn btn-done" onclick="openOv('done')"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 09:59</span></button>
+        <button class="main-btn btn-done" onclick="openOv('done')"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 09:00</span></button>
       </div>
 
       <!-- 상태 B: 오늘 이미 참여함 → 밴링크 등록 + 완료체크만 -->
@@ -244,7 +244,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
           </div>
         </div>
         <div class="main-btns" style="margin-bottom:10px">
-          <button class="main-btn btn-done" onclick="openOv('done')" style="grid-column:span 2"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 09:59</span></button>
+          <button class="main-btn btn-done" onclick="openOv('done')" style="grid-column:span 2"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 09:00</span></button>
         </div>
         <button class="sub-btn" style="width:100%;margin-bottom:10px" onclick="openOv('van-only')"><span class="sub-icon">🔗</span>밴링크 등록</button>
       </div>
@@ -257,7 +257,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
   </div>
   <div id="pg-rules">
     <div class="rule-block"><div class="rb-head pink">참여 규칙</div>
-      <div class="ri"><span class="rn">①</span>참여 시간 10:00~21:59 / 완료 시간 22:00~익일 09:59</div>
+      <div class="ri"><span class="rn">①</span>참여 시간 10:00~21:59 / 완료 시간 22:00~09:00</div>
       <div class="ri"><span class="rn">②</span>해시태그 복사 후 게시물 댓글에 작성 → 참여 등록</div>
       <div class="ri"><span class="rn">③</span>완료 시간에 해시태그 2~3회 재검색, 꼼꼼히 좋아요</div>
       <div class="ri"><span class="rn">④</span>밴일 경우에만 밴 링크 추가 (허위 밴 봉사 처리)</div>
@@ -307,7 +307,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
   <div class="sheet">
     <div class="sh-handle"></div><div class="sh-title">✅ 완료 체크</div>
     <div class="info-box green">해시태그 2~3회 재검색 후 꼼꼼히 좋아요 눌렀나요? 밴 링크도 챙겨주세요!</div>
-    <div class="sf"><label>완료 구분</label><select id="d-late"><option value="no">일반 완료 (22:00 ~ 09:59)</option><option value="yes">지각 완료</option></select></div>
+    <div class="sf"><label>완료 구분</label><select id="d-late"><option value="no">일반 완료 (22:00 ~ 09:00)</option><option value="yes">지각 완료</option></select></div>
     <button class="sh-btn green" id="done-sb" onclick="doDone()">완료 등록하기</button>
     <button class="sh-btn ghost" onclick="closeOv('ov-done')">취소</button>
   </div>
@@ -352,7 +352,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
   </div>
 </div>
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbwulAMXKpJDl4jwN05PRLsWBlY6mdUiRzQEB24hkYazVg2BoyMTvrJGGJIAqs2L0O2STg/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbyl_YBonOOiR1lhklU7B-9XBXm39mIaco_WPt-JiMtMwl6b60IiANMBgBwnQc6riujyyw/exec';
 const DAYS=['월','화','수','목','금','토','일'];
 let user=null,settings={},myWeek=null;
 async function api(action,p={}){const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,...p})});return r.json();}
