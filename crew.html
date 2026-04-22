@@ -216,8 +216,8 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
       <div style="background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <div>
-            <div style="font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.04em;text-transform:uppercase">오늘 참여 링크 (해시태그 누락)</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:2px">해시태그 누락된 크루의 참여 링크 — 클릭해서 좋아요를 눌러주세요</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.04em;text-transform:uppercase">오늘 밴링크</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">밴 걸린 크루의 게시물 링크 — 클릭해서 좋아요를 눌러주세요</div>
           </div>
           <button style="font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:100px;padding:4px 10px;cursor:pointer;font-family:inherit" onclick="loadVanLinks()">새로고침</button>
         </div>
@@ -246,7 +246,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
         <div class="main-btns" style="margin-bottom:10px">
           <button class="main-btn btn-done" onclick="openOv('done')" style="grid-column:span 2"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 09:59</span></button>
         </div>
-        <button class="sub-btn" style="width:100%;margin-bottom:10px" onclick="openOv('van-only')"><span class="sub-icon">🔗</span>해시태그 누락 — 참여 링크 등록</button>
+        <button class="sub-btn" style="width:100%;margin-bottom:10px" onclick="openOv('van-only')"><span class="sub-icon">🔗</span>밴링크 등록</button>
       </div>
 
       <div class="sub-btns">
@@ -298,14 +298,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
         <option value="honor">명예 / 운영진 참여</option>
       </select>
     </div>
-    <div id="van-section-wrap" style="margin-top:4px">
-      <button class="van-toggle" onclick="toggleVan()">+ 해시태그 누락 시 참여 링크 등록</button>
-      <div id="van-wrap" style="display:none" class="sf">
-        <label>참여 게시물 링크 (해시태그 누락된 경우만)</label>
-        <input id="j-van" placeholder="https://www.instagram.com/p/..." type="url"/>
-        <div style="font-size:11px;color:var(--text3);margin-top:4px">해시태그에 내 게시물이 안 뜨는 경우 링크를 등록하면 다른 크루에게 공유됩니다</div>
-      </div>
-    </div>
+    <div id="van-wrap" style="display:none"></div>
     <button class="sh-btn blue" id="join-sb" onclick="doJoin()">참여 등록하기</button>
     <button class="sh-btn ghost" onclick="closeOv('ov-join')">취소</button>
   </div>
@@ -323,16 +316,16 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 <div class="overlay" id="ov-van-only" onclick="bgClose(event,'ov-van-only')">
   <div class="sheet">
     <div class="sh-handle"></div>
-    <div class="sh-title">🔗 참여 링크 등록</div>
+    <div class="sh-title">🔗 밴링크 등록</div>
     <div style="background:var(--amber-bg);border-radius:var(--r3);padding:10px 13px;font-size:12px;color:var(--amber-text);margin-bottom:14px;line-height:1.6">
-      해시태그 검색에 내 게시물이 안 뜨는 경우에만 등록해주세요.<br>등록된 링크는 다른 크루에게 공유됩니다.
+      해시태그에 걸리지 않은(밴) 경우 링크를 등록해주세요.<br>등록된 밴링크는 다른 크루에게 공유됩니다.
     </div>
     <div class="sf">
-      <label>내 게시물 링크</label>
+      <label>밴링크 (인스타그램 게시물 URL)</label>
       <input id="van-only-input" placeholder="https://www.instagram.com/p/..." type="url"/>
     </div>
     <div id="van-only-alert" style="display:none;padding:8px 12px;border-radius:var(--r3);font-size:12px;margin-bottom:10px"></div>
-    <button class="sh-btn amber" id="van-only-sb" onclick="doVanOnly()">링크 등록하기</button>
+    <button class="sh-btn amber" id="van-only-sb" onclick="doVanOnly()">밴링크 등록하기</button>
     <button class="sh-btn ghost" onclick="closeOv('ov-van-only')">취소</button>
   </div>
 </div>
@@ -359,7 +352,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
   </div>
 </div>
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxImu1SCQM-4cma8Kx8RoHsM_MsX3eHYoK_7-NU5GHw_QoxVms2toh7c_up-X4CrupZig/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbzv5V1D5GG6K7nOT8TjhG9v1wouDwYH2JxWNBvfyre0yZu8MphNHIoOHasgLGX9ObMxGA/exec';
 const DAYS=['월','화','수','목','금','토','일'];
 let user=null,settings={},myWeek=null;
 async function api(action,p={}){const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,...p})});return r.json();}
@@ -534,8 +527,8 @@ function bgClose(e,id){if(e.target===e.currentTarget)closeOv(id);}
 function toggleVan(){const w=document.getElementById('van-wrap');w.style.display=w.style.display==='none'?'block':'none';}
 async function doJoin(){
   const rawType=document.getElementById('j-type').value;
-  const vanLink=document.getElementById('j-van').value.trim();
-  // 유형 매핑: UI 값 → 시트 기호
+  const vanEl=document.getElementById('j-van');
+  const vanLink=vanEl?vanEl.value.trim():'';
   const typeMap={'●':'●','B':'B','honor':'명예'};
   const type=typeMap[rawType]||rawType;
   const btn=document.getElementById('join-sb');
@@ -607,7 +600,7 @@ async function loadVanLinks(){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;${i<items.length-1?'border-bottom:1px solid var(--border)':''}">
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--text)">${t.nickname}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:1px">해시태그 누락 참여 링크</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:1px">밴링크</div>
       </div>
       <div style="display:flex;gap:6px">
         <button style="padding:6px 11px;font-size:12px;font-weight:600;background:var(--blue-bg);color:var(--blue-text);border:1.5px solid rgba(59,130,246,.3);border-radius:100px;cursor:pointer;font-family:inherit" onclick="cpVan('${t.resolvedLink}')">링크 복사</button>

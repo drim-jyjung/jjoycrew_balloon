@@ -311,6 +311,19 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
             </div>
           </div>
 
+          <!-- 이번 주 신규 입장자 -->
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title">
+              🆕 이번 주 신규 입장자
+              <span class="badge bb" id="newbie-cnt">0명</span>
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:10px">입장 주에는 봉사 면제 (연습 기간). 다음 주 월요일부터 필참 적용.</div>
+            <div style="max-height:160px;overflow-y:auto">
+              <table><thead><tr><th>닉네임</th><th>아이디</th><th>입장일</th></tr></thead>
+              <tbody id="newbie-tbody"><tr><td colspan="3" class="empty">신규 입장자 없음</td></tr></tbody></table>
+            </div>
+          </div>
+
           <!-- 멤버 목록 -->
           <div class="card">
             <div class="card-title">
@@ -328,7 +341,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
               </select>
             </div>
             <div class="tbl-wrap">
-              <table><thead><tr><th>닉네임</th><th>아이디</th><th>번호</th><th>주완료</th><th>봉사</th><th>상태</th><th>관리</th></tr></thead>
+              <table><thead><tr><th>닉네임</th><th>아이디</th><th>번호</th><th>주완료</th><th>봉사</th><th>입장일</th><th>상태</th><th>관리</th></tr></thead>
               <tbody id="mem-tbody"></tbody></table>
             </div>
           </div>
@@ -391,7 +404,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 </div>
 
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxImu1SCQM-4cma8Kx8RoHsM_MsX3eHYoK_7-NU5GHw_QoxVms2toh7c_up-X4CrupZig/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbzv5V1D5GG6K7nOT8TjhG9v1wouDwYH2JxWNBvfyre0yZu8MphNHIoOHasgLGX9ObMxGA/exec';
 let adminId=null, allMembers=[], weekCache={};
 
 // ── 로딩바 ──
@@ -611,6 +624,27 @@ async function loadMembers(){
 function filterMembers(){
   const q=(document.getElementById('mem-search').value||'').toLowerCase();
   const f=document.getElementById('mem-filter').value;
+  // 이번 주 신규 입장자 분류
+  const now=new Date();
+  const nowDay=now.getDay();
+  const nowMonday=new Date(now);
+  nowMonday.setDate(now.getDate()-(nowDay===0?6:nowDay-1));
+  nowMonday.setHours(0,0,0,0);
+  const newbies=allMembers.filter(m=>{
+    if(!m.joinDate)return false;
+    const jd=new Date(m.joinDate);
+    const jDay=jd.getDay();
+    const jMon=new Date(jd);
+    jMon.setDate(jd.getDate()-(jDay===0?6:jDay-1));
+    jMon.setHours(0,0,0,0);
+    return jMon.getTime()===nowMonday.getTime();
+  });
+  const nb=document.getElementById('newbie-tbody');
+  const nc=document.getElementById('newbie-cnt');
+  if(nb){
+    nb.innerHTML=newbies.length?newbies.map(m=>`<tr><td style="font-weight:600">${m.nickname}</td><td style="color:var(--text2)">@${m.id||''}</td><td style="color:var(--text3)">${m.joinDate||''}</td></tr>`).join(''):'<tr><td colspan="3" class="empty">신규 입장자 없음</td></tr>';
+  }
+  if(nc)nc.textContent=newbies.length+'명';
   const list=allMembers.filter(m=>{
     if(q&&!m.nickname.toLowerCase().includes(q)&&!(m.id||'').toLowerCase().includes(q))return false;
     if(f==='active'&&m.status!=='active')return false;
@@ -634,6 +668,7 @@ function filterMembers(){
       <td style="color:var(--text2)">${m.no||'-'}</td>
       <td>${m.weekJoin||0}회</td>
       <td>${sv}회</td>
+      <td style="color:var(--text3);font-size:12px">${m.joinDate||'-'}</td>
       <td>${sb}</td>
       <td style="display:flex;gap:4px;flex-wrap:wrap">${btns}</td>
     </tr>`;
