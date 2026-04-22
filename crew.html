@@ -204,7 +204,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
       <div class="extra-tags" id="extra-tags" style="display:none"></div>
     </div>
     <button class="logout-btn" onclick="logout()">로그아웃</button>
-    <div class="ht-section">
+    <div class="ht-section" id="ht-section">
       <div class="ht-card">
         <div class="ht-eyebrow">오늘의 해시태그</div>
         <div class="ht-value" id="ht-text">#불러오는 중...</div>
@@ -352,7 +352,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
   </div>
 </div>
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbzv5V1D5GG6K7nOT8TjhG9v1wouDwYH2JxWNBvfyre0yZu8MphNHIoOHasgLGX9ObMxGA/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbwulAMXKpJDl4jwN05PRLsWBlY6mdUiRzQEB24hkYazVg2BoyMTvrJGGJIAqs2L0O2STg/exec';
 const DAYS=['월','화','수','목','금','토','일'];
 let user=null,settings={},myWeek=null;
 async function api(action,p={}){const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,...p})});return r.json();}
@@ -468,6 +468,41 @@ function renderServiceBanner(){
 }
 
 function renderActionArea(){
+  const sv=Number(user.service||0);
+  const htSection=document.getElementById('ht-section')||document.querySelector('.ht-section');
+
+  // 봉사 있으면 해시태그 숨기고 봉사참여 안내 표시
+  let svNotice=document.getElementById('sv-force-notice');
+  if(sv>0){
+    if(htSection)htSection.style.display='none';
+    if(!svNotice){
+      svNotice=document.createElement('div');
+      svNotice.id='sv-force-notice';
+      svNotice.style.cssText='margin:0 14px 12px;background:var(--red-bg);border:2px solid var(--red-text);border-radius:var(--r);padding:14px 16px';
+      svNotice.innerHTML=`<div style="font-size:14px;font-weight:700;color:var(--red-text);margin-bottom:6px">🚨 봉사 ${sv}회 — 봉사 참여만 가능</div><div style="font-size:12px;color:var(--red-text);line-height:1.65;opacity:.9">봉사가 있는 동안은 일반 참여가 불가합니다.<br>봉사 참여 유형을 선택해서 참여+완료 체크를 해주세요.</div>`;
+      const actionSection=document.querySelector('.action-section');
+      if(actionSection)actionSection.parentNode.insertBefore(svNotice,actionSection);
+    }else{
+      svNotice.style.display='block';
+      svNotice.querySelector('div').textContent=`🚨 봉사 ${sv}회 — 봉사 참여만 가능`;
+    }
+    // 참여 등록 모달에서 봉사참여만 선택되게
+    const jType=document.getElementById('j-type');
+    if(jType){
+      jType.value='B';
+      // 일반참여, 명예 옵션 비활성화
+      Array.from(jType.options).forEach(opt=>{
+        opt.disabled=(opt.value!=='B');
+      });
+    }
+  } else {
+    if(htSection)htSection.style.display='block';
+    if(svNotice)svNotice.style.display='none';
+    // 옵션 복구
+    const jType=document.getElementById('j-type');
+    if(jType)Array.from(jType.options).forEach(opt=>opt.disabled=false);
+  }
+
   // 오늘 참여 여부 확인
   if(!myWeek) return;
   const n=new Date();
