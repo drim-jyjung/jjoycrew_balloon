@@ -219,7 +219,10 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
             <div style="font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.04em;text-transform:uppercase">오늘 밴링크</div>
             <div style="font-size:11px;color:var(--text3);margin-top:2px">밴 걸린 크루의 게시물 링크 — 클릭해서 좋아요를 눌러주세요</div>
           </div>
-          <button style="font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:100px;padding:4px 10px;cursor:pointer;font-family:inherit" onclick="loadVanLinks()">새로고침</button>
+          <div style="display:flex;gap:6px">
+            <button style="font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-bg);border:1.5px solid var(--blue-border);border-radius:100px;padding:4px 10px;cursor:pointer;font-family:inherit" onclick="copyAllVanLinks()">📋 전체복사</button>
+            <button style="font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:100px;padding:4px 10px;cursor:pointer;font-family:inherit" onclick="loadVanLinks()">새로고침</button>
+          </div>
         </div>
         <div id="van-links-list"><div style="text-align:center;padding:10px;color:var(--text3);font-size:12px">불러오는 중...</div></div>
       </div>
