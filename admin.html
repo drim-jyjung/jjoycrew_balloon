@@ -441,8 +441,7 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
 </div><!-- /app -->
 
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycby8ej3TJ7FGlbdeBxVS7jhnp-3wZcnoXtZuG7lFnctrL3R_wH4OjiPu08paKZrDVZR7Hw/exec
-';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycby8ej3TJ7FGlbdeBxVS7jhnp-3wZcnoXtZuG7lFnctrL3R_wH4OjiPu08paKZrDVZR7Hw/exec';
 let adminId=null,allMems=[],wkCache={};
 
 // ── 프로그레스바 ──
@@ -725,10 +724,7 @@ async function doSv1(nick){
 async function doSvM(nick){
   const m=allMems.find(x=>x.nickname===nick);
   if(!m||Number(m.service||0)<=0){toast('차감할 봉사가 없습니다','a');return;}
-  const newSv=Math.max(0,Number(m.service||0)-1);
-  m.service=newSv;
-  if(newSv===0)m.status='active'; // 봉사 0되면 상태도 active로
-  filterMem();
+  m.service=Math.max(0,Number(m.service||0)-1);filterMem();
   const res=await api('giveService',{nickname:nick,days:-1,reason:'멤버관리 봉사-1 수동차감'}).catch(()=>({ok:false}));
   toast(res.ok?nick+' 봉사-1 차감':'실패',res.ok?'g':'r');
   setTimeout(loadMembers,2000);
