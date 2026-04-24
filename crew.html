@@ -2,790 +2,709 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>🎈 열기구 방</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0f0f13;--bg2:#1a1a24;--bg3:#22222e;
-  --border:#2e2e3e;--border2:#3e3e52;
-  --text:#f0f0f5;--text2:#8888aa;--text3:#55556a;
-  --blue:#6b8eff;--blue-bg:rgba(107,142,255,.12);--blue-text:#6b8eff;
-  --green:#4ade80;--green-bg:rgba(74,222,128,.12);--green-text:#4ade80;
-  --amber:#fbbf24;--amber-bg:rgba(251,191,36,.12);--amber-text:#fbbf24;
-  --red:#f87171;--red-bg:rgba(248,113,113,.12);--red-text:#f87171;
-  --pink:#f472b6;--pink-bg:rgba(244,114,182,.12);--pink-text:#f472b6;
-  --r:14px;--r2:10px;--r3:8px;--r4:6px;
+  --pink:#e91e8c;--pink-light:#fce4ec;--pink-mid:#f48fb1;
+  --orange:#ff6b35;
+  --grad:linear-gradient(135deg,var(--orange),var(--pink));
+  --bg:#fafafa;--bg2:#ffffff;--surface:#f5f5f5;
+  --text:#111;--text2:#555;--text3:#999;
+  --border:#ebebeb;--border2:#ddd;
+  --green:#00c471;--green-bg:#e6f9f1;--green-text:#007a46;
+  --blue:#3b82f6;--blue-bg:#eff6ff;--blue-text:#1d4ed8;
+  --amber:#f59e0b;--amber-bg:#fffbeb;--amber-text:#b45309;
+  --red:#ef4444;--red-bg:#fef2f2;--red-text:#b91c1c;
+  --r:16px;--r2:12px;--r3:8px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;font-size:14px;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;padding-bottom:72px}
+#login-screen{padding:0 20px 40px;display:flex;flex-direction:column;min-height:100vh}
+.login-top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 0 24px}
+.balloon-anim{font-size:68px;display:block;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-10px) rotate(2deg)}}
+.login-title{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-top:14px;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--text3)}
+.login-card{background:var(--bg2);border-radius:var(--r);padding:24px 20px;box-shadow:0 2px 16px rgba(0,0,0,.07)}
+.lf{margin-bottom:14px}
+.lf label{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;letter-spacing:.04em}
+.lf input{width:100%;padding:13px 15px;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r2);font-size:15px;color:var(--text);outline:none;transition:.2s;font-family:inherit}
+.lf input:focus{border-color:var(--pink);background:#fff}
+.btn-enter{width:100%;padding:15px;font-size:15px;font-weight:700;border:none;border-radius:var(--r2);background:var(--grad);color:#fff;cursor:pointer;margin-top:4px;box-shadow:0 4px 16px rgba(233,30,140,.25);transition:.15s;font-family:inherit}
+.btn-enter:active{transform:scale(.97)}
+.login-note{font-size:12px;color:var(--text3);text-align:center;margin-top:12px}
+#main-screen{display:none}
+.topbar{background:var(--bg2);padding:12px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.topbar-logo{font-size:16px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:6px}
+.topbar-logo span{font-size:18px}
+.phase-chip{padding:5px 11px;border-radius:100px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:4px}
+.phase-chip.join{background:var(--blue-bg);color:var(--blue-text)}
+.phase-chip.comp{background:var(--green-bg);color:var(--green-text)}
+.blink{width:6px;height:6px;border-radius:50%;display:inline-block;animation:blink 1.4s infinite;flex-shrink:0}
+.blink.b{background:var(--blue)}.blink.g{background:var(--green)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.week-hero{background:var(--bg2);margin:12px 14px 0;border-radius:var(--r);padding:16px;border:1px solid var(--border)}
+.user-status-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.user-left{display:flex;align-items:center;gap:10px}
+.av{width:40px;height:40px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;flex-shrink:0}
+.u-name{font-size:15px;font-weight:700;color:var(--text)}
+.u-id{font-size:11px;color:var(--text3);margin-top:1px}
+.status-badge{padding:6px 12px;border-radius:100px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;flex-shrink:0;white-space:nowrap}
+.status-badge.ok{background:var(--green-bg);color:var(--green-text)}
+.status-badge.warn{background:var(--amber-bg);color:var(--amber-text)}
+.status-badge.bad{background:var(--red-bg);color:var(--red-text)}
+.status-badge.honor{background:var(--grad);color:#fff}
+.status-badge.vac{background:var(--blue-bg);color:var(--blue-text)}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-ok{background:var(--green)}.dot-warn{background:var(--amber)}.dot-bad{background:var(--red)}
+.week-counts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.wc-box{background:var(--surface);border-radius:var(--r3);padding:10px 12px;display:flex;align-items:center;gap:10px}
+.wc-icon{font-size:20px;flex-shrink:0}
+.wc-label{font-size:11px;color:var(--text3);margin-bottom:2px}
+.wc-val{font-size:19px;font-weight:700}
+.wc-val.ok{color:var(--green-text)}.wc-val.warn{color:var(--amber-text)}.wc-val.bad{color:var(--red-text)}.wc-val.neutral{color:var(--text)}
+.wk-label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.wk-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.dc{border-radius:var(--r3);padding:8px 2px 7px;text-align:center;border:1.5px solid transparent;position:relative;transition:.15s}
+.dc.empty-day{background:var(--surface);border-color:var(--border)}
+.dc.has-mark{background:#fff;border-color:var(--pink-mid);box-shadow:0 2px 6px rgba(233,30,140,.12)}
+.dc.today{border-color:var(--pink)!important;box-shadow:0 2px 8px rgba(233,30,140,.2)!important}
+.dc.today::after{content:'오늘';position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:700;color:var(--pink);background:#fff;padding:0 3px;white-space:nowrap;border-radius:4px}
+.dc-day{font-size:10px;font-weight:700;color:var(--text3);margin-bottom:2px}
+.dc-date{font-size:9px;color:var(--text2);margin-bottom:3px}
+.dc-mark{font-size:14px;font-weight:900;min-height:18px;line-height:18px}
+.dc-mark.dot{color:var(--green)}.dc-mark.N{color:var(--blue)}.dc-mark.B{color:var(--amber)}.dc-mark.F{color:var(--pink)}.dc-mark.none{color:var(--border2);font-size:12px}
+.extra-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.etag{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700}
+.etag-honor{background:var(--grad);color:#fff}
+.etag-vac{background:var(--blue-bg);color:var(--blue-text)}
+.etag-sv{background:var(--red-bg);color:var(--red-text)}
+.logout-btn{font-size:12px;color:var(--text3);background:none;border:1.5px solid var(--border2);border-radius:100px;padding:5px 0;cursor:pointer;font-family:inherit;margin:10px 14px 0;display:block;width:calc(100% - 28px);text-align:center}
+.ht-section{padding:12px 14px 0}
+.ht-card{background:#1c1c2e;border-radius:var(--r);padding:18px;position:relative;overflow:hidden}
+.ht-card::before{content:'';position:absolute;top:-50px;right:-30px;width:130px;height:130px;border-radius:50%;background:rgba(233,30,140,.1)}
+.ht-eyebrow{font-size:10px;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.ht-value{font-size:20px;font-weight:700;color:#fff;word-break:break-all;line-height:1.45;margin-bottom:14px;position:relative;z-index:1}
+.ht-copy-btn{width:100%;padding:14px;font-size:15px;font-weight:700;border:none;border-radius:var(--r2);background:#fff;color:#1c1c2e;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s;position:relative;z-index:1;font-family:inherit}
+.ht-copy-btn:active{transform:scale(.97)}
+.ht-copy-btn.copied{background:var(--green);color:#fff}
+.action-section{padding:12px 14px 0}
+.sec-title{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px}
+.main-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.main-btn{padding:20px 10px 18px;border:none;border-radius:var(--r);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;transition:.15s;font-family:inherit}
+.main-btn:active{transform:scale(.96)}
+.mb-icon{font-size:28px;line-height:1}
+.mb-title{font-size:15px;font-weight:700;color:#fff}
+.mb-time{font-size:10px;color:rgba(255,255,255,.65);font-weight:500}
+.btn-join{background:linear-gradient(145deg,#1565c0,#1e88e5)}
+.btn-done{background:linear-gradient(145deg,#1b5e20,#2e7d32)}
+.sub-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sub-btn{padding:14px 8px;border:1.5px solid var(--border2);border-radius:var(--r2);background:var(--bg2);font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;transition:.15s}
+.sub-btn:active{background:var(--surface);transform:scale(.97)}
+.sub-icon{font-size:16px}
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg2);border-top:1px solid var(--border);display:none;z-index:50}
+.bnav-row{display:flex}
+.nb{flex:1;padding:10px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;text-decoration:none;font-family:inherit}
+.nb-icon{font-size:20px}
+.nb-label{font-size:10px;color:var(--text3);font-weight:500}
+.nb.on .nb-label{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700}
+#pg-rules{display:none;padding:14px}
+.rule-block{background:var(--bg2);border-radius:var(--r2);overflow:hidden;border:1px solid var(--border);margin-bottom:12px}
+.rb-head{padding:12px 16px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.rb-head.pink{background:var(--pink-light);color:var(--pink)}
+.rb-head.green{background:var(--green-bg);color:var(--green-text)}
+.rb-head.gray{background:var(--surface);color:var(--text2)}
+.ri{display:flex;gap:10px;padding:11px 16px;border-top:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.55;align-items:flex-start}
+.rn{font-size:11px;font-weight:700;color:var(--text3);min-width:16px;padding-top:1px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.overlay.on{display:flex}
+.sheet{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:430px;padding:12px 20px;padding-bottom:calc(24px + env(safe-area-inset-bottom,0));max-height:90vh;overflow-y:auto;animation:up .22s ease;font-family:inherit}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sh-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px}
+.sh-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.sf{margin-bottom:14px}
+.sf label{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;letter-spacing:.04em}
+.sf select,.sf input{width:100%;padding:13px 14px;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r2);font-size:14px;color:var(--text);outline:none;transition:.2s;font-family:inherit;-webkit-appearance:none}
+.sf select:focus,.sf input:focus{border-color:var(--pink);background:#fff}
+.van-toggle{font-size:12px;color:var(--pink);background:none;border:none;cursor:pointer;padding:0 0 12px;font-weight:600;font-family:inherit}
+.sh-btn{width:100%;padding:15px;font-size:15px;font-weight:700;border:none;border-radius:var(--r2);cursor:pointer;font-family:inherit;transition:.15s;margin-top:2px;color:#fff}
+.sh-btn:active{transform:scale(.97)}
+.sh-btn.pink{background:var(--grad);box-shadow:0 4px 16px rgba(233,30,140,.25)}
+.sh-btn.green{background:linear-gradient(135deg,#1b5e20,#2e7d32)}
+.sh-btn.blue{background:linear-gradient(135deg,#1565c0,#1e88e5)}
+.sh-btn.amber{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.sh-btn.ghost{background:var(--surface);color:var(--text2);border:1.5px solid var(--border2);margin-top:8px}
+.info-box{border-radius:var(--r3);padding:11px 13px;font-size:12px;line-height:1.65;margin-bottom:14px}
+.info-box.green{background:var(--green-bg);color:var(--green-text)}
+.info-box.blue{background:var(--blue-bg);color:var(--blue-text)}
+.toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%) translateY(8px);background:#222;color:#fff;padding:11px 20px;border-radius:100px;font-size:13px;font-weight:500;opacity:0;transition:.25s;z-index:200;white-space:nowrap;max-width:90vw;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.g{background:var(--green)}.toast.r{background:var(--red)}.toast.a{background:var(--amber)}
+.spinner{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* 로딩 오버레이 */
-.lov{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px}
-.lov.on{display:flex}
-.lsp{width:52px;height:52px;border:4px solid rgba(255,255,255,.1);border-top-color:var(--blue);border-radius:50%;animation:sp .7s linear infinite}
-.lmsg{font-size:13px;color:rgba(255,255,255,.75);font-weight:500}
-@keyframes sp{to{transform:rotate(360deg)}}
-
-/* 토스트 */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;opacity:0;transition:.25s;z-index:1000;white-space:nowrap;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.4)}
-.toast.on{opacity:1}
-.toast.g{background:var(--green-bg);border-color:var(--green);color:var(--green)}
-.toast.r{background:var(--red-bg);border-color:var(--red);color:var(--red)}
-.toast.a{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}
-
-/* 로그인 화면 */
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.lcard{width:100%;max-width:360px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:32px 24px}
-.lcard-logo{text-align:center;margin-bottom:28px}
-.lcard-logo .icon{font-size:40px;display:block;margin-bottom:10px}
-.lcard-logo h1{font-size:20px;font-weight:900;margin-bottom:4px}
-.lcard-logo p{font-size:12px;color:var(--text2)}
-.lf{margin-bottom:14px}
-.lf label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px}
-.lf input{width:100%;padding:12px 14px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r2);color:var(--text);font-size:15px;outline:none;font-family:inherit;transition:.15s}
-.lf input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-bg)}
-.lf input::placeholder{color:var(--text3)}
-.btn-enter{width:100%;padding:14px;font-size:15px;font-weight:700;border:none;border-radius:var(--r2);background:var(--blue);color:#fff;cursor:pointer;font-family:inherit;margin-top:4px;transition:.15s}
-.btn-enter:active{opacity:.85;transform:scale(.98)}
-.lerr{font-size:12px;color:var(--red);margin-top:8px;min-height:18px;text-align:center}
-
-/* 메인 화면 */
-#main-screen{display:none;padding-bottom:80px}
-
-/* 탑바 */
-.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 16px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.tb-user{display:flex;flex-direction:column}
-.tb-nick{font-size:14px;font-weight:700}
-.tb-id{font-size:11px;color:var(--text2);margin-top:1px}
-.btn-logout{padding:6px 12px;font-size:12px;background:transparent;border:1px solid var(--border2);border-radius:100px;color:var(--text2);cursor:pointer;font-family:inherit}
-
-/* 섹션 */
-.section{padding:14px 16px}
-
-/* 상태 헤더 */
-.status-hero{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin:14px 16px 0}
-.sh-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.sh-name{font-size:17px;font-weight:900}
-.sh-hint{font-size:11px;color:var(--amber);background:var(--amber-bg);padding:3px 8px;border-radius:100px;font-weight:600}
-.sh-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.sh-stat{background:var(--bg3);border-radius:var(--r2);padding:10px 12px}
-.sh-stat-label{font-size:10px;color:var(--text2);margin-bottom:3px;font-weight:500}
-.sh-stat-val{font-size:18px;font-weight:900}
-
-/* 태그 */
-.tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;border:1px solid}
-.tag-honor{background:var(--amber-bg);color:var(--amber);border-color:var(--amber)}
-.tag-vac{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue)}
-.tag-sv{background:var(--red-bg);color:var(--red);border-color:var(--red)}
-
-/* 봉사 알림 배너 */
-.sv-banner{border-radius:var(--r);padding:14px 16px;margin:14px 16px 0;border:2px solid}
-.sv-banner-red{background:var(--red-bg);border-color:var(--red)}
-.sv-banner-amber{background:var(--amber-bg);border-color:var(--amber)}
-.sv-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.sv-desc{font-size:12px;line-height:1.6;margin-bottom:8px;opacity:.9}
-.sv-deadline{font-size:11px;font-weight:700;text-align:right}
-
-/* 주간 그리드 */
-.week-section{padding:14px 16px 0}
-.week-label{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:10px;letter-spacing:.05em}
-.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.day-cell{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:8px 4px;text-align:center;transition:.15s}
-.day-cell.today{border-color:var(--blue);background:var(--blue-bg)}
-.day-cell.done{border-color:var(--green);background:var(--green-bg)}
-.day-cell.partial{border-color:var(--amber);background:var(--amber-bg)}
-.dc-day{font-size:9px;color:var(--text2);margin-bottom:3px;font-weight:600}
-.dc-date{font-size:11px;color:var(--text2);margin-bottom:4px}
-.dc-mark{font-size:14px;min-height:18px;line-height:18px}
-
-/* 해시태그 카드 */
-.ht-section{margin:14px 16px 0;background:linear-gradient(135deg,#1e1e35,#161628);border:1px solid var(--border2);border-radius:var(--r);padding:16px;position:relative;overflow:hidden}
-.ht-section::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:var(--blue-bg);border-radius:50%;filter:blur(20px)}
-.ht-label{font-size:10px;font-weight:700;color:var(--text2);letter-spacing:.1em;margin-bottom:8px}
-.ht-tag{font-size:20px;font-weight:900;color:var(--blue-text);word-break:break-all;line-height:1.3;margin-bottom:14px}
-.btn-copy-ht{width:100%;padding:12px;font-size:14px;font-weight:700;border:none;border-radius:var(--r2);background:var(--blue);color:#fff;cursor:pointer;font-family:inherit;transition:.15s}
-.btn-copy-ht:active{opacity:.85;transform:scale(.98)}
-
-/* 밴링크 섹션 */
-.van-section{margin:14px 16px 0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
-.van-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.van-title{font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.04em}
-.van-hd-btns{display:flex;gap:6px}
-.btn-van-all{font-size:11px;font-weight:700;padding:5px 10px;border-radius:100px;background:var(--blue-bg);color:var(--blue-text);border:1.5px solid rgba(107,142,255,.3);cursor:pointer;font-family:inherit}
-.btn-van-refresh{font-size:11px;padding:5px 10px;border-radius:100px;background:none;color:var(--text2);border:1px solid var(--border2);cursor:pointer;font-family:inherit}
-.van-desc{font-size:11px;color:var(--text3);margin-bottom:10px}
-.van-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
-.van-item:last-child{border-bottom:none}
-.van-nick{font-size:13px;font-weight:700}
-.van-item-btns{display:flex;gap:6px}
-.btn-van-copy{font-size:12px;font-weight:600;padding:6px 12px;border-radius:100px;background:var(--blue-bg);color:var(--blue-text);border:1.5px solid rgba(107,142,255,.3);cursor:pointer;font-family:inherit}
-.btn-van-go{font-size:12px;font-weight:600;padding:6px 12px;border-radius:100px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);cursor:pointer;font-family:inherit;text-decoration:none}
-.van-empty{font-size:12px;color:var(--text3);text-align:center;padding:12px 0}
-
-/* 액션 섹션 */
-.action-section{margin:14px 16px 0}
-.action-label{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.05em;margin-bottom:10px}
-
-/* 참여완료 배너 */
-.done-banner{background:var(--green-bg);border:1.5px solid var(--green);border-radius:var(--r2);padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.done-banner-icon{font-size:20px}
-.done-banner-title{font-size:13px;font-weight:700;color:var(--green-text)}
-.done-banner-sub{font-size:11px;color:var(--green-text);opacity:.8;margin-top:1px}
-
-/* 액션 버튼들 */
-.main-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.main-btn{background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--r2);padding:16px 12px;cursor:pointer;font-family:inherit;text-align:center;transition:.15s;display:flex;flex-direction:column;align-items:center;gap:6px}
-.main-btn:active{opacity:.8;transform:scale(.97)}
-.main-btn.join{border-color:var(--blue);background:var(--blue-bg)}
-.main-btn.done{border-color:var(--green);background:var(--green-bg)}
-.mb-icon{font-size:24px}
-.mb-title{font-size:13px;font-weight:700}
-.mb-time{font-size:10px;color:var(--text2)}
-.main-btn.join .mb-title{color:var(--blue-text)}
-.main-btn.done .mb-title{color:var(--green-text)}
-.main-btn.done-wide{grid-column:span 2}
-
-.sub-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.sub-btn{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:var(--text2);transition:.15s}
-.sub-btn:active{opacity:.8}
-.van-only-btn{grid-column:span 2;background:var(--amber-bg);border-color:var(--amber);color:var(--amber-text)}
-
-/* 오버레이 (모달) */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end;justify-content:center}
-.overlay.on{display:flex}
-.sheet{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:480px;padding:0 0 env(safe-area-inset-bottom);max-height:85vh;overflow-y:auto}
-.sh-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:12px auto 16px}
-.sh-title{font-size:17px;font-weight:700;padding:0 20px;margin-bottom:16px}
-.sh-body{padding:0 20px 20px}
-.sf{margin-bottom:14px}
-.sf label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px}
-.sf input,.sf select,.sf textarea{width:100%;padding:12px 14px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r2);color:var(--text);font-size:14px;outline:none;font-family:inherit;-webkit-appearance:none;transition:.15s}
-.sf input:focus,.sf select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-bg)}
-.sf input::placeholder,.sf textarea::placeholder{color:var(--text3)}
-.info-box{padding:10px 14px;border-radius:var(--r3);font-size:12px;line-height:1.6;margin-bottom:14px;border:1px solid}
-.info-box.blue{background:var(--blue-bg);border-color:var(--blue);color:var(--blue-text)}
-.info-box.amber{background:var(--amber-bg);border-color:var(--amber);color:var(--amber-text)}
-.info-box.green{background:var(--green-bg);border-color:var(--green);color:var(--green-text)}
-.sh-btn{width:100%;padding:14px;font-size:15px;font-weight:700;border:none;border-radius:var(--r2);cursor:pointer;font-family:inherit;margin-bottom:8px;transition:.15s}
-.sh-btn:active{opacity:.85;transform:scale(.98)}
-.sh-btn.blue{background:var(--blue);color:#fff}
-.sh-btn.green{background:var(--green);color:#0f0f13}
-.sh-btn.amber{background:var(--amber);color:#0f0f13}
-.sh-btn.ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border2)}
-.sh-alert{padding:10px 14px;border-radius:var(--r3);font-size:12px;line-height:1.6;margin-bottom:10px;border:1px solid;display:none}
-.sh-alert.on{display:block}
-.sh-alert.red{background:var(--red-bg);border-color:var(--red);color:var(--red)}
-.sh-alert.amber{background:var(--amber-bg);border-color:var(--amber);color:var(--amber-text)}
-.sh-alert.green{background:var(--green-bg);border-color:var(--green);color:var(--green-text)}
-
-/* 규칙 */
-.rule-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin:14px 16px 0;overflow:hidden}
-.rb-head{padding:10px 14px;font-size:12px;font-weight:700;letter-spacing:.04em}
-.rb-head.pink{background:var(--pink-bg);color:var(--pink)}
-.rb-head.green{background:var(--green-bg);color:var(--green-text)}
-.rb-head.gray{background:var(--bg3);color:var(--text2)}
-.ri{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-top:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.5}
-.rn{font-weight:700;color:var(--text);flex-shrink:0;min-width:20px}
-
-/* 하단 네비 */
-.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);padding:8px 0 env(safe-area-inset-bottom);z-index:100}
-.bnav-row{display:flex}
-.nb{flex:1;background:none;border:none;padding:8px 4px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text3);transition:.15s}
-.nb.on{color:var(--blue-text)}
-.nb-icon{font-size:20px}
-.nb-label{font-size:10px;font-weight:600}
-
-/* 스피너 */
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:4px}
+#lov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+#lov.on{display:flex}
+.lsp{width:50px;height:50px;border:4px solid rgba(255,255,255,.15);border-top-color:#ff6b6b;border-radius:50%;animation:lspin .7s linear infinite}
+.lmsg{font-size:13px;color:rgba(255,255,255,.85);font-weight:600}
+@keyframes lspin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+<div id="lov"><div class="lsp"></div><div class="lmsg" id="lov-msg">불러오는 중...</div></div>
 
-<!-- 로딩 오버레이 -->
-<div class="lov" id="lov">
-  <div class="lsp"></div>
-  <div class="lmsg" id="lov-msg">불러오는 중...</div>
-</div>
 <div class="toast" id="toast"></div>
-
-<!-- 로그인 -->
 <div id="login-screen">
-  <div class="lcard">
-    <div class="lcard-logo">
-      <span class="icon">🎈</span>
-      <h1>열기구 방</h1>
-      <p>인스타그램 해시태그 품앗이 커뮤니티</p>
-    </div>
-    <div class="lf"><label>닉네임</label><input id="li-nick" placeholder="내 닉네임" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-    <div class="lf"><label>인스타그램 아이디 (@ 없이)</label><input id="li-id" placeholder="instagram_id" autocomplete="off" autocapitalize="none" inputmode="url" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-    <div class="lerr" id="l-err"></div>
-    <button class="btn-enter" id="l-btn" onclick="doLogin()">입장하기</button>
+  <div class="login-top">
+    <span class="balloon-anim">🎈</span>
+    <div class="login-title">열기구 방</div>
+    <div class="login-sub">닉네임과 아이디로 입장하세요</div>
+  </div>
+  <div class="login-card">
+    <div class="lf"><label>닉네임</label><input id="li-nick" placeholder="내 닉네임" autocomplete="off"/></div>
+    <div class="lf"><label>인스타그램 아이디 (@ 없이)</label><input id="li-id" placeholder="instagram_id" autocomplete="off" autocapitalize="none" inputmode="url"/></div>
+    <button class="btn-enter" id="enter-btn" onclick="crewLogin()">입장하기</button>
+    <div class="login-note">등록된 크루만 입장 가능합니다</div>
   </div>
 </div>
-
-<!-- 메인 -->
 <div id="main-screen">
   <div class="topbar">
-    <div class="tb-user">
-      <div class="tb-nick" id="tb-nick">-</div>
-      <div class="tb-id" id="tb-id">-</div>
-    </div>
-    <button class="btn-logout" onclick="doLogout()">로그아웃</button>
+    <div class="topbar-logo"><span>🎈</span>열기구 방</div>
+    <span id="phase-chip" class="phase-chip join"><span class="blink b"></span>참여시간</span>
   </div>
-
-  <!-- 홈 탭 -->
   <div id="pg-home">
-
-    <!-- 상태 헤더 -->
-    <div class="status-hero" id="status-hero">
-      <div class="sh-row">
-        <div class="sh-nick" id="sh-nick" style="font-size:17px;font-weight:900">-</div>
-        <div class="sh-hint" id="sh-hint" style="display:none"></div>
-      </div>
-      <div class="sh-stats">
-        <div class="sh-stat"><div class="sh-stat-label">이번 주 참여</div><div class="sh-stat-val" id="sh-join" style="color:var(--blue-text)">-</div></div>
-        <div class="sh-stat"><div class="sh-stat-label">봉사 누적(회)</div><div class="sh-stat-val" id="sh-sv" style="color:var(--red)">0</div></div>
-      </div>
-      <div class="tag-row" id="tag-row"></div>
-    </div>
-
-    <!-- 봉사 알림 배너 -->
-    <div id="sv-banner" style="display:none"></div>
-
-    <!-- 주간 그리드 -->
-    <div class="week-section">
-      <div class="week-label">요일별 참여 현황</div>
-      <div class="week-grid" id="week-grid"></div>
-    </div>
-
-    <!-- 해시태그 -->
-    <div class="ht-section" id="ht-section">
-      <div class="ht-label">오늘의 해시태그</div>
-      <div class="ht-tag" id="ht-tag">#불러오는 중...</div>
-      <button class="btn-copy-ht" onclick="copyHt()">📋 해시태그 복사하기</button>
-    </div>
-
-    <!-- 밴링크 -->
-    <div class="van-section">
-      <div class="van-hd">
-        <div>
-          <div class="van-title">오늘 밴링크</div>
-          <div class="van-desc">밴 걸린 크루 게시물 — 좋아요 눌러주세요</div>
-        </div>
-        <div class="van-hd-btns">
-          <button class="btn-van-all" onclick="copyAllVan()">📋 전체복사</button>
-          <button class="btn-van-refresh" onclick="loadVanLinks()">새로고침</button>
-        </div>
-      </div>
-      <div id="van-list"><div class="van-empty">불러오는 중...</div></div>
-    </div>
-
-    <!-- 액션 -->
-    <div class="action-section">
-      <div class="action-label">오늘 할 일</div>
-
-      <!-- 상태 A: 미참여 -->
-      <div id="action-before">
-        <div class="main-btns">
-          <button class="main-btn join" onclick="openOv('ov-join')">
-            <span class="mb-icon">✋</span>
-            <span class="mb-title">참여 등록</span>
-            <span class="mb-time">10:00 ~ 22:00</span>
-          </button>
-          <button class="main-btn done" onclick="openOv('ov-done')">
-            <span class="mb-icon">✅</span>
-            <span class="mb-title">완료 체크</span>
-            <span class="mb-time">22:00 ~ 09:00</span>
-          </button>
-        </div>
-        <div class="sub-btns">
-          <button class="sub-btn" onclick="openOv('ov-vac')"><span>✈️</span>휴가 신청</button>
-          <button class="sub-btn" onclick="openOv('ov-report')"><span>🚨</span>신고</button>
-        </div>
-      </div>
-
-      <!-- 상태 B: 참여 완료 -->
-      <div id="action-after" style="display:none">
-        <div class="done-banner" id="done-banner">
-          <div class="done-banner-icon">✅</div>
+    <!-- 봉사 알림 배너 (봉사 있을 때만 표시) -->
+    <div id="service-banner" style="display:none;margin:12px 14px 0">
+      <div id="service-banner-inner" style="border-radius:var(--r);padding:14px 16px;border:2px solid">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="font-size:22px" id="sv-icon">🚨</span>
           <div>
-            <div class="done-banner-title">오늘 참여 완료!</div>
-            <div class="done-banner-sub" id="done-type-txt"></div>
+            <div style="font-size:14px;font-weight:700" id="sv-title"></div>
+            <div style="font-size:12px;margin-top:2px;opacity:.85" id="sv-desc"></div>
           </div>
         </div>
-        <div class="main-btns">
-          <button class="main-btn done done-wide" onclick="openOv('ov-done')">
-            <span class="mb-icon">✅</span>
-            <span class="mb-title">완료 체크</span>
-            <span class="mb-time">22:00 ~ 09:00</span>
-          </button>
+        <div style="background:rgba(0,0,0,.06);border-radius:var(--r3);padding:10px 12px;font-size:12px;line-height:1.65" id="sv-guide">
+          참여 등록 후 완료 체크를 하면 봉사 1회이 차감됩니다.
         </div>
-        <div class="sub-btns">
-          <button class="sub-btn van-only-btn" onclick="openOv('ov-van-only')">🔗 밴링크 등록</button>
-          <button class="sub-btn" onclick="openOv('ov-vac')"><span>✈️</span>휴가 신청</button>
-          <button class="sub-btn" onclick="openOv('ov-report')"><span>🚨</span>신고</button>
-        </div>
+        <div style="margin-top:8px;font-size:11px;font-weight:700;text-align:right" id="sv-deadline"></div>
       </div>
     </div>
 
-  </div><!-- /pg-home -->
+    <div class="week-hero">
+      <div class="user-status-row">
+        <div class="user-left">
+          <div class="av" id="av">?</div>
+          <div><div class="u-name" id="u-name"></div><div class="u-id" id="u-id"></div></div>
+        </div>
+        <div class="status-badge ok" id="status-badge">
+          <span class="status-dot dot-ok" id="status-dot"></span>
+          <span id="status-text">확인 중</span>
+        </div>
+      </div>
+      <div class="week-counts">
+        <div class="wc-box"><span class="wc-icon">📅</span><div><div class="wc-label">이번 주 참여</div><div class="wc-val neutral" id="wc-join">-</div></div></div>
+        <div class="wc-box"><span class="wc-icon">🚨</span><div><div class="wc-label">봉사 누적(회)</div><div class="wc-val neutral" id="wc-sv">-</div></div></div>
+      </div>
+      <div class="wk-label">요일별 참여 현황</div>
+      <div class="wk-grid" id="wk-grid"></div>
+      <div class="extra-tags" id="extra-tags" style="display:none"></div>
+    </div>
+    <button class="logout-btn" onclick="logout()">로그아웃</button>
+    <div class="ht-section" id="ht-section">
+      <div class="ht-card">
+        <div class="ht-eyebrow">오늘의 해시태그</div>
+        <div class="ht-value" id="ht-text">#불러오는 중...</div>
+        <button class="ht-copy-btn" id="ht-btn" onclick="copyTag()">📋 <span id="ht-lbl">해시태그 복사하기</span></button>
+      </div>
+    </div>
+    <!-- 밴링크 섹션 -->
+    <div style="padding:0 14px 12px">
+      <div style="background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.04em;text-transform:uppercase">오늘 밴링크</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">밴 걸린 크루의 게시물 링크 — 클릭해서 좋아요를 눌러주세요</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button style="font-size:11px;color:var(--blue-text);background:var(--blue-bg);border:1.5px solid rgba(59,130,246,.3);border-radius:100px;padding:4px 10px;cursor:pointer;font-family:inherit;font-weight:600" onclick="copyAllVanLinks()">📋 전체복사</button>
+            <button style="font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:100px;padding:4px 10px;cursor:pointer;font-family:inherit" onclick="loadVanLinks()">새로고침</button>
+          </div>
+        </div>
+        <div id="van-links-list"><div style="text-align:center;padding:10px;color:var(--text3);font-size:12px">불러오는 중...</div></div>
+      </div>
+    </div>
 
-  <!-- 규칙 탭 -->
-  <div id="pg-rules" style="display:none;padding-bottom:14px">
-    <div class="rule-block">
-      <div class="rb-head pink">참여 규칙</div>
+    <div class="action-section">
+      <div class="sec-title">오늘 할 일</div>
+
+      <!-- 상태 A: 오늘 미참여 → 참여등록 + 완료체크 -->
+      <div id="action-before" class="main-btns">
+        <button class="main-btn btn-join" onclick="openOv('join')"><span class="mb-icon">✋</span><span class="mb-title">참여 등록</span><span class="mb-time">10:00 ~ 21:59</span></button>
+        <button class="main-btn btn-done" onclick="openOv('done')"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 09:00</span></button>
+      </div>
+
+      <!-- 상태 B: 오늘 이미 참여함 → 밴링크 등록 + 완료체크만 -->
+      <div id="action-after" style="display:none">
+        <div style="background:var(--green-bg);border:1.5px solid var(--green-text);border-radius:var(--r2);padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">✅</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--green-text)">오늘 참여 완료!</div>
+            <div style="font-size:11px;color:var(--green-text);margin-top:1px;opacity:.8" id="today-join-type"></div>
+          </div>
+        </div>
+        <div class="main-btns" style="margin-bottom:10px">
+          <button class="main-btn btn-done" onclick="openOv('done')" style="grid-column:span 2"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 09:00</span></button>
+        </div>
+        <button class="sub-btn" style="width:100%;margin-bottom:10px" onclick="openOv('van-only')"><span class="sub-icon">🔗</span>밴링크 등록</button>
+      </div>
+
+      <div class="sub-btns">
+        <button class="sub-btn" onclick="openOv('vac')"><span class="sub-icon">✈️</span>휴가 신청</button>
+        <button class="sub-btn" onclick="openOv('report')"><span class="sub-icon">🚨</span>신고</button>
+      </div>
+    </div>
+  </div>
+  <div id="pg-rules">
+    <div class="rule-block"><div class="rb-head pink">참여 규칙</div>
       <div class="ri"><span class="rn">①</span>참여 시간 10:00~22:00 / 완료 시간 22:00~다음날 09:00</div>
-      <div class="ri"><span class="rn">②</span>해시태그 복사 후 피드에 작성 → 앱에서 참여 등록</div>
+      <div class="ri"><span class="rn">②</span>해시태그 복사 후 게시물에 작성 → 앱에서 참여 등록</div>
       <div class="ri"><span class="rn">③</span>완료 시간에 해시태그 2~3회 재검색, 꼼꼼히 좋아요 → 완료 체크</div>
       <div class="ri"><span class="rn">④</span>밴(해시태그 미노출) 시에만 밴링크 등록 (허위 등록 시 봉사 처리)</div>
       <div class="ri"><span class="rn">⑤</span>주 2회 이상 완료 필수 (월~일 기준)</div>
     </div>
-    <div class="rule-block">
-      <div class="rb-head green">봉사 규칙</div>
+    <div class="rule-block"><div class="rb-head green">봉사 규칙</div>
       <div class="ri"><span class="rn">①</span>주 완료 0회 또는 1회 → 봉사 1회 (매주 월요일 자동 부여)</div>
       <div class="ri"><span class="rn">②</span>완료 미체크 → 봉사 1회 자동 부여 (매일 09:01)</div>
-      <div class="ri"><span class="rn">③</span>봉사 처리: 참여 유형 [봉사 참여] 선택 → 참여+완료 체크</div>
-      <div class="ri"><span class="rn">④</span>봉사 발생 후 3일 이내 미처리 → 계정 자동 잠금</div>
+      <div class="ri"><span class="rn">③</span>봉사 처리 방법: 참여 유형에서 [봉사 참여] 선택 → 참여+완료 체크</div>
+      <div class="ri"><span class="rn">④</span>봉사 발생 후 3일 이내 미처리 → 계정 자동 잠금 (운영진 해제 필요)</div>
       <div class="ri"><span class="rn">⑤</span>봉사 3회 누적 → 계정 즉시 잠금</div>
     </div>
-    <div class="rule-block">
-      <div class="rb-head gray">참여 유형</div>
-      <div class="ri"><span class="rn" style="color:var(--green-text)">●</span>일반 참여 — 완료 체크 필수</div>
-      <div class="ri"><span class="rn" style="color:var(--amber)">B</span>봉사 참여 — 봉사 있을 때만 가능, 완료 시 봉사 1회 차감</div>
+    <div class="rule-block"><div class="rb-head gray">참여 유형</div>
+      <div class="ri"><span class="rn" style="color:var(--green-text)">●</span>일반 참여 — 피드 게시 후 참여+완료 체크 필수</div>
+      <div class="ri"><span class="rn" style="color:var(--amber)">B</span>봉사 참여 — 봉사가 있을 때만 선택 가능, 완료 체크 시 봉사 1회 차감</div>
       <div class="ri"><span class="rn" style="color:var(--pink)">🏅</span>명예/운영진 — 완료 체크 면제, 좋아요 면제</div>
     </div>
-    <div class="rule-block">
-      <div class="rb-head gray">주의사항</div>
-      <div class="ri"><span class="rn">⚠️</span>입장 첫 주(월~일)는 연습 기간 — 봉사 면제, 참여 가능</div>
+    <div class="rule-block"><div class="rb-head gray">주의사항</div>
+      <div class="ri"><span class="rn">⚠️</span>입장 첫 주(월~일)는 연습 기간 — 봉사 면제, 참여는 가능</div>
       <div class="ri"><span class="rn">⚠️</span>해태/무임승차/먹튀 → 연계방 전체 차단 (1,500명+)</div>
     </div>
   </div>
-
-  <!-- 하단 네비 -->
-  <nav class="bnav">
-    <div class="bnav-row">
-      <button class="nb on" onclick="switchTab('home',this)"><span class="nb-icon">🏠</span><span class="nb-label">홈</span></button>
-      <button class="nb" onclick="switchTab('rules',this)"><span class="nb-icon">📋</span><span class="nb-label">규칙</span></button>
-    </div>
-  </nav>
 </div>
-
-<!-- 참여 등록 모달 -->
+<nav class="bnav" id="bnav">
+  <div class="bnav-row">
+    <button class="nb on" onclick="switchPg('home',0)"><span class="nb-icon">🏠</span><span class="nb-label">홈</span></button>
+    <button class="nb" onclick="switchPg('rules',1)"><span class="nb-icon">📋</span><span class="nb-label">규칙</span></button>
+  </div>
+</nav>
 <div class="overlay" id="ov-join" onclick="bgClose(event,'ov-join')">
   <div class="sheet">
     <div class="sh-handle"></div>
     <div class="sh-title">✋ 참여 등록</div>
-    <div class="sh-body">
-      <div class="info-box blue" id="join-ht-display">#해시태그 불러오는 중...</div>
-      <div class="sf">
-        <label>참여 유형</label>
-        <select id="j-type">
-          <option value="●">● 일반 참여</option>
-          <option value="B">B 봉사 참여</option>
-          <option value="honor">🏅 명예/운영진 참여</option>
-        </select>
-      </div>
-      <div class="sh-alert" id="j-alert"></div>
-      <button class="sh-btn blue" id="j-btn" onclick="doJoin()">참여 등록하기</button>
-      <button class="sh-btn ghost" onclick="closeOv('ov-join')">취소</button>
+    <div style="background:var(--blue-bg);border-radius:var(--r3);padding:10px 13px;font-size:12px;color:var(--blue-text);margin-bottom:14px;line-height:1.6">
+      1인 1회 참여만 가능합니다. 해시태그에 누락된 경우 아래에서 참여 링크를 등록해주세요.
     </div>
+    <div class="sf">
+      <label>참여 유형</label>
+      <select id="j-type">
+        <option value="●">참여</option>
+        <option value="B">봉사 참여</option>
+        <option value="honor">명예 / 운영진 참여</option>
+      </select>
+    </div>
+    <div id="van-wrap" style="display:none"></div>
+    <button class="sh-btn blue" id="join-sb" onclick="doJoin()">참여 등록하기</button>
+    <button class="sh-btn ghost" onclick="closeOv('ov-join')">취소</button>
   </div>
 </div>
-
-<!-- 완료 체크 모달 -->
 <div class="overlay" id="ov-done" onclick="bgClose(event,'ov-done')">
   <div class="sheet">
-    <div class="sh-handle"></div>
-    <div class="sh-title">✅ 완료 체크</div>
-    <div class="sh-body">
-      <div class="info-box green">해시태그 2~3회 재검색 후 꼼꼼히 좋아요 눌렀나요? 밴링크도 챙겨주세요!</div>
-      <div class="sh-alert" id="d-alert"></div>
-      <button class="sh-btn green" id="d-btn" onclick="doDone()">완료 등록하기</button>
-      <button class="sh-btn ghost" onclick="closeOv('ov-done')">취소</button>
-    </div>
+    <div class="sh-handle"></div><div class="sh-title">✅ 완료 체크</div>
+    <div class="info-box green">해시태그 2~3회 재검색 후 꼼꼼히 좋아요 눌렀나요? 밴 링크도 챙겨주세요!</div>
+    <button class="sh-btn green" id="done-sb" onclick="doDone()">완료 등록하기</button>
+    <button class="sh-btn ghost" onclick="closeOv('ov-done')">취소</button>
   </div>
 </div>
-
-<!-- 밴링크 등록 모달 -->
+<!-- 밴링크 전용 모달 (참여 후 노출) -->
 <div class="overlay" id="ov-van-only" onclick="bgClose(event,'ov-van-only')">
   <div class="sheet">
     <div class="sh-handle"></div>
     <div class="sh-title">🔗 밴링크 등록</div>
-    <div class="sh-body">
-      <div class="info-box amber">해시태그에 내 게시물이 안 뜨는 경우에만 등록해주세요. 등록된 밴링크는 다른 크루에게 공유됩니다.</div>
-      <div class="sf">
-        <label>밴링크 (인스타그램 게시물 URL)</label>
-        <input id="van-input" placeholder="https://www.instagram.com/p/..." type="url"/>
-      </div>
-      <div class="sh-alert" id="van-alert"></div>
-      <button class="sh-btn amber" id="van-btn" onclick="doVanOnly()">밴링크 등록하기</button>
-      <button class="sh-btn ghost" onclick="closeOv('ov-van-only')">취소</button>
+    <div style="background:var(--amber-bg);border-radius:var(--r3);padding:10px 13px;font-size:12px;color:var(--amber-text);margin-bottom:14px;line-height:1.6">
+      해시태그에 걸리지 않은(밴) 경우 링크를 등록해주세요.<br>등록된 밴링크는 다른 크루에게 공유됩니다.
     </div>
+    <div class="sf">
+      <label>밴링크 (인스타그램 게시물 URL)</label>
+      <input id="van-only-input" placeholder="https://www.instagram.com/p/..." type="url"/>
+    </div>
+    <div id="van-only-alert" style="display:none;padding:8px 12px;border-radius:var(--r3);font-size:12px;margin-bottom:10px"></div>
+    <button class="sh-btn amber" id="van-only-sb" onclick="doVanOnly()">밴링크 등록하기</button>
+    <button class="sh-btn ghost" onclick="closeOv('ov-van-only')">취소</button>
   </div>
 </div>
 
-<!-- 휴가 신청 모달 -->
 <div class="overlay" id="ov-vac" onclick="bgClose(event,'ov-vac')">
   <div class="sheet">
-    <div class="sh-handle"></div>
-    <div class="sh-title">✈️ 휴가 신청</div>
-    <div class="sh-body">
-      <div class="info-box blue">휴가 기간 중 필참이 면제됩니다. 운영진 승인 후 적용돼요.</div>
-      <div class="sf"><label>시작일</label><input id="vac-start" type="date"/></div>
-      <div class="sf"><label>종료일</label><input id="vac-end" type="date"/></div>
-      <div class="sf"><label>사유 (선택)</label><input id="vac-reason" placeholder="사유를 입력해주세요"/></div>
-      <div class="sh-alert" id="vac-alert"></div>
-      <button class="sh-btn blue" id="vac-btn" onclick="doVac()">신청하기</button>
-      <button class="sh-btn ghost" onclick="closeOv('ov-vac')">취소</button>
-    </div>
+    <div class="sh-handle"></div><div class="sh-title">✈️ 휴가 신청</div>
+    <div class="info-box blue">휴가 기간 동안은 봉사가 면제됩니다. 운영진 승인 후 적용됩니다.</div>
+    <div class="sf"><label>시작일</label><input id="v-start" type="date"/></div>
+    <div class="sf"><label>종료일</label><input id="v-end" type="date"/></div>
+    <div class="sf"><label>사유 (선택)</label><input id="v-reason" placeholder="여행, 개인 사정 등"/></div>
+    <button class="sh-btn blue" onclick="doVac()">휴가 신청하기</button>
+    <button class="sh-btn ghost" onclick="closeOv('ov-vac')">취소</button>
   </div>
 </div>
-
-<!-- 신고 모달 -->
 <div class="overlay" id="ov-report" onclick="bgClose(event,'ov-report')">
   <div class="sheet">
-    <div class="sh-handle"></div>
-    <div class="sh-title">🚨 신고</div>
-    <div class="sh-body">
-      <div class="sf"><label>신고 유형</label>
-        <select id="rep-type">
-          <option value="완료 미처리">완료 미처리</option>
-          <option value="허위 밴링크">허위 밴링크</option>
-          <option value="해태/무임승차">해태/무임승차</option>
-          <option value="기타">기타</option>
-        </select>
-      </div>
-      <div class="sf"><label>대상 닉네임</label><input id="rep-target" placeholder="신고 대상 닉네임"/></div>
-      <div class="sf"><label>내용 (선택)</label><input id="rep-desc" placeholder="구체적인 내용을 입력해주세요"/></div>
-      <div class="sh-alert" id="rep-alert"></div>
-      <button class="sh-btn blue" id="rep-btn" onclick="doReport()">신고하기</button>
-      <button class="sh-btn ghost" onclick="closeOv('ov-report')">취소</button>
-    </div>
+    <div class="sh-handle"></div><div class="sh-title">🚨 신고</div>
+    <div class="sf"><label>신고 대상 닉네임</label><input id="r-target" placeholder="닉네임"/></div>
+    <div class="sf"><label>신고 유형</label><select id="r-type"><option>좋아요 누락</option><option>밴 링크 누락</option><option>허위 밴 등록</option><option>완료 미등록 의심</option><option>해태/무임승차/먹튀 의심</option></select></div>
+    <div class="sf"><label>증거 / 설명 (선택)</label><input id="r-evidence" placeholder="링크 또는 상세 설명"/></div>
+    <button class="sh-btn amber" onclick="doReport()">신고 접수하기</button>
+    <button class="sh-btn ghost" onclick="closeOv('ov-report')">취소</button>
   </div>
 </div>
-
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycby8ej3TJ7FGlbdeBxVS7jhnp-3wZcnoXtZuG7lFnctrL3R_wH4OjiPu08paKZrDVZR7Hw/exec
-';
-let user=null,myWeek=null,_vanItems=[];
 
-// ── 로딩 ──
-function pStart(msg='불러오는 중...'){
-  const o=document.getElementById('lov');
-  document.getElementById('lov-msg').textContent=msg;
-  o.classList.add('on');
+function pStart(msg){
+  document.getElementById('lov-msg').textContent=msg||'불러오는 중...';
+  document.getElementById('lov').classList.add('on');
 }
-function pEnd(){document.getElementById('lov').classList.remove('on');}
-
-// ── 토스트 ──
-function toast(msg,type='',dur=2800){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.className='toast on'+(type?' '+type:'');
-  clearTimeout(el._t);el._t=setTimeout(()=>el.className='toast',dur);
+function pEnd(){
+  document.getElementById('lov').classList.remove('on');
 }
 
-// ── 모달 ──
-function openOv(id){document.getElementById(id).classList.add('on');}
-function closeOv(id){document.getElementById(id).classList.remove('on');}
-function bgClose(e,id){if(e.target===e.currentTarget)closeOv(id);}
-
-// ── 탭 ──
-function switchTab(name,el){
-  document.getElementById('pg-home').style.display=name==='home'?'block':'none';
-  document.getElementById('pg-rules').style.display=name==='rules'?'block':'none';
-  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');
-}
-
-// ── API ──
-async function api(action,p={}){
-  const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,nickname:user?.nick,instagramId:user?.id,...p})});
-  return r.json();
-}
-
-// ── 로그인 ──
-async function doLogin(){
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycby8ej3TJ7FGlbdeBxVS7jhnp-3wZcnoXtZuG7lFnctrL3R_wH4OjiPu08paKZrDVZR7Hw/exec';
+const DAYS=['월','화','수','목','금','토','일'];
+let user=null,settings={},myWeek=null;
+async function api(action,p={}){const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,...p})});return r.json();}
+function toast(msg,type='',dur=2800){const el=document.getElementById('toast');el.textContent=msg;el.className='toast on'+(type?' '+type:'');clearTimeout(el._t);el._t=setTimeout(()=>el.className='toast',dur);}
+async function crewLogin(){
   const nick=document.getElementById('li-nick').value.trim();
   const id=document.getElementById('li-id').value.trim().replace('@','');
-  const err=document.getElementById('l-err');
-  if(!nick||!id){err.textContent='닉네임과 아이디를 입력해주세요.';return;}
-  const btn=document.getElementById('l-btn');
-  btn.innerHTML='<span class="spinner"></span>입장 중...';btn.disabled=true;
-  const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'checkMember',nickname:nick,instagramId:id})}).then(r=>r.json()).catch(()=>({ok:false,msg:'네트워크 오류'}));
+  if(!nick||!id){toast('닉네임과 아이디를 입력해주세요','a');return;}
+  const btn=document.getElementById('enter-btn');
+  btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;
+  const res=await api('checkMember',{nickname:nick,instagramId:id}).catch(()=>({ok:false,msg:'네트워크 오류. SCRIPT_URL을 확인해주세요.'}));
   btn.innerHTML='입장하기';btn.disabled=false;
-  if(!res.ok){err.textContent=res.msg||'로그인 실패';return;}
+  if(!res.ok){toast(res.msg,'r',4000);return;}
+  if(res.member&&res.member.status==='locked'){
+    toast('봉사 미처리로 계정이 잠금되었습니다. 운영진에게 문의해주세요.','r',6000);return;
+  }
   user={nick,id,...res.member};
   localStorage.setItem('cn',nick);localStorage.setItem('ci',id);
   document.getElementById('login-screen').style.display='none';
   document.getElementById('main-screen').style.display='block';
-  document.getElementById('tb-nick').textContent=nick;
-  document.getElementById('tb-id').textContent='@'+id;
-  loadMain();
+  document.getElementById('bnav').style.display='block';
+  await loadMain();
 }
-function doLogout(){
-  localStorage.removeItem('cn');localStorage.removeItem('ci');user=null;myWeek=null;
-  document.getElementById('main-screen').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('l-err').textContent='';
-}
-
-// ── 메인 로드 ──
 async function loadMain(){
-  pStart();
-  const[st,settings]=await Promise.all([
-    api('myStatus').catch(()=>null),
-    api('getSettings').catch(()=>null)
-  ]);
-  pEnd();
-  if(!st?.ok){toast('데이터 로드 실패','r');return;}
-  user={...user,...st.member};
-  myWeek=st.thisWeek;
-  // 해시태그
-  const ht=settings?.settings?.hashtag||'#없음';
-  document.getElementById('ht-tag').textContent=ht;
-  document.getElementById('join-ht-display').textContent=ht;
-  renderStatus();
+  const[s,st]=await Promise.all([api('getSettings').catch(()=>({ok:false})),api('myStatus',{nickname:user.nick,instagramId:user.id}).catch(()=>({ok:false}))]);
+  if(s.ok)settings=s.settings;
+  if(st.ok){user={...user,...st.member};myWeek=st.thisWeek;user.serviceInfo=st.serviceInfo||null;}
+  document.getElementById('ht-text').textContent=settings.hashtag||'#해시태그 없음';
+  loadVanLinks();
+  renderAll();renderPhase();
+}
+function renderAll(){
+  document.getElementById('av').textContent=user.nick.charAt(0);
+  document.getElementById('u-name').textContent=user.nick;
+  document.getElementById('u-id').textContent='@'+user.id;
+  const wk=Number(user.weekJoin||0),sv=Number(user.service||0);
+  const joinEl=document.getElementById('wc-join');
+  joinEl.textContent=wk+'회';
+  joinEl.className='wc-val '+(wk>=2?'ok':wk===1?'warn':'bad');
+  const svEl=document.getElementById('wc-sv');
+  svEl.textContent=sv+'일';
+  svEl.className='wc-val '+(sv===0?'ok':sv>=3?'bad':'warn');
+  const badge=document.getElementById('status-badge');
+  const dot=document.getElementById('status-dot');
+  const txt=document.getElementById('status-text');
+  if(user.isHonor){badge.className='status-badge honor';dot.className='';txt.textContent='🏅 명예회원';}
+  else if(user.onVacation){badge.className='status-badge vac';dot.className='status-dot dot-ok';txt.textContent='✈️ 휴가 중';}
+  else if(wk>=2){badge.className='status-badge ok';dot.className='status-dot dot-ok';txt.textContent='정상 참여 중';}
+  else if(wk===1){badge.className='status-badge warn';dot.className='status-dot dot-warn';txt.textContent='⚠️ 1회 — 1회 더 필요';}
+  else{badge.className='status-badge bad';dot.className='status-dot dot-bad';txt.textContent='❌ 미참여 — 봉사 대상';}
+  const tags=document.getElementById('extra-tags');
+  let t='';
+  if(user.isHonor)t+='<span class="etag etag-honor">🏅 명예회원</span>';
+  if(user.onVacation)t+='<span class="etag etag-vac">✈️ 휴가 중</span>';
+  if(sv>0)t+=`<span class="etag etag-sv">봉사 ${sv}회 누적</span>`;
+  tags.innerHTML=t;tags.style.display=t?'flex':'none';
+  renderServiceBanner();
   renderWeekGrid();
   renderActionArea();
-  renderSvBanner();
-  loadVanLinks();
 }
 
-// ── 상태 렌더 ──
-function renderStatus(){
+function renderServiceBanner(){
+  const banner=document.getElementById('service-banner');
+  const inner=document.getElementById('service-banner-inner');
+  if(!banner||!inner)return;
   const sv=Number(user.service||0);
-  document.getElementById('sh-nick').textContent=user.nick;
-  document.getElementById('sh-join').textContent=(myWeek?.weekJoin||0)+'회';
-  document.getElementById('sh-sv').textContent=sv+'회';
-  // 힌트
-  const hint=document.getElementById('sh-hint');
-  const wj=myWeek?.weekJoin||0;
-  if(wj<2){hint.style.display='block';hint.textContent=`● ${2-wj}회 — ${2-wj}회 더 필요`;}
-  else{hint.style.display='none';}
-  // 태그
-  const tagRow=document.getElementById('tag-row');
-  let tags='';
-  if(user.isHonor)tags+=`<span class="tag tag-honor">🏅 명예회원</span>`;
-  if(user.onVacation)tags+=`<span class="tag tag-vac">✈️ 휴가 중</span>`;
-  if(sv>0)tags+=`<span class="tag tag-sv">봉사 ${sv}회</span>`;
-  tagRow.innerHTML=tags;
-  // 봉사 있으면 해시태그 숨김
-  const htSec=document.getElementById('ht-section');
-  if(htSec)htSec.style.display=sv>0&&user.status==='service'?'none':'block';
-  // 봉사 있으면 참여 유형 봉사만 허용
-  const jType=document.getElementById('j-type');
-  if(jType&&sv>0){
-    Array.from(jType.options).forEach(o=>{o.disabled=(o.value!=='B');});
-    jType.value='B';
-  } else if(jType){
-    Array.from(jType.options).forEach(o=>{o.disabled=false;});
+  const status=user.status;
+  const si=user.serviceInfo;
+
+  if(status==='locked'){
+    banner.style.display='block';
+    inner.style.background='var(--red-bg)';
+    inner.style.borderColor='var(--red-text)';
+    document.getElementById('sv-icon').textContent='🔒';
+    document.getElementById('sv-title').style.color='var(--red-text)';
+    document.getElementById('sv-title').textContent='계정이 잠금 상태입니다';
+    document.getElementById('sv-desc').style.color='var(--red-text)';
+    document.getElementById('sv-desc').textContent='봉사 처리 기한을 초과했습니다. 운영진에게 문의해주세요.';
+    document.getElementById('sv-guide').textContent='카카오톡방 운영진에게 잠금 해제를 요청해주세요.';
+    document.getElementById('sv-deadline').style.color='var(--red-text)';
+    document.getElementById('sv-deadline').textContent='';
+    return;
+  }
+
+  if(sv<=0){banner.style.display='none';return;}
+
+  const isUrgent=si&&si.isUrgent;
+  banner.style.display='block';
+
+  if(isUrgent){
+    inner.style.background='var(--red-bg)';
+    inner.style.borderColor='var(--red-text)';
+    document.getElementById('sv-icon').textContent='🚨';
+    document.getElementById('sv-title').style.color='var(--red-text)';
+    document.getElementById('sv-title').textContent=`봉사 ${sv}회 — 오늘 처리하지 않으면 잠금!`;
+    document.getElementById('sv-desc').style.color='var(--red-text)';
+    document.getElementById('sv-desc').textContent='지금 바로 참여 등록 후 완료 체크를 해주세요';
+    document.getElementById('sv-guide').textContent='참여 등록 → 완료 체크 1회 완료 시 봉사 1회 자동 차감됩니다.';
+    document.getElementById('sv-deadline').style.color='var(--red-text)';
+    document.getElementById('sv-deadline').textContent=si?`⏰ 처리 기한: ${si.deadline}까지 (${si.daysLeft}일 남음)`:'';
+  } else {
+    inner.style.background='var(--amber-bg)';
+    inner.style.borderColor='var(--amber-text)';
+    document.getElementById('sv-icon').textContent='⚠️';
+    document.getElementById('sv-title').style.color='var(--amber-text)';
+    document.getElementById('sv-title').textContent=`봉사 ${sv}회 처리 필요`;
+    document.getElementById('sv-desc').style.color='var(--amber-text)';
+    document.getElementById('sv-desc').textContent='참여 등록 후 완료 체크를 하면 1일 차감됩니다';
+    document.getElementById('sv-guide').textContent='참여 등록 → 완료 체크 1회 완료 시 봉사 1회 자동 차감. 3일 내 미처리 시 계정이 잠깁니다.';
+    document.getElementById('sv-deadline').style.color='var(--amber-text)';
+    document.getElementById('sv-deadline').textContent=si?`⏰ 처리 기한: ${si.deadline}까지 (${si.daysLeft}일 남음)`:'';
   }
 }
 
-// ── 주간 그리드 ──
-function renderWeekGrid(){
-  if(!myWeek){document.getElementById('week-grid').innerHTML='';return;}
-  const days=['월','화','수','목','금','토','일'];
-  const n=new Date();
-  const todayStr=`${n.getMonth()+1}/${n.getDate()}`;
-  document.getElementById('week-grid').innerHTML=myWeek.dates.map((d,i)=>{
-    const mark=myWeek.days[i]||'';
-    const isToday=d===todayStr;
-    const isDone=mark.includes('✓');
-    const hasAny=mark!=='';
-    let cls='day-cell';
-    if(isToday)cls+=' today';
-    else if(isDone)cls+=' done';
-    else if(hasAny)cls+=' partial';
-    const emoji=isDone?'✅':hasAny?'●':'·';
-    return`<div class="${cls}"><div class="dc-day">${days[i]}</div><div class="dc-date">${d}</div><div class="dc-mark">${emoji}</div></div>`;
-  }).join('');
-}
-
-// ── 액션 영역 ──
 function renderActionArea(){
-  if(!myWeek)return;
+  const sv=Number(user.service||0);
+  const htSection=document.getElementById('ht-section')||document.querySelector('.ht-section');
+
+  // 봉사 있으면 해시태그 숨기고 봉사참여 안내 표시
+  let svNotice=document.getElementById('sv-force-notice');
+  if(sv>0){
+    if(htSection)htSection.style.display='none';
+    if(!svNotice){
+      svNotice=document.createElement('div');
+      svNotice.id='sv-force-notice';
+      svNotice.style.cssText='margin:0 14px 12px;background:var(--red-bg);border:2px solid var(--red-text);border-radius:var(--r);padding:14px 16px';
+      svNotice.innerHTML=`<div style="font-size:14px;font-weight:700;color:var(--red-text);margin-bottom:6px">🚨 봉사 ${sv}회 — 봉사 참여만 가능</div><div style="font-size:12px;color:var(--red-text);line-height:1.65;opacity:.9">봉사가 있는 동안은 일반 참여가 불가합니다.<br>봉사 참여 유형을 선택해서 참여+완료 체크를 해주세요.</div>`;
+      const actionSection=document.querySelector('.action-section');
+      if(actionSection)actionSection.parentNode.insertBefore(svNotice,actionSection);
+    }else{
+      svNotice.style.display='block';
+      svNotice.querySelector('div').textContent=`🚨 봉사 ${sv}회 — 봉사 참여만 가능`;
+    }
+    // 참여 등록 모달에서 봉사참여만 선택되게
+    const jType=document.getElementById('j-type');
+    if(jType){
+      jType.value='B';
+      // 일반참여, 명예 옵션 비활성화
+      Array.from(jType.options).forEach(opt=>{
+        opt.disabled=(opt.value!=='B');
+      });
+    }
+  } else {
+    if(htSection)htSection.style.display='block';
+    if(svNotice)svNotice.style.display='none';
+    // 옵션 복구
+    const jType=document.getElementById('j-type');
+    if(jType)Array.from(jType.options).forEach(opt=>opt.disabled=false);
+  }
+
+  // 오늘 참여 여부 확인
+  if(!myWeek) return;
   const n=new Date();
   const todayStr=`${n.getMonth()+1}/${n.getDate()}`;
   const todayIdx=myWeek.dates.indexOf(todayStr);
   const todayMark=todayIdx>=0?myWeek.days[todayIdx]:'';
-  const joined=todayMark!=='';
-  document.getElementById('action-before').style.display=joined?'none':'block';
-  document.getElementById('action-after').style.display=joined?'block':'none';
-  if(joined){
-    const typeMap={'●':'일반 참여 등록됨','B':'봉사 참여 등록됨','명예':'명예/운영진 참여 등록됨'};
-    document.getElementById('done-type-txt').textContent=typeMap[todayMark.replace('✓','')]||`${todayMark} 등록됨`;
+  const joinedToday=todayMark&&todayMark!=='';
+
+  const before=document.getElementById('action-before');
+  const after=document.getElementById('action-after');
+  if(!before||!after)return;
+
+  if(joinedToday){
+    // 이미 참여 → 상태 B 표시
+    before.style.display='none';
+    after.style.display='block';
+    const typeMap={'●':'참여 등록됨','B':'봉사 참여 등록됨','명예':'명예/운영진 참여 등록됨'};
+    const typeEl=document.getElementById('today-join-type');
+    if(typeEl)typeEl.textContent=typeMap[todayMark]||`${todayMark} 등록됨`;
+  } else {
+    // 미참여 → 상태 A 표시
+    before.style.display='grid';
+    after.style.display='none';
   }
 }
-
-// ── 봉사 배너 ──
-function renderSvBanner(){
-  const banner=document.getElementById('sv-banner');
-  const sv=Number(user.service||0);
-  const si=user.serviceInfo;
-  if(user.status==='locked'){
-    banner.style.display='block';
-    banner.className='sv-banner sv-banner-red';
-    banner.innerHTML=`<div class="sv-title" style="color:var(--red)">🔒 계정이 잠금 상태입니다</div><div class="sv-desc" style="color:var(--red)">봉사 처리 기한을 초과했습니다. 운영진에게 문의해주세요.</div>`;
-    return;
-  }
-  if(sv<=0){banner.style.display='none';return;}
-  const urgent=si&&si.isUrgent;
-  banner.style.display='block';
-  banner.className=`sv-banner ${urgent?'sv-banner-red':'sv-banner-amber'}`;
-  const c=urgent?'var(--red)':'var(--amber-text)';
-  banner.innerHTML=`
-    <div class="sv-title" style="color:${c}">${urgent?'🚨':'⚠️'} 봉사 ${sv}회 ${urgent?'— 오늘 처리하지 않으면 잠금!':'처리 필요'}</div>
-    <div class="sv-desc" style="color:${c}">참여 유형을 [봉사 참여]로 선택 후 참여+완료 체크를 해주세요.</div>
-    ${si?`<div class="sv-deadline" style="color:${c}">⏰ 처리 기한: ${si.deadline}까지 (${si.daysLeft}일 남음)</div>`:''}`;
+function renderWeekGrid(){
+  const grid=document.getElementById('wk-grid');
+  if(!myWeek){grid.innerHTML='';return;}
+  const n=new Date();
+  const todayStr=`${n.getMonth()+1}/${n.getDate()}`;
+  grid.innerHTML=myWeek.dates.map((date,i)=>{
+    const mark=myWeek.days[i]||'';
+    const isToday=date===todayStr;
+    const hasMark=mark!=='';
+    const cls=isToday?'dc today':hasMark?'dc has-mark':'dc empty-day';
+    const mc=mark==='●'?'dot':mark?mark:'none';
+    return `<div class="${cls}"><div class="dc-day">${DAYS[i]}</div><div class="dc-date">${date}</div><div class="dc-mark ${mc}">${mark||'·'}</div></div>`;
+  }).join('');
 }
-
-// ── 밴링크 ──
-async function loadVanLinks(){
-  const el=document.getElementById('van-list');
-  const d=await api('getDashboard').catch(()=>null);
-  if(!d?.ok){el.innerHTML='<div class="van-empty">불러오기 실패</div>';return;}
-  const items=(d.todayParticipants||[]).filter(t=>{
-    if(t.vanLink&&t.vanLink.trim())return true;
-    if(t.memo&&t.memo.includes('밴:'))return true;
-    return false;
-  }).map(t=>{
-    let link=t.vanLink||'';
-    if(!link&&t.memo){const m=t.memo.match(/밴:(https?:\/\/\S+)/);if(m)link=m[1];}
-    return{...t,link};
-  });
-  _vanItems=items;
-  if(!items.length){el.innerHTML='<div class="van-empty">오늘 등록된 밴링크 없음</div>';return;}
-  el.innerHTML=items.map(t=>`
-    <div class="van-item">
-      <div class="van-nick">${t.nickname}</div>
-      <div class="van-item-btns">
-        <button class="btn-van-copy" onclick="copyVan('${t.link}')">링크 복사</button>
-        <a class="btn-van-go" href="${t.link}" target="_blank" rel="noopener">바로가기 →</a>
-      </div>
-    </div>`).join('');
+function renderPhase(){
+  const h=new Date().getHours();const isP=h>=10&&h<22;
+  const el=document.getElementById('phase-chip');
+  el.className='phase-chip '+(isP?'join':'comp');
+  el.innerHTML=isP?'<span class="blink b"></span>참여시간':'<span class="blink g"></span>완료시간';
 }
-function copyVan(url){
-  navigator.clipboard.writeText(url).then(()=>toast('링크 복사됐어요!','g')).catch(()=>toast('직접 복사해주세요','a'));
+function copyTag(){
+  const tag=document.getElementById('ht-text').textContent;
+  navigator.clipboard.writeText(tag).then(()=>{
+    const btn=document.getElementById('ht-btn');const lbl=document.getElementById('ht-lbl');
+    btn.classList.add('copied');lbl.textContent='✓ 복사됐어요! 댓글에 붙여넣기 하세요';
+    setTimeout(()=>{btn.classList.remove('copied');lbl.textContent='해시태그 복사하기';},3000);
+  }).catch(()=>toast('길게 눌러서 직접 복사해주세요','a'));
 }
-function copyAllVan(){
-  if(!_vanItems.length){toast('복사할 밴링크가 없습니다','a');return;}
-  const lines=_vanItems.map((t,i)=>`${i+1}. ${t.nickname} / "${t.link}"`);
-  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('전체 복사 완료!','g')).catch(()=>toast('복사 실패','a'));
-}
-
-// ── 해시태그 복사 ──
-function copyHt(){
-  const ht=document.getElementById('ht-tag').textContent;
-  navigator.clipboard.writeText(ht).then(()=>toast('해시태그 복사됐어요!','g')).catch(()=>toast('직접 복사해주세요','a'));
-}
-
-// ── 참여 등록 ──
+function openOv(name){document.getElementById('ov-'+name).classList.add('on');}
+function closeOv(id){document.getElementById(id).classList.remove('on');}
+function bgClose(e,id){if(e.target===e.currentTarget)closeOv(id);}
+function toggleVan(){const w=document.getElementById('van-wrap');w.style.display=w.style.display==='none'?'block':'none';}
 async function doJoin(){
   const rawType=document.getElementById('j-type').value;
   const vanEl=document.getElementById('j-van');
   const vanLink=vanEl?vanEl.value.trim():'';
   const typeMap={'●':'●','B':'B','honor':'명예'};
   const type=typeMap[rawType]||rawType;
-  const btn=document.getElementById('j-btn');
-  btn.innerHTML='<span class="spinner"></span>등록 중...';btn.disabled=true;
-  const res=await api('participate',{type,vanLink}).catch(()=>({ok:false,msg:'네트워크 오류'}));
+  const btn=document.getElementById('join-sb');
+  btn.innerHTML='<span class="spinner"></span> 등록 중...';btn.disabled=true;
+  const res=await api('participate',{nickname:user.nick,instagramId:user.id,type,vanLink}).catch(()=>({ok:false,msg:'네트워크 오류'}));
   btn.innerHTML='참여 등록하기';btn.disabled=false;
-  const alert=document.getElementById('j-alert');
-  if(res.ok){
-    closeOv('ov-join');toast(res.msg||'참여 등록 완료!','g');
-    alert.className='sh-alert';
-    await loadMain();
-  } else {
-    alert.className='sh-alert on red';alert.textContent=res.msg;
-  }
+  if(res.ok){closeOv('ov-join');toast(res.msg,'g');await loadMain();}
+  else toast(res.msg,res.warn?'a':'r',4000);
 }
-
-// ── 완료 체크 ──
 async function doDone(){
-  const btn=document.getElementById('d-btn');
-  btn.innerHTML='<span class="spinner"></span>처리 중...';btn.disabled=true;
-  const res=await api('complete',{late:'no'}).catch(()=>({ok:false,msg:'네트워크 오류'}));
+  const btn=document.getElementById('done-sb');
+  btn.innerHTML='<span class="spinner"></span> 처리 중...';btn.disabled=true;
+  const res=await api('complete',{nickname:user.nick,instagramId:user.id,late:'no'}).catch(()=>({ok:false,msg:'네트워크 오류'}));
   btn.innerHTML='완료 등록하기';btn.disabled=false;
-  const alert=document.getElementById('d-alert');
+  if(res.ok){closeOv('ov-done');toast(res.msg,'g');await loadMain();}
+  else toast(res.msg,res.warn?'a':'r',4000);
+}
+async function doVac(){
+  const start=document.getElementById('v-start').value;
+  const end=document.getElementById('v-end').value;
+  const reason=document.getElementById('v-reason').value.trim();
+  if(!start||!end){toast('시작일과 종료일을 선택해주세요','a');return;}
+  if(start>end){toast('종료일이 시작일보다 빠릅니다','r');return;}
+  const res=await api('applyVacation',{nickname:user.nick,instagramId:user.id,startDate:start,endDate:end,reason}).catch(()=>({ok:false,msg:'네트워크 오류'}));
+  if(res.ok){closeOv('ov-vac');toast(res.msg,'g',4000);}else toast(res.msg,'r',4000);
+}
+async function doReport(){
+  const target=document.getElementById('r-target').value.trim();
+  const type=document.getElementById('r-type').value;
+  const evidence=document.getElementById('r-evidence').value.trim();
+  if(!target){toast('신고 대상 닉네임을 입력해주세요','a');return;}
+  const res=await api('submitReport',{reporter:user.nick,target,type,evidence}).catch(()=>({ok:false,msg:'네트워크 오류'}));
+  if(res.ok){closeOv('ov-report');document.getElementById('r-target').value='';document.getElementById('r-evidence').value='';toast(res.msg,'g');}
+  else toast(res.msg,'r',4000);
+}
+function switchPg(name,idx){
+  document.getElementById('pg-home').style.display=name==='home'?'block':'none';
+  document.getElementById('pg-rules').style.display=name==='rules'?'block':'none';
+  document.querySelectorAll('.nb').forEach((b,i)=>b.classList.toggle('on',i===idx));
+}
+function logout(){
+  localStorage.removeItem('cn');localStorage.removeItem('ci');user=null;
+  document.getElementById('main-screen').style.display='none';
+  document.getElementById('bnav').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('li-nick').value='';document.getElementById('li-id').value='';
+}
+async async function loadVanLinks(){
+  const el=document.getElementById('van-links-list');
+  if(!el)return;
+  const d=await api('getDashboard').catch(()=>null);
+  if(!d||!d.ok){el.innerHTML='<div style="text-align:center;padding:10px;color:var(--text3);font-size:12px">불러오기 실패</div>';return;}
+  // vanLink 필드 또는 memo의 '밴:URL' 형식 모두 체크
+  const items=(d.todayParticipants||[]).filter(t=>{
+    if(t.vanLink&&t.vanLink.trim()!=='')return true;
+    if(t.memo&&t.memo.includes('밴:'))return true;
+    return false;
+  }).map(t=>{
+    let link=t.vanLink||'';
+    if(!link&&t.memo){const m=t.memo.match(/밴:(https?:\/\/\S+)/);if(m)link=m[1];}
+    return{...t,resolvedLink:link};
+  });
+  window._vanItems=items;
+  if(!items.length){
+    el.innerHTML='<div style="text-align:center;padding:10px;color:var(--text3);font-size:12px">오늘 등록된 참여 링크 없음</div>';
+    return;
+  }
+  el.innerHTML=items.map((t,i)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;${i<items.length-1?'border-bottom:1px solid var(--border)':''}">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${t.nickname}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:1px">밴링크</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button style="padding:6px 11px;font-size:12px;font-weight:600;background:var(--blue-bg);color:var(--blue-text);border:1.5px solid rgba(59,130,246,.3);border-radius:100px;cursor:pointer;font-family:inherit" onclick="cpVan('${t.resolvedLink}')">링크 복사</button>
+        <a href="${t.resolvedLink}" target="_blank" style="padding:6px 11px;font-size:12px;font-weight:600;background:var(--surface);color:var(--text2);border:1.5px solid var(--border2);border-radius:100px;text-decoration:none;display:inline-flex;align-items:center">바로가기 →</a>
+      </div>
+    </div>`).join('');
+}
+function copyAllVanLinks(){
+  const items=(window._vanItems||[]);
+  if(!items.length){toast('복사할 밴링크가 없습니다','a');return;}
+  const lines=items.map((t,i)=>`${i+1}. ${t.nickname}(@${t.id||''}) / "${t.resolvedLink}"`);
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('밴링크 전체 복사 완료!','g')).catch(()=>toast('복사 실패','a'));
+}
+function cpVan(url){navigator.clipboard.writeText(url).then(()=>toast('링크 복사됐어요!','g')).catch(()=>toast('직접 복사해주세요','a'));}
+
+async function doVanOnly(){
+  const vanLink=document.getElementById('van-only-input').value.trim();
+  const alertEl=document.getElementById('van-only-alert');
+  if(!vanLink){
+    alertEl.style.display='block';
+    alertEl.style.background='var(--amber-bg)';
+    alertEl.style.color='var(--amber-text)';
+    alertEl.textContent='링크를 입력해주세요.';
+    return;
+  }
+  const btn=document.getElementById('van-only-sb');
+  btn.innerHTML='<span class="spinner"></span> 등록 중...';btn.disabled=true;
+  const res=await api('participate',{nickname:user.nick,instagramId:user.id,type:'●',vanLink}).catch(()=>({ok:false,msg:'네트워크 오류'}));
+  btn.innerHTML='링크 등록하기';btn.disabled=false;
   if(res.ok){
-    closeOv('ov-done');toast('완료 처리됐어요!','g');
-    alert.className='sh-alert';
+    closeOv('ov-van-only');
+    document.getElementById('van-only-input').value='';
+    toast(res.msg,'g');
     await loadMain();
   } else {
-    alert.className='sh-alert on red';alert.textContent=res.msg;
+    alertEl.style.display='block';
+    alertEl.style.background='var(--red-bg)';
+    alertEl.style.color='var(--red-text)';
+    alertEl.textContent=res.msg;
   }
 }
 
-// ── 밴링크 등록 (참여 후) ──
-async function doVanOnly(){
-  const vanLink=document.getElementById('van-input').value.trim();
-  const alert=document.getElementById('van-alert');
-  if(!vanLink){alert.className='sh-alert on amber';alert.textContent='링크를 입력해주세요.';return;}
-  const btn=document.getElementById('van-btn');
-  btn.innerHTML='<span class="spinner"></span>등록 중...';btn.disabled=true;
-  const res=await api('participate',{type:'●',vanLink}).catch(()=>({ok:false,msg:'네트워크 오류'}));
-  btn.innerHTML='밴링크 등록하기';btn.disabled=false;
-  if(res.ok){
-    closeOv('ov-van-only');document.getElementById('van-input').value='';
-    toast('밴링크 등록됐어요!','g');loadVanLinks();
-  } else {
-    alert.className='sh-alert on red';alert.textContent=res.msg;
-  }
-}
-
-// ── 휴가 신청 ──
-async function doVac(){
-  const start=document.getElementById('vac-start').value;
-  const end=document.getElementById('vac-end').value;
-  const reason=document.getElementById('vac-reason').value.trim();
-  const alert=document.getElementById('vac-alert');
-  if(!start||!end){alert.className='sh-alert on amber';alert.textContent='날짜를 선택해주세요.';return;}
-  const btn=document.getElementById('vac-btn');
-  btn.innerHTML='<span class="spinner"></span>신청 중...';btn.disabled=true;
-  const res=await api('applyVacation',{start,end,reason}).catch(()=>({ok:false,msg:'네트워크 오류'}));
-  btn.innerHTML='신청하기';btn.disabled=false;
-  if(res.ok){closeOv('ov-vac');toast('휴가 신청됐어요!','g');alert.className='sh-alert';}
-  else{alert.className='sh-alert on red';alert.textContent=res.msg;}
-}
-
-// ── 신고 ──
-async function doReport(){
-  const type=document.getElementById('rep-type').value;
-  const target=document.getElementById('rep-target').value.trim();
-  const evidence=document.getElementById('rep-desc').value.trim();
-  const alert=document.getElementById('rep-alert');
-  if(!target){alert.className='sh-alert on amber';alert.textContent='대상 닉네임을 입력해주세요.';return;}
-  const btn=document.getElementById('rep-btn');
-  btn.innerHTML='<span class="spinner"></span>신고 중...';btn.disabled=true;
-  const res=await api('submitReport',{reporter:user.nick,target,type,evidence}).catch(()=>({ok:false,msg:'네트워크 오류'}));
-  btn.innerHTML='신고하기';btn.disabled=false;
-  if(res.ok){closeOv('ov-report');toast('신고됐어요!','g');alert.className='sh-alert';}
-  else{alert.className='sh-alert on red';alert.textContent=res.msg;}
-}
-
-// ── 자동 로그인 ──
 window.onload=async()=>{
-  const nick=localStorage.getItem('cn');
-  const id=localStorage.getItem('ci');
-  if(nick&&id){
-    document.getElementById('li-nick').value=nick;
-    document.getElementById('li-id').value=id;
-    user={nick,id};
-    pStart('로그인 중...');
-    const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'checkMember',nickname:nick,instagramId:id})}).then(r=>r.json()).catch(()=>({ok:false}));
-    pEnd();
-    if(res.ok){
-      user={nick,id,...res.member};
-      document.getElementById('login-screen').style.display='none';
-      document.getElementById('main-screen').style.display='block';
-      document.getElementById('tb-nick').textContent=nick;
-      document.getElementById('tb-id').textContent='@'+id;
-      loadMain();
-    }
-  }
+  const nick=localStorage.getItem('cn');const id=localStorage.getItem('ci');
+  if(nick&&id){document.getElementById('li-nick').value=nick;document.getElementById('li-id').value=id;await crewLogin();}
 };
 </script>
 </body>
