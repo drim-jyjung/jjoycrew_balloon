@@ -144,18 +144,9 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .toast.g{background:var(--green)}.toast.r{background:var(--red)}.toast.a{background:var(--amber)}
 .spinner{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* 로딩 오버레이 */
-#lov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
-#lov.on{display:flex}
-.lsp{width:50px;height:50px;border:4px solid rgba(255,255,255,.15);border-top-color:#ff6b6b;border-radius:50%;animation:lspin .7s linear infinite}
-.lmsg{font-size:13px;color:rgba(255,255,255,.85);font-weight:600}
-@keyframes lspin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div id="lov"><div class="lsp"></div><div class="lmsg" id="lov-msg">불러오는 중...</div></div>
-
 <div class="toast" id="toast"></div>
 <div id="login-screen">
   <div class="login-top">
@@ -228,10 +219,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
             <div style="font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.04em;text-transform:uppercase">오늘 밴링크</div>
             <div style="font-size:11px;color:var(--text3);margin-top:2px">밴 걸린 크루의 게시물 링크 — 클릭해서 좋아요를 눌러주세요</div>
           </div>
-          <div style="display:flex;gap:6px">
-            <button style="font-size:11px;color:var(--blue-text);background:var(--blue-bg);border:1.5px solid rgba(59,130,246,.3);border-radius:100px;padding:4px 10px;cursor:pointer;font-family:inherit;font-weight:600" onclick="copyAllVanLinks()">📋 전체복사</button>
-            <button style="font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:100px;padding:4px 10px;cursor:pointer;font-family:inherit" onclick="loadVanLinks()">새로고침</button>
-          </div>
+          <button style="font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:100px;padding:4px 10px;cursor:pointer;font-family:inherit" onclick="loadVanLinks()">새로고침</button>
         </div>
         <div id="van-links-list"><div style="text-align:center;padding:10px;color:var(--text3);font-size:12px">불러오는 중...</div></div>
       </div>
@@ -367,15 +355,6 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
   </div>
 </div>
 <script>
-
-function pStart(msg){
-  document.getElementById('lov-msg').textContent=msg||'불러오는 중...';
-  document.getElementById('lov').classList.add('on');
-}
-function pEnd(){
-  document.getElementById('lov').classList.remove('on');
-}
-
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycby8ej3TJ7FGlbdeBxVS7jhnp-3wZcnoXtZuG7lFnctrL3R_wH4OjiPu08paKZrDVZR7Hw/exec';
 const DAYS=['월','화','수','목','금','토','일'];
 let user=null,settings={},myWeek=null;
@@ -635,7 +614,7 @@ function logout(){
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('li-nick').value='';document.getElementById('li-id').value='';
 }
-async async function loadVanLinks(){
+async function loadVanLinks(){
   const el=document.getElementById('van-links-list');
   if(!el)return;
   const d=await api('getDashboard').catch(()=>null);
