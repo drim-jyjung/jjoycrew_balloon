@@ -356,17 +356,18 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
               <button class="btn btn-blue btn-w" onclick="addMem()">추가하기</button>
             </div>
             <div class="card">
-              <div class="card-title">명예회원 지정</div>
+              <div class="card-title">명예회원 지정
+                <button class="btn btn-ghost btn-sm" onclick="loadHonorList()" style="margin-left:auto">새로고침</button>
+              </div>
               <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:var(--bg3);padding:8px 10px;border-radius:var(--r2);line-height:1.6">좋아요 면제 · 완료 체크 면제 · 봉사 면제</div>
               <div class="alert" id="hon-alert"></div>
               <div class="row2" style="margin-bottom:8px">
                 <div class="field" style="margin-bottom:0"><label>닉네임</label><input id="hon-nick" placeholder="닉네임"/></div>
                 <div class="field" style="margin-bottom:0"><label>아이디</label><input id="hon-id" placeholder="@없이"/></div>
               </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                <button class="btn btn-blue btn-sm" onclick="setHon('honor')">지정</button>
-                <button class="btn btn-ghost btn-sm" onclick="setHon('remove_honor')">해제</button>
-              </div>
+              <button class="btn btn-blue btn-w" style="margin-bottom:12px" onclick="setHon('honor')">명예회원 지정</button>
+              <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">현재 명예회원</div>
+              <div id="honor-list"><div style="font-size:12px;color:var(--text3);padding:8px 0">불러오는 중...</div></div>
             </div>
             <div class="card">
               <div class="card-title" style="font-size:11px">🆕 이번 주 신규 <span class="bdg bdg-blue" id="newbie-cnt">0명</span></div>
@@ -441,7 +442,7 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
 </div><!-- /app -->
 
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycby8ej3TJ7FGlbdeBxVS7jhnp-3wZcnoXtZuG7lFnctrL3R_wH4OjiPu08paKZrDVZR7Hw/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxIXh0y8eH-bXe_XUqeW9pRRaQGpMm_VKBplg4nozvnvjPOz55FbhZ7arrrRDhgwS22JQ/exec';
 let adminId=null,allMems=[],wkCache={};
 
 // ── 프로그레스바 ──
@@ -599,7 +600,7 @@ async function loadWeek(){
       <div class="wg-hd">
         <div class="wg-title">${g.icon} ${g.title} <span class="wg-sub">— ${g.sub}</span></div>
         <div class="wg-right">
-          ${bdg('bdg-'+g.cls,g.list.length+'명')}
+          ${bdg(g.cls,g.list.length+'명')}
           <button class="btn btn-ghost btn-sm" onclick="copyGroup('${g.key}','${g.icon} ${g.title}')">📋 복사</button>
         </div>
       </div>
@@ -652,6 +653,7 @@ async function runClose(){
 
 // ── 멤버 ──
 async function loadMembers(){
+  loadHonorList();
   pS();
   const res=await api('getMembers').catch(()=>({ok:false}));
   pE();if(!res.ok)return;
@@ -724,7 +726,10 @@ async function doSv1(nick){
 async function doSvM(nick){
   const m=allMems.find(x=>x.nickname===nick);
   if(!m||Number(m.service||0)<=0){toast('차감할 봉사가 없습니다','a');return;}
-  m.service=Math.max(0,Number(m.service||0)-1);filterMem();
+  const newSv=Math.max(0,Number(m.service||0)-1);
+  m.service=newSv;
+  if(newSv===0)m.status='active'; // 봉사 0되면 상태도 active로
+  filterMem();
   const res=await api('giveService',{nickname:nick,days:-1,reason:'멤버관리 봉사-1 수동차감'}).catch(()=>({ok:false}));
   toast(res.ok?nick+' 봉사-1 차감':'실패',res.ok?'g':'r');
   setTimeout(loadMembers,2000);
@@ -745,10 +750,27 @@ async function doUnlock(nick){
   toast(res.ok?nick+' 잠금 해제':'실패',res.ok?'g':'r');
   setTimeout(loadMembers,2000);
 }
+async function loadHonorList(){
+  const res=await api('getHonorList').catch(()=>({ok:false}));
+  const el=document.getElementById('honor-list');
+  if(!res?.ok||!res.honor?.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0">명예회원 없음</div>';return;}
+  el.innerHTML=res.honor.map(h=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
+      <div><div style="font-size:13px;font-weight:700">${h.nickname}</div><div style="font-size:11px;color:var(--text2)">@${h.id||''}</div></div>
+      <button class="btn btn-red btn-sm" onclick="removeHon('${h.nickname}','${h.id||''}')">해제</button>
+    </div>`).join('');
+}
+async function removeHon(nick,id){
+  if(!confirm(nick+'의 명예회원을 해제하시겠습니까?'))return;
+  const res=await api('setHonorStatus',{nickname:nick,instagramId:id,status:'remove_honor'}).catch(()=>({ok:false,msg:'오류'}));
+  toast(res.ok?nick+' 명예회원 해제':'실패',res.ok?'g':'r');
+  if(res.ok)loadHonorList();
+}
 async function setHon(status){
   const nick=document.getElementById('hon-nick').value.trim();
-  const id=document.getElementById('hon-id').value.trim();
+  const id=document.getElementById('hon-id').value.trim().replace('@','');
   if(!nick){showAlert('hon-alert','amber','닉네임을 입력해주세요.');return;}
+  if(status==='honor'&&!id){showAlert('hon-alert','amber','아이디도 입력해주세요.');return;}
   const res=await api('setHonorStatus',{nickname:nick,instagramId:id,status}).catch(()=>({ok:false,msg:'오류'}));
   showAlert('hon-alert',res.ok?'green':'red',res.ok?`${nick} ${status==='honor'?'명예회원 지정':'해제'} 완료`:res.msg);
   if(res.ok){document.getElementById('hon-nick').value='';document.getElementById('hon-id').value='';}

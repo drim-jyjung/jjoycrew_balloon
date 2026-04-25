@@ -188,7 +188,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
       <div class="user-status-row">
         <div class="user-left">
           <div class="av" id="av">?</div>
-          <div><div class="u-name" id="u-name"></div><div class="u-id" id="u-id"></div></div>
+          <div><div style="display:flex;align-items:center;gap:6px"><div class="u-name" id="u-name"></div><button onclick="logout()" style="font-size:10px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:100px;padding:2px 7px;cursor:pointer;font-family:inherit">로그아웃</button></div><div class="u-id" id="u-id"></div></div>
         </div>
         <div class="status-badge ok" id="status-badge">
           <span class="status-dot dot-ok" id="status-dot"></span>
@@ -203,12 +203,14 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
       <div class="wk-grid" id="wk-grid"></div>
       <div class="extra-tags" id="extra-tags" style="display:none"></div>
     </div>
-    <button class="logout-btn" onclick="logout()">로그아웃</button>
     <div class="ht-section" id="ht-section">
       <div class="ht-card">
         <div class="ht-eyebrow">오늘의 해시태그</div>
-        <div class="ht-value" id="ht-text">#불러오는 중...</div>
-        <button class="ht-copy-btn" id="ht-btn" onclick="copyTag()">📋 <span id="ht-lbl">해시태그 복사하기</span></button>
+        <div id="ht-text-wrap">
+          <div class="ht-value" id="ht-text">#불러오는 중...</div>
+          <button class="ht-copy-btn" id="ht-btn" onclick="copyTag()">📋 <span id="ht-lbl">해시태그 복사하기</span></button>
+        </div>
+        <div id="ht-expired-msg" style="display:none;padding:10px 0;font-size:13px;color:#aaa;text-align:center">🔒 해시태그는 오후 10시까지만 노출됩니다</div>
       </div>
     </div>
     <!-- 밴링크 섹션 -->
@@ -249,7 +251,8 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
         <div class="main-btns" style="margin-bottom:10px">
           <button class="main-btn btn-done" onclick="openOv('done')" style="grid-column:span 2"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 09:00</span></button>
         </div>
-        <button class="sub-btn" style="width:100%;margin-bottom:10px" onclick="openOv('van-only')"><span class="sub-icon">🔗</span>밴링크 등록</button>
+        <button class="sub-btn van-only-btn" style="width:100%;margin-bottom:6px" onclick="openOv('van-only')"><span class="sub-icon">🔗</span>밴링크 등록</button>
+        <div id="van-expired-msg" style="display:none;font-size:11px;color:#999;text-align:center;margin-bottom:10px">🔒 밴링크는 새벽 3시까지만 등록 가능합니다</div>
       </div>
 
       <div class="sub-btns">
@@ -354,7 +357,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
   </div>
 </div>
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbyAHc42y8Jq4XoxDoHYoavkhbORPbp5EB76yaKxxJuVvDaNuiK7ojt2njMZWeF9lDdC3w/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxIXh0y8eH-bXe_XUqeW9pRRaQGpMm_VKBplg4nozvnvjPOz55FbhZ7arrrRDhgwS22JQ/exec';
 const DAYS=['월','화','수','목','금','토','일'];
 let user=null,settings={},myWeek=null;
 async function api(action,p={}){const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,...p})});return r.json();}
@@ -385,6 +388,7 @@ async function loadMain(){
   document.getElementById('ht-text').textContent=settings.hashtag||'#해시태그 없음';
   loadVanLinks();
   renderAll();renderPhase();
+  updateTimeBasedUI();
 }
 function renderAll(){
   document.getElementById('av').textContent=user.nick.charAt(0);
@@ -498,8 +502,10 @@ function renderActionArea(){
       });
     }
   } else {
-    if(htSection)htSection.style.display='block';
+    // ht-section 표시 여부는 updateTimeBasedUI()가 담당
     if(svNotice)svNotice.style.display='none';
+    // 시간 기반 해시태그 내용 제어 (봉사 없어도 22시 이후엔 숨김)
+    updateTimeBasedUI();
     // 옵션 복구
     const jType=document.getElementById('j-type');
     if(jType)Array.from(jType.options).forEach(opt=>opt.disabled=false);
@@ -521,7 +527,11 @@ function renderActionArea(){
     // 이미 참여 → 상태 B 표시
     before.style.display='none';
     after.style.display='block';
-    const typeMap={'●':'참여 등록됨','B':'봉사 참여 등록됨','명예':'명예/운영진 참여 등록됨'};
+    const typeMap={
+      '●':'참여 등록됨','●✓':'참여 완료됨',
+      'B':'봉사 참여 등록됨','B✓':'봉사 참여 완료됨',
+      '명예':'명예/운영진 참여 등록됨','명예✓':'명예/운영진 참여 완료됨'
+    };
     const typeEl=document.getElementById('today-join-type');
     if(typeEl)typeEl.textContent=typeMap[todayMark]||`${todayMark} 등록됨`;
   } else {
@@ -558,7 +568,25 @@ function copyTag(){
     setTimeout(()=>{btn.classList.remove('copied');lbl.textContent='해시태그 복사하기';},3000);
   }).catch(()=>toast('길게 눌러서 직접 복사해주세요','a'));
 }
-function openOv(name){document.getElementById('ov-'+name).classList.add('on');}
+function openOv(name){
+  document.getElementById('ov-'+name).classList.add('on');
+  if(name==='join'){
+    const sv=Number(user?.service||0);
+    const jType=document.getElementById('j-type');
+    if(jType){
+      Array.from(jType.options).forEach(o=>{
+        if(o.value==='B'){
+          o.style.display=sv>0?'':'none';
+          o.disabled=sv<=0;
+        } else {
+          o.style.display=sv>0?'none':'';
+          o.disabled=sv>0;
+        }
+      });
+      jType.value=sv>0?'B':'●';
+    }
+  }
+}
 function closeOv(id){document.getElementById(id).classList.remove('on');}
 function bgClose(e,id){if(e.target===e.currentTarget)closeOv(id);}
 function toggleVan(){const w=document.getElementById('van-wrap');w.style.display=w.style.display==='none'?'block':'none';}
@@ -576,6 +604,19 @@ async function doJoin(){
   else toast(res.msg,res.warn?'a':'r',4000);
 }
 async function doDone(){
+  // 오늘 참여 여부 확인
+  if(myWeek){
+    const n=new Date();
+    const todayStr=`${n.getMonth()+1}/${n.getDate()}`;
+    const todayIdx=myWeek.dates?myWeek.dates.indexOf(todayStr):-1;
+    const todayMark=todayIdx>=0?myWeek.days[todayIdx]:'';
+    if(!todayMark||todayMark===''){
+      toast('오늘 참여 등록 후 완료 체크할 수 있어요!','a');return;
+    }
+    if(todayMark.includes('✓')){
+      toast('이미 완료 처리된 계정입니다.','a');return;
+    }
+  }
   const btn=document.getElementById('done-sb');
   btn.innerHTML='<span class="spinner"></span> 처리 중...';btn.disabled=true;
   const res=await api('complete',{nickname:user.nick,instagramId:user.id,late:'no'}).catch(()=>({ok:false,msg:'네트워크 오류'}));
@@ -679,6 +720,28 @@ async function doVanOnly(){
     alertEl.textContent=res.msg;
   }
 }
+
+// 시간 기반 UI 업데이트
+function updateTimeBasedUI(){
+  const h=new Date().getHours();
+  // 해시태그: 10시~22시만 공개
+  const htWrap=document.getElementById('ht-text-wrap');
+  const htExpired=document.getElementById('ht-expired-msg');
+  const showHt=h>=10&&h<22;
+  if(htWrap)htWrap.style.display=showHt?'block':'none';
+  if(htExpired)htExpired.style.display=showHt?'none':'block';
+  // 밴링크 등록 버튼: 15시~03시만 가능
+  const showVan=(h>=15)||(h<3);
+  const vanOnlyBtn=document.querySelector('.van-only-btn');
+  const vanExpiredMsg=document.getElementById('van-expired-msg');
+  if(vanOnlyBtn)vanOnlyBtn.style.display=showVan?'':'none';
+  if(vanExpiredMsg)vanExpiredMsg.style.display=showVan?'none':'block';
+  // 참여 등록 버튼: 10시~22시만
+  const joinBtn=document.querySelector('.main-btn.join');
+  if(joinBtn)joinBtn.style.display=(h>=10&&h<22)?'':'none';
+}
+
+// 1분마다 UI 업데이트 — 제거 (로드 시 1회만 체크)
 
 window.onload=async()=>{
   const nick=localStorage.getItem('cn');const id=localStorage.getItem('ci');
