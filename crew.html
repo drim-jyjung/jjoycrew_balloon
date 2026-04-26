@@ -375,7 +375,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 function pStart(msg){var o=document.getElementById('lov');if(o){document.getElementById('lov-msg').textContent=msg||'불러오는 중...';o.classList.add('on');}}
 function pEnd(){var o=document.getElementById('lov');if(o)o.classList.remove('on');}
 
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycby2Y6y-DBky_QjuHai9YGzk5dYTQlzH-BNxZzemg9cGWZndY3hzFoPCAoxbTQj8SWOlZQ/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxIXh0y8eH-bXe_XUqeW9pRRaQGpMm_VKBplg4nozvnvjPOz55FbhZ7arrrRDhgwS22JQ/exec';
 const DAYS=['월','화','수','목','금','토','일'];
 let user=null,settings={},myWeek=null;
 async function api(action,p={}){const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,...p})});return r.json();}
@@ -614,8 +614,9 @@ function openOv(name){
           o.style.display=sv>0?'':'none';
           o.disabled=sv<=0;
         } else if(o.value==='honor'){
-          o.style.display=hc>0&&sv<=0?'':'none';
-          o.disabled=hc<=0||sv>0;
+          // 명예/운영진은 항상 선택 가능 (명예권 없어도)
+          o.style.display=sv>0?'none':'';
+          o.disabled=sv>0;
         } else {
           o.style.display=sv>0?'none':'';
           o.disabled=sv>0;
@@ -803,7 +804,14 @@ function updateTimeBasedUI(){
 
 window.onload=async()=>{
   const nick=localStorage.getItem('cn');const id=localStorage.getItem('ci');
-  if(nick&&id){document.getElementById('li-nick').value=nick;document.getElementById('li-id').value=id;await crewLogin();}
+  if(nick&&id){
+    document.getElementById('li-nick').value=nick;
+    document.getElementById('li-id').value=id;
+    try{await crewLogin();}catch(e){
+      // 자동 로그인 실패 시 로그인 화면 유지
+      localStorage.removeItem('cn');localStorage.removeItem('ci');
+    }
+  }
 };
 </script>
 </body>
