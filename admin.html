@@ -94,6 +94,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .btn-purple{background:var(--purple-bg);color:var(--purple);border-color:var(--purple-bd)}
 .btn-ghost{background:transparent;color:var(--text2);border-color:var(--border2)}
 .btn-ghost:hover{color:var(--text);border-color:var(--text2)}
+.btn-orange{background:var(--orange-bg);color:var(--orange);border-color:var(--orange-bd)}
 .btn-sm{padding:4px 10px;font-size:11px}
 .btn-w{width:100%;justify-content:center}
 
@@ -199,9 +200,17 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
 .loading-overlay.on{display:flex}
 .loading-spinner{width:44px;height:44px;border:4px solid rgba(255,255,255,.15);border-top-color:#58a6ff;border-radius:50%;animation:spin .7s linear infinite}
 .loading-msg{font-size:13px;color:rgba(255,255,255,.8);font-weight:500}
+
+/* 로딩 오버레이 */
+#lov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+#lov.on{display:flex}
+.lsp{width:50px;height:50px;border:4px solid rgba(255,255,255,.1);border-top-color:var(--blue);border-radius:50%;animation:losp .7s linear infinite}
+.lmsg{font-size:13px;color:rgba(255,255,255,.85);font-weight:600}
+@keyframes losp{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+<div id="lov"><div class="lsp"></div><div class="lmsg" id="lov-msg">불러오는 중...</div></div>
 <div id="pb"></div>
 <!-- 로딩 오버레이 -->
 <div class="loading-overlay" id="loading-overlay">
@@ -319,7 +328,7 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
 
       <!-- 멤버 관리 -->
       <div class="pg" id="pg-member">
-        <div class="ph"><div><h2>멤버 관리</h2><p>크루 추가 · 봉사 부여/차감 · 잠금 처리 · 명예회원 지정</p></div></div>
+        <div class="ph"><div><h2>멤버 관리</h2><p>크루 추가 · 봉사 부여/차감 · 잠금 처리 · 🏅 명예 부여</p></div></div>
         <div style="display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start">
 
           <!-- 좌: 전체 멤버 테이블 -->
@@ -337,7 +346,7 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
             </div>
             <div class="tbl-wrap">
               <table>
-                <thead><tr><th>닉네임</th><th>아이디</th><th>주완료</th><th>봉사</th><th>입장일</th><th>상태</th><th>관리</th></tr></thead>
+                <thead><tr><th>닉네임</th><th>아이디</th><th>주완료</th><th>봉사</th><th>명예</th><th>상태</th><th>관리</th></tr></thead>
                 <tbody id="mem-body"></tbody>
               </table>
             </div>
@@ -355,20 +364,7 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
               <div class="field"><label>번호 (선택)</label><input id="m-no" placeholder="예: 001"/></div>
               <button class="btn btn-blue btn-w" onclick="addMem()">추가하기</button>
             </div>
-            <div class="card">
-              <div class="card-title">명예회원 지정
-                <button class="btn btn-ghost btn-sm" onclick="loadHonorList()" style="margin-left:auto">새로고침</button>
-              </div>
-              <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:var(--bg3);padding:8px 10px;border-radius:var(--r2);line-height:1.6">좋아요 면제 · 완료 체크 면제 · 봉사 면제</div>
-              <div class="alert" id="hon-alert"></div>
-              <div class="row2" style="margin-bottom:8px">
-                <div class="field" style="margin-bottom:0"><label>닉네임</label><input id="hon-nick" placeholder="닉네임"/></div>
-                <div class="field" style="margin-bottom:0"><label>아이디</label><input id="hon-id" placeholder="@없이"/></div>
-              </div>
-              <button class="btn btn-blue btn-w" style="margin-bottom:12px" onclick="setHon('honor')">명예회원 지정</button>
-              <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">현재 명예회원</div>
-              <div id="honor-list"><div style="font-size:12px;color:var(--text3);padding:8px 0">불러오는 중...</div></div>
-            </div>
+
             <div class="card">
               <div class="card-title" style="font-size:11px">🆕 이번 주 신규 <span class="bdg bdg-blue" id="newbie-cnt">0명</span></div>
               <div style="font-size:11px;color:var(--text2);margin-bottom:8px">입장 주 봉사 면제 (연습 기간)</div>
@@ -442,19 +438,13 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
 </div><!-- /app -->
 
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbz4tgCbdAyY32dYELFaYwM2ZfSRZncu6d3QpFyAXAm9sKhbMbQ5EA5TuZG7oMRn496K3Q/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycby2Y6y-DBky_QjuHai9YGzk5dYTQlzH-BNxZzemg9cGWZndY3hzFoPCAoxbTQj8SWOlZQ/exec';
 let adminId=null,allMems=[],wkCache={};
 
 // ── 프로그레스바 ──
 let _pt=null;
-function pS(msg='불러오는 중...'){
-  const o=document.getElementById('loading-overlay');
-  if(o){o.querySelector('.loading-msg').textContent=msg;o.classList.add('on');}
-}
-function pE(){
-  const o=document.getElementById('loading-overlay');
-  if(o)o.classList.remove('on');
-}
+function pS(msg){var o=document.getElementById('lov');if(o){document.getElementById('lov-msg').textContent=msg||'불러오는 중...';o.classList.add('on');}}
+function pE(){var o=document.getElementById('lov');if(o)o.classList.remove('on');}
 
 // ── API ──
 async function api(action,p={}){
@@ -653,7 +643,6 @@ async function runClose(){
 
 // ── 멤버 ──
 async function loadMembers(){
-  loadHonorList();
   pS();
   const res=await api('getMembers').catch(()=>({ok:false}));
   pE();if(!res.ok)return;
@@ -691,15 +680,16 @@ function filterMem(){
     const sv=Number(m.service||0);
     const isLocked=m.status==='locked';
     const sb=isLocked?bdg('red','🔒 잠금'):sv>0?bdg('amber','봉사 '+sv+'회'):bdg('green','정상');
+    const honorCount=Number(m.honorCount||0);
     const btns=isLocked
       ?`<button class="btn btn-blue btn-sm" onclick="doUnlock('${m.nickname}')">🔓 잠금해제</button>`
-      :`<button class="btn btn-ghost btn-sm" onclick="doSv1('${m.nickname}')">봉사+1</button>${sv>0?`<button class="btn btn-purple btn-sm" onclick="doSvM('${m.nickname}')">봉사-1</button>`:''}<button class="btn btn-amber btn-sm" onclick="doLock('${m.nickname}')">🔒 잠금</button>`;
+      :`<button class="btn btn-ghost btn-sm" onclick="doSv1('${m.nickname}')">봉사+1</button>${sv>0?`<button class="btn btn-purple btn-sm" onclick="doSvM('${m.nickname}')">봉사-1</button>`:''}<button class="btn btn-amber btn-sm" onclick="doLock('${m.nickname}')">🔒 잠금</button><button class="btn btn-ghost btn-sm" onclick="doHonor('${m.nickname}','${m.id||''}')">명예+1</button>${honorCount>0?`<button class="btn btn-orange btn-sm" onclick="doUnhonor('${m.nickname}','${m.id||''}')">명예-1</button>`:''}`;
     return`<tr>
       <td style="font-weight:700">${m.nickname}</td>
       <td>@${m.id||''}</td>
       <td>${m.weekJoin||0}회</td>
       <td>${sv}회</td>
-      <td style="font-size:12px;color:var(--text2)">${m.joinDate||'-'}</td>
+      <td>${honorCount>0?`<span class="bdg bdg-orange">${honorCount}건</span>`:'0건'}</td>
       <td>${sb}</td>
       <td style="display:flex;gap:4px;flex-wrap:wrap">${btns}</td>
     </tr>`;
@@ -721,7 +711,6 @@ async function doSv1(nick){
   if(m){m.service=(Number(m.service||0)+1);filterMem();}
   const res=await api('giveService',{nickname:nick,days:1,reason:'멤버관리 봉사+1'}).catch(()=>({ok:false}));
   toast(res.ok?nick+' 봉사+1':'실패',res.ok?'g':'r');
-  setTimeout(loadMembers,2000);
 }
 async function doSvM(nick){
   const m=allMems.find(x=>x.nickname===nick);
@@ -732,7 +721,6 @@ async function doSvM(nick){
   filterMem();
   const res=await api('giveService',{nickname:nick,days:-1,reason:'멤버관리 봉사-1 수동차감'}).catch(()=>({ok:false}));
   toast(res.ok?nick+' 봉사-1 차감':'실패',res.ok?'g':'r');
-  setTimeout(loadMembers,2000);
 }
 async function doLock(nick){
   if(!confirm(nick+'을 잠금 처리하시겠습니까?\n로그인/참여가 불가능해집니다.'))return;
@@ -740,7 +728,6 @@ async function doLock(nick){
   if(m){m.status='locked';filterMem();}
   const res=await api('lockMember',{nickname:nick,reason:'멤버관리 수동 잠금'}).catch(()=>({ok:false}));
   toast(res.ok?nick+' 잠금 처리':'실패',res.ok?'g':'r');
-  setTimeout(loadMembers,2000);
 }
 async function doUnlock(nick){
   if(!confirm(nick+'의 잠금을 해제하시겠습니까?'))return;
@@ -748,7 +735,6 @@ async function doUnlock(nick){
   if(m){m.status='active';filterMem();}
   const res=await api('unlockMember',{nickname:nick}).catch(()=>({ok:false}));
   toast(res.ok?nick+' 잠금 해제':'실패',res.ok?'g':'r');
-  setTimeout(loadMembers,2000);
 }
 async function loadHonorList(){
   const res=await api('getHonorList').catch(()=>({ok:false}));
@@ -757,7 +743,7 @@ async function loadHonorList(){
   el.innerHTML=res.honor.map(h=>`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
       <div><div style="font-size:13px;font-weight:700">${h.nickname}</div><div style="font-size:11px;color:var(--text2)">@${h.id||''}</div></div>
-      <button class="btn btn-red btn-sm" onclick="removeHon('${h.nickname}','${h.id||''}')">해제</button>
+      <button class="btn btn-ghost btn-sm" onclick="removeHon('${h.nickname}','${h.id||''}')">회수</button>
     </div>`).join('');
 }
 async function removeHon(nick,id){
@@ -766,17 +752,29 @@ async function removeHon(nick,id){
   toast(res.ok?nick+' 명예회원 해제':'실패',res.ok?'g':'r');
   if(res.ok)loadHonorList();
 }
-async function setHon(status){
-  const nick=document.getElementById('hon-nick').value.trim();
-  const id=document.getElementById('hon-id').value.trim().replace('@','');
-  if(!nick){showAlert('hon-alert','amber','닉네임을 입력해주세요.');return;}
-  if(status==='honor'&&!id){showAlert('hon-alert','amber','아이디도 입력해주세요.');return;}
-  const res=await api('setHonorStatus',{nickname:nick,instagramId:id,status}).catch(()=>({ok:false,msg:'오류'}));
-  showAlert('hon-alert',res.ok?'green':'red',res.ok?`${nick} ${status==='honor'?'명예회원 지정':'해제'} 완료`:res.msg);
-  if(res.ok){document.getElementById('hon-nick').value='';document.getElementById('hon-id').value='';}
+async function doHonor(nick,id){
+  pS('명예권 부여 중...');
+  const res=await api('setHonorStatus',{nickname:nick,instagramId:id,status:'honor'}).catch(()=>({ok:false,msg:'네트워크 오류'}));
+  pE();
+  if(res.ok){
+    const m=allMems.find(x=>x.nickname===nick);
+    if(m)m.honorCount=(Number(m.honorCount||0)+1);
+    filterMem();
+    toast(nick+' 명예+1 (7일)','g');
+  } else toast(res.msg||'명예 부여 실패','r');
+}
+async function doUnhonor(nick,id){
+  pS('명예권 회수 중...');
+  const res=await api('setHonorStatus',{nickname:nick,instagramId:id,status:'remove_honor'}).catch(()=>({ok:false,msg:'네트워크 오류'}));
+  pE();
+  if(res.ok){
+    const m=allMems.find(x=>x.nickname===nick);
+    if(m)m.honorCount=Math.max(0,Number(m.honorCount||0)-1);
+    filterMem();
+    toast(nick+' 명예-1','g');
+  } else toast(res.msg||'명예 회수 실패','r');
 }
 
-// ── 신고/휴가 ──
 async function loadReports(){
   pS();
   const res=await api('getReports').catch(()=>({ok:false}));
