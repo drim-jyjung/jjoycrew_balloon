@@ -276,75 +276,52 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
       </div>
     </div>
   </div>
-  
-
-
-
-
-<div id="pg-rules" style="padding:14px">
-
-    <!-- 참여 규칙 -->
-    <div class="rule-block">
-      <div class="rb-head pink">✋ 참여 규칙</div>
-      <div class="ri"><span class="rn">①</span><b>참여 시간</b> 오전 10:00 ~ 오후 10:00</div>
-      <div class="ri"><span class="rn">②</span><b>완료 체크 시간</b> 오후 10:00 ~ 다음날 오전 09:00</div>
-      <div class="ri"><span class="rn">③</span>해시태그 복사 → 내 게시물 댓글에 작성 → 앱에서 참여 등록</div>
-      <div class="ri"><span class="rn">④</span>완료 시간에 해시태그 2~3회 재검색 후 꼼꼼히 좋아요</div>
-      <div class="ri"><span class="rn">⑤</span><b>주 2회 이상 완료 필수</b> (미달 시 봉사 자동 부여)</div>
-      <div class="ri"><span class="rn">⑥</span>밴(계정차단) 상태일 때만 밴링크 등록 가능 — 허위 등록 시 봉사 처리</div>
-      <div class="ri"><span class="rn">⑦</span>밴링크 등록 가능 시간: <b>오후 3:00 ~ 새벽 3:00</b></div>
+  <div id="pg-members" style="display:none;padding:14px 16px 14px">
+  <div style="font-size:13px;font-weight:700;margin-bottom:4px">오늘 참여자 목록</div>
+  <div style="font-size:11px;color:var(--text2);margin-bottom:14px">참여 등록한 크루 명단이에요. 미참여 신고 전 꼭 확인해주세요!</div>
+  <div id="member-list-wrap">
+    <div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">불러오는 중...</div>
+  </div>
+</div>
+<div id="pg-rules" >
+    <div class="rule-block"><div class="rb-head pink">참여 규칙</div>
+      <div class="ri"><span class="rn">①</span>참여 시간 10:00 ~ 22:00 / 완료 시간 22:00 ~ 다음날 09:00</div>
+      <div class="ri"><span class="rn">②</span>해시태그 복사 후 피드에 작성 → 앱에서 참여 등록</div>
+      <div class="ri"><span class="rn">③</span>완료 시간에 해시태그 2~3회 재검색 후 꼼꼼히 좋아요 → 완료 체크</div>
+      <div class="ri"><span class="rn">④</span>밴링크 등록은 15:00 ~ 새벽 3:00 (해시태그 미노출 시에만 등록)</div>
+      <div class="ri"><span class="rn">⑤</span>주 2회 이상 완료 필수 (월~일 기준)</div>
     </div>
-
-    <!-- 봉사 규칙 -->
-    <div class="rule-block">
-      <div class="rb-head green">🚨 봉사 규칙</div>
-      <div class="ri"><span class="rn">①</span>주 <b>0회 또는 1회</b> 완료 → 봉사 <b>1회</b> 자동 부여 (매주 월요일)</div>
-      <div class="ri"><span class="rn">②</span>완료 체크 미등록 → 봉사 <b>1회</b> 자동 부여 (매일 09:01)</div>
-      <div class="ri"><span class="rn">③</span>봉사 발생 후 <b>3일 이내</b> 미처리 시 계정 자동 잠금</div>
-      <div class="ri"><span class="rn">④</span>봉사 <b>3회 이상</b> 누적 → 즉시 계정 잠금 (운영진 해제 필요)</div>
-      <div class="ri"><span class="rn">⑤</span>봉사 진행 중에는 <b>봉사 참여(B)</b>만 가능, 해시태그 비공개</div>
-      <div class="ri"><span class="rn">⑥</span>봉사 참여 완료 체크 시 봉사 1회 차감</div>
-      <div class="ri"><span class="rn">⑦</span>해태 / 무임승차 / 먹튀 → 연계방 전체 차단 (1,500명+)</div>
+    <div class="rule-block"><div class="rb-head green">봉사 규칙</div>
+      <div class="ri"><span class="rn">①</span>주 완료 0회 또는 1회 → 봉사 1회 (매주 월요일 09:10 자동 부여)</div>
+      <div class="ri"><span class="rn">②</span>완료 체크 미처리 → 봉사 1회 (매일 09:01 자동 부여)</div>
+      <div class="ri"><span class="rn">③</span>봉사 처리 방법: 참여 유형 [봉사 참여] 선택 → 참여 + 완료 체크</div>
+      <div class="ri"><span class="rn">④</span>봉사 발생 후 3일 이내 미처리 → 계정 자동 잠금</div>
+      <div class="ri"><span class="rn">⑤</span>봉사 3회 누적 → 계정 즉시 잠금 (운영진에게 문의)</div>
+      <div class="ri"><span class="rn">⑥</span>허위 밴링크 등록 신고 처리 시 봉사 부여</div>
     </div>
-
-    <!-- 계정 상태 -->
-    <div class="rule-block">
-      <div class="rb-head" style="background:var(--blue-bg);color:var(--blue-text)">🔒 계정 상태</div>
-      <div class="ri"><span class="rn" style="background:var(--green-bg);color:var(--green-text);border-radius:4px;padding:1px 6px">정상</span> 일반 참여 가능, 해시태그 공개</div>
-      <div class="ri"><span class="rn" style="background:var(--amber-bg);color:var(--amber-text);border-radius:4px;padding:1px 6px">봉사중</span> 봉사 참여만 가능, 해시태그 비공개</div>
-      <div class="ri"><span class="rn" style="background:var(--red-bg);color:var(--red-text);border-radius:4px;padding:1px 6px">잠금</span> 로그인/참여 불가 — 운영진에게 문의</div>
+    <div class="rule-block"><div class="rb-head gray">참여 유형</div>
+      <div class="ri"><span class="rn" style="color:var(--green-text)">●</span>일반 참여 — 완료 체크 필수, 주완료 횟수 포함</div>
+      <div class="ri"><span class="rn" style="color:var(--amber)">B</span>봉사 참여 — 봉사 있을 때만 가능, 완료 시 봉사 1회 차감, 주완료 미포함</div>
+      <div class="ri"><span class="rn" style="color:var(--pink)">🏅</span>명예/운영진 — 완료 체크 면제, 좋아요 면제, 주완료 1회 인정</div>
     </div>
-
-    <!-- 명예회원 -->
-    <div class="rule-block">
-      <div class="rb-head" style="background:#fff8e1;color:#b8860b">🏅 명예회원</div>
-      <div class="ri"><span class="rn">·</span>누적 <b>7회 완료</b> 달성 시 자동 명예회원 등록</div>
-      <div class="ri"><span class="rn">·</span>좋아요 면제 · 완료 체크 면제 · 봉사 부여 면제</div>
-      <div class="ri"><span class="rn">·</span>해시태그 1회 활동 가능 (참여 등록만 하면 됨)</div>
+    <div class="rule-block"><div class="rb-head gray">명예회원</div>
+      <div class="ri"><span class="rn">①</span>주 7회 완료 달성 시 명예권 자동 부여 (7일 유효)</div>
+      <div class="ri"><span class="rn">②</span>명예권 보유 시 [명예/운영진] 유형으로 참여 가능</div>
+      <div class="ri"><span class="rn">③</span>명예 참여 시 명예권 1개 차감, 완료 체크 면제</div>
+      <div class="ri"><span class="rn">④</span>7일 이내 미사용 시 명예권 자동 만료</div>
     </div>
-
-    <!-- 신규 멤버 -->
-    <div class="rule-block">
-      <div class="rb-head" style="background:#f3e5f5;color:#7b1fa2">🆕 신규 멤버</div>
-      <div class="ri"><span class="rn">·</span>입장한 주(월~일): 봉사 면제 <span style="color:var(--text3);font-size:11px">(연습 기간)</span></div>
-      <div class="ri"><span class="rn">·</span>다음 주 월요일부터 필참 정상 적용</div>
+    <div class="rule-block"><div class="rb-head gray">주의사항</div>
+      <div class="ri"><span class="rn">⚠️</span>입장 첫 주(월~일)는 연습 기간 — 봉사 면제, 참여는 가능</div>
+      <div class="ri"><span class="rn">⚠️</span>해태 / 무임승차 / 먹튀 → 연계방 전체 차단 (1,500명+)</div>
+      <div class="ri"><span class="rn">⚠️</span>1인 1일 1참여, 참여 등록 + 완료 체크 둘 다 해야 인정</div>
     </div>
-
-    <!-- 참여 기호 -->
-    <div class="rule-block">
-      <div class="rb-head gray">📌 참여 기호</div>
-      <div class="ri"><span class="rn" style="font-weight:900;color:var(--pink)">●</span>일반 참여 — 주 완료 횟수에 포함</div>
-      <div class="ri"><span class="rn" style="font-weight:900;color:var(--amber)">B</span>봉사 참여 — 완료 시 봉사 1회 차감, 주 완료 횟수 <b>미포함</b></div>
-      <div class="ri"><span class="rn" style="font-weight:900;color:var(--blue)">명예</span>명예/운영진 참여 — 즉시 완료 처리, 면제 적용</div>
-      <div class="ri" style="margin-top:8px;font-size:11px;color:var(--text3)">✓ 표시: 완료 체크 완료 (예: ●✓, B✓)</div>
-    </div>
-
   </div>
 </div>
 <nav class="bnav" id="bnav">
   <div class="bnav-row">
     <button class="nb on" onclick="switchPg('home',0)"><span class="nb-icon">🏠</span><span class="nb-label">홈</span></button>
-    <button class="nb" onclick="switchPg('rules',1)"><span class="nb-icon">📋</span><span class="nb-label">규칙</span></button>
+    <button class="nb" onclick="switchPg('members',1)"><span class="nb-icon">👥</span><span class="nb-label">참여자</span></button>
+    <button class="nb" onclick="switchPg('rules',2)"><span class="nb-icon">📋</span><span class="nb-label">규칙</span></button>
   </div>
 </nav>
 <div class="overlay" id="ov-join" onclick="bgClose(event,'ov-join')">
@@ -358,28 +335,10 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
       <label>참여 유형</label>
       <select id="j-type">
         <option value="●">참여</option>
-        <option value="B" id="opt-service" style="display:none">봉사 참여</option>
+        <option value="B">봉사 참여</option>
         <option value="honor">명예 / 운영진 참여</option>
       </select>
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     <div id="van-wrap" style="display:none"></div>
     <button class="sh-btn blue" id="join-sb" onclick="doJoin()">참여 등록하기</button>
     <button class="sh-btn ghost" onclick="closeOv('ov-join')">취소</button>
@@ -436,7 +395,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 function pStart(msg){var o=document.getElementById('lov');if(o){document.getElementById('lov-msg').textContent=msg||'불러오는 중...';o.classList.add('on');}}
 function pEnd(){var o=document.getElementById('lov');if(o)o.classList.remove('on');}
 
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxIXh0y8eH-bXe_XUqeW9pRRaQGpMm_VKBplg4nozvnvjPOz55FbhZ7arrrRDhgwS22JQ/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycby2Y6y-DBky_QjuHai9YGzk5dYTQlzH-BNxZzemg9cGWZndY3hzFoPCAoxbTQj8SWOlZQ/exec';
 const DAYS=['월','화','수','목','금','토','일'];
 let user=null,settings={},myWeek=null;
 async function api(action,p={}){const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,...p})});return r.json();}
@@ -446,9 +405,9 @@ async function crewLogin(){
   const id=document.getElementById('li-id').value.trim().replace('@','');
   if(!nick||!id){toast('닉네임과 아이디를 입력해주세요','a');return;}
   const btn=document.getElementById('enter-btn');
-  btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;
+  if(btn){btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;}
   const res=await api('checkMember',{nickname:nick,instagramId:id}).catch(()=>({ok:false,msg:'네트워크 오류. SCRIPT_URL을 확인해주세요.'}));
-  btn.innerHTML='입장하기';btn.disabled=false;
+  if(btn){btn.innerHTML='입장하기';btn.disabled=false;}
   if(!res.ok){toast(res.msg,'r',4000);return;}
   if(res.member&&res.member.status==='locked'){
     toast('봉사 미처리로 계정이 잠금되었습니다. 운영진에게 문의해주세요.','r',6000);return;
@@ -765,7 +724,9 @@ async function doReport(){
 function switchPg(name,idx){
   document.getElementById('pg-home').style.display=name==='home'?'block':'none';
   document.getElementById('pg-rules').style.display=name==='rules'?'block':'none';
+  document.getElementById('pg-members').style.display=name==='members'?'block':'none';
   document.querySelectorAll('.nb').forEach((b,i)=>b.classList.toggle('on',i===idx));
+  if(name==='members')loadMemberList();
 }
 function logout(){
   localStorage.removeItem('cn');localStorage.removeItem('ci');user=null;
@@ -863,13 +824,88 @@ function updateTimeBasedUI(){
 
 // 1분마다 UI 업데이트 — 제거 (로드 시 1회만 체크)
 
+async function loadMemberList(){
+  const el=document.getElementById('member-list-wrap');
+  el.innerHTML='<div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px">불러오는 중...</div>';
+  const res=await api('getDashboard').catch(()=>null);
+  if(!res?.ok){el.innerHTML='<div style="text-align:center;padding:30px 0;color:var(--text3)">불러오기 실패</div>';return;}
+  const pts=(res.todayParticipants||[]);
+  window._todayPts=pts;
+  if(!pts.length){
+    el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:13px">아직 참여자가 없어요</div>';
+    return;
+  }
+  const done=pts.filter(p=>p.done).length;
+  el.innerHTML=`
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div style="flex:1;background:var(--blue-bg);border:1px solid var(--blue);border-radius:var(--r2);padding:10px;text-align:center">
+        <div style="font-size:11px;color:var(--text2)">참여</div>
+        <div style="font-size:20px;font-weight:900;color:var(--blue-text)">${pts.length}명</div>
+      </div>
+      <div style="flex:1;background:var(--green-bg);border:1px solid var(--green);border-radius:var(--r2);padding:10px;text-align:center">
+        <div style="font-size:11px;color:var(--text2)">완료</div>
+        <div style="font-size:20px;font-weight:900;color:var(--green-text)">${done}명</div>
+      </div>
+      <div style="flex:1;background:var(--amber-bg);border:1px solid var(--amber);border-radius:var(--r2);padding:10px;text-align:center">
+        <div style="font-size:11px;color:var(--text2)">미완료</div>
+        <div style="font-size:20px;font-weight:900;color:var(--amber-text)">${pts.length-done}명</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--text3)">닉네임 / 아이디 / 밴 / 완료여부</div>
+      <div style="display:flex;gap:6px">
+        <button onclick="copyMemberList()" style="font-size:11px;font-weight:700;color:var(--blue-text);background:var(--blue-bg);border:1.5px solid var(--blue);border-radius:100px;padding:4px 10px;cursor:pointer;font-family:inherit">📋 복사</button>
+        <button onclick="loadMemberList()" style="font-size:11px;color:var(--text2);background:none;border:1px solid var(--border2);border-radius:100px;padding:4px 10px;cursor:pointer;font-family:inherit">새로고침</button>
+      </div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+      ${pts.map((p,i)=>{
+        const hasVan=!!(p.vanLink||p.memo?.includes('밴:'));
+        const doneStyle=p.done?'background:var(--green-bg);color:var(--green-text)':'background:var(--amber-bg);color:var(--amber-text)';
+        return`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;${i<pts.length-1?'border-bottom:1px solid var(--border)':''}">
+          <div>
+            <div style="font-size:13px;font-weight:700">${p.nickname}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:1px">@${p.id||''}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px">
+            ${hasVan?`<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;background:var(--amber-bg);color:var(--amber-text);border:1px solid var(--amber)">밴</span>`:''}
+            <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;${doneStyle}">${p.done?'완료':'미완료'}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+function copyMemberList(){
+  const pts=window._todayPts||[];
+  if(!pts.length){toast('복사할 목록이 없어요','a');return;}
+  const d=new Date();
+  const ds=`${d.getMonth()+1}월 ${d.getDate()}일`;
+  const lines=[`🎈 열기구 방 참여 현황 (${ds})`,``];
+  pts.forEach(p=>{
+    const hasVan=!!(p.vanLink||p.memo?.includes('밴:'));
+    const parts=[p.id||p.nickname];
+    if(hasVan)parts.push('밴참여');
+    parts.push(p.done?'완료':'미완료');
+    lines.push(parts.join(' / '));
+  });
+  lines.push(``);
+  lines.push(`총 ${pts.length}명 참여 / ${pts.filter(p=>p.done).length}명 완료`);
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('복사됐어요!','g')).catch(()=>toast('복사 실패','a'));
+}
+
 window.onload=async()=>{
   const nick=localStorage.getItem('cn');const id=localStorage.getItem('ci');
   if(nick&&id){
-    document.getElementById('li-nick').value=nick;
-    document.getElementById('li-id').value=id;
-    try{await crewLogin();}catch(e){
-      // 자동 로그인 실패 시 로그인 화면 유지
+    pStart('로그인 중...');
+    const res=await api('checkMember',{nickname:nick,instagramId:id}).catch(()=>({ok:false}));
+    pEnd();
+    if(res.ok&&res.member&&res.member.status!=='locked'){
+      user={nick,id,...res.member};
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('main-screen').style.display='block';
+      document.getElementById('bnav').style.display='block';
+      await loadMain();
+    } else {
       localStorage.removeItem('cn');localStorage.removeItem('ci');
     }
   }
