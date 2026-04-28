@@ -266,7 +266,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
         <div class="main-btns" style="margin-bottom:10px">
           <button class="main-btn btn-done" onclick="openOv('done')" style="grid-column:span 2"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 09:00</span></button>
         </div>
-        <button class="sub-btn van-only-btn" style="width:100%;margin-bottom:6px" onclick="openOv('van-only')"><span class="sub-icon">🔗</span>밴링크 등록</button>
+        <button class="sub-btn van-only-btn" id="van-only-btn" style="width:100%;margin-bottom:6px" onclick="openOv('van-only')"><span class="sub-icon">🔗</span>밴링크 등록</button>
         <div id="van-expired-msg" style="display:none;font-size:11px;color:#999;text-align:center;margin-bottom:10px">🔒 밴링크는 새벽 3시까지만 등록 가능합니다</div>
       </div>
 
@@ -395,7 +395,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 function pStart(msg){var o=document.getElementById('lov');if(o){document.getElementById('lov-msg').textContent=msg||'불러오는 중...';o.classList.add('on');}}
 function pEnd(){var o=document.getElementById('lov');if(o)o.classList.remove('on');}
 
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycby2Y6y-DBky_QjuHai9YGzk5dYTQlzH-BNxZzemg9cGWZndY3hzFoPCAoxbTQj8SWOlZQ/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycby2yqBJ2HD5mwrHYtnhN0EdOR6ND-p9DDFBol1-ZEvnhyLC_xeO7dPCTjEqIM34FDZKxA/exec';
 const DAYS=['월','화','수','목','금','토','일'];
 let user=null,settings={},myWeek=null;
 async function api(action,p={}){const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,...p})});return r.json();}
@@ -568,7 +568,11 @@ function renderActionArea(){
   // 오늘 참여 여부 확인
   if(!myWeek) return;
   const n=new Date();
-  const todayStr=`${n.getMonth()+1}/${n.getDate()}`;
+  const h=n.getHours();
+  // 00~09시는 완료 시간 → 어제 날짜 기준으로 판단
+  const ref=new Date(n);
+  if(h<9)ref.setDate(ref.getDate()-1);
+  const todayStr=`${ref.getMonth()+1}/${ref.getDate()}`;
   const todayIdx=myWeek.dates.indexOf(todayStr);
   const todayMark=todayIdx>=0?myWeek.days[todayIdx]:'';
   const joinedToday=todayMark&&todayMark!=='';
@@ -598,7 +602,9 @@ function renderWeekGrid(){
   const grid=document.getElementById('wk-grid');
   if(!myWeek){grid.innerHTML='';return;}
   const n=new Date();
-  const todayStr=`${n.getMonth()+1}/${n.getDate()}`;
+  const hg=n.getHours();
+  const refg=new Date(n);if(hg<9)refg.setDate(refg.getDate()-1);
+  const todayStr=`${refg.getMonth()+1}/${refg.getDate()}`;
   grid.innerHTML=myWeek.dates.map((date,i)=>{
     const mark=myWeek.days[i]||'';
     const isToday=date===todayStr;
@@ -686,7 +692,9 @@ async function doDone(){
   // 오늘 참여 여부 확인
   if(myWeek){
     const n=new Date();
-    const todayStr=`${n.getMonth()+1}/${n.getDate()}`;
+    const h2=n.getHours();
+    const ref2=new Date(n);if(h2<9)ref2.setDate(ref2.getDate()-1);
+    const todayStr=`${ref2.getMonth()+1}/${ref2.getDate()}`;
     const todayIdx=myWeek.dates?myWeek.dates.indexOf(todayStr):-1;
     const todayMark=todayIdx>=0?myWeek.days[todayIdx]:'';
     if(!todayMark||todayMark===''){
@@ -787,7 +795,7 @@ async function doVanOnly(){
   }
   const btn=document.getElementById('van-only-sb');
   btn.innerHTML='<span class="spinner"></span> 등록 중...';btn.disabled=true;
-  const res=await api('participate',{nickname:user.nick,instagramId:user.id,type:'●',vanLink}).catch(()=>({ok:false,msg:'네트워크 오류'}));
+  const res=await api('submitVanLink',{vanLink}).catch(()=>({ok:false,msg:'네트워크 오류'}));
   btn.innerHTML='링크 등록하기';btn.disabled=false;
   if(res.ok){
     closeOv('ov-van-only');
@@ -808,12 +816,12 @@ function updateTimeBasedUI(){
   // 해시태그: 10시~22시만 공개
   const htWrap=document.getElementById('ht-text-wrap');
   const htExpired=document.getElementById('ht-expired-msg');
-  const showHt=h>=10&&h<22;
+  const showHt=h>=10&&h<22; // 10~22시만 공개 (00~09시도 숨김)
   if(htWrap)htWrap.style.display=showHt?'block':'none';
   if(htExpired)htExpired.style.display=showHt?'none':'block';
   // 밴링크 등록 버튼: 15시~03시만 가능
   const showVan=(h>=15)||(h<3);
-  const vanOnlyBtn=document.querySelector('.van-only-btn');
+  const vanOnlyBtn=document.getElementById('van-only-btn');
   const vanExpiredMsg=document.getElementById('van-expired-msg');
   if(vanOnlyBtn)vanOnlyBtn.style.display=showVan?'':'none';
   if(vanExpiredMsg)vanExpiredMsg.style.display=showVan?'none':'block';

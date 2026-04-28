@@ -438,7 +438,7 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
 </div><!-- /app -->
 
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycby2Y6y-DBky_QjuHai9YGzk5dYTQlzH-BNxZzemg9cGWZndY3hzFoPCAoxbTQj8SWOlZQ/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycby2yqBJ2HD5mwrHYtnhN0EdOR6ND-p9DDFBol1-ZEvnhyLC_xeO7dPCTjEqIM34FDZKxA/exec';
 let adminId=null,allMems=[],wkCache={};
 
 // ── 프로그레스바 ──
@@ -609,7 +609,10 @@ async function loadWeek(){
     </div>`).join('');
 }
 function buildSvcCopy(warn,caution,nodone){
-  const d=new Date();const ds=`${d.getMonth()+1}월 ${d.getDate()}일`;
+  const d=new Date();
+  // 00~09시는 어제 날짜 기준
+  if(d.getHours()<9)d.setDate(d.getDate()-1);
+  const ds=`${d.getMonth()+1}월 ${d.getDate()}일`;
   const lines=[`🎈 열기구 방 — 봉사 안내 (${ds})`,'','봉사 처리: [봉사 참여] 유형 선택 후 참여+완료 체크','기한: 봉사 부여일 포함 3일 이내 (초과 시 계정 잠금)',''];
   if(warn.length){lines.push(`❌ 봉사 1회 대상 (주 0회 완료) — ${warn.length}명`);warn.forEach((r,i)=>lines.push(`  ${i+1}. ${r.nickname} (@${r.id||''})`));lines.push('');}
   if(caution.length){lines.push(`⚠️ 봉사 1회 대상 (주 1회 완료) — ${caution.length}명`);caution.forEach((r,i)=>lines.push(`  ${i+1}. ${r.nickname} (@${r.id||''})`));lines.push('');}
@@ -626,7 +629,10 @@ function copyGroup(key,label){
   const map={warn:'warn',caution:'caution',nodone:'nodone',svAct:'svAct',locked:'locked',honorL:'honorL',ok:'ok'};
   const list=wkCache[map[key]]||[];
   if(!list.length){toast('복사할 명단이 없습니다','a');return;}
-  const d=new Date();const ds=`${d.getMonth()+1}월 ${d.getDate()}일`;
+  const d=new Date();
+  // 00~09시는 어제 날짜 기준
+  if(d.getHours()<9)d.setDate(d.getDate()-1);
+  const ds=`${d.getMonth()+1}월 ${d.getDate()}일`;
   const lines=[`🎈 열기구 방 — ${label} (${ds})`,``];
   list.forEach((r,i)=>lines.push(`  ${i+1}. ${r.nickname} (@${r.id||''})${r.service?` [봉사 ${r.service}회]`:''}${r.status==='locked'?' 🔒':''}`));
   lines.push('',`총 ${list.length}명`);
