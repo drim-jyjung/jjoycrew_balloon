@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>🎈 열기구 방 — 운영자 🎈</title>
+<title>🎈 열기구 방 — 운영자</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -293,11 +293,15 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div class="card">
             <div class="card-title">오늘 참여자 <span class="bdg bdg-blue" id="today-cnt">0명</span></div>
-            <div id="today-list"><div class="empty"><span class="empty-icon">👋</span>아직 참여자 없음</div></div>
+            <div id="today-list" style="max-height:320px;overflow-y:auto"><div class="empty"><span class="empty-icon">👋</span>아직 참여자 없음</div></div>
           </div>
           <div class="card" style="border-color:var(--amber-bd)">
             <div class="card-title">⚠️ 전일 완료 미처리 <span style="font-size:10px;color:var(--text3)">(매일 09:01 갱신)</span></div>
-            <div id="daily-missing-section"><div class="empty">불러오는 중...</div></div>
+            <div id="daily-missing-section" style="max-height:280px;overflow-y:auto"><div class="empty">불러오는 중...</div></div>
+          </div>
+          <div class="card" style="border-color:var(--blue-bd)">
+            <div class="card-title">🔗 전일 밴링크 <span style="font-size:10px;color:var(--text3)">(매일 10:10 갱신)</span></div>
+            <div id="daily-van-section"><div style="font-size:12px;color:var(--text3);padding:8px 0;text-align:center">불러오는 중...</div></div>
           </div>
           <div class="card">
             <div class="card-title">해시태그 설정 <span class="bdg bdg-green">즉시 반영</span></div>
@@ -517,6 +521,14 @@ function doLogout(){
 }
 
 // ── 홈 ──
+function copyDailyVan(){
+  const list=window._dvList||[];
+  const date=window._dvDate||'';
+  if(!list.length){toast('복사할 밴링크가 없어요','a');return;}
+  const lines=[`🎈 열기구 방 — ${date} 밴링크 목록`,``];
+  list.forEach((v,i)=>lines.push(`${i+1}. ${v.nickname} (@${v.id||''}) / ${v.link}`));
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('복사됐어요!','g')).catch(()=>toast('복사 실패','r'));
+}
 function copyMissing(){
   const list=window._dmList||[];
   const date=window._dmDate||'';
@@ -539,6 +551,27 @@ async function loadHome(){
   if(!document.getElementById('ht-input').value)
     document.getElementById('ht-input').value=d.hashtag||'';
 
+  // 전일 밴링크 렌더링
+  const dv=d.dailyVan||[];
+  const dvDate=d.dailyVanDate||'';
+  const dvEl=document.getElementById('daily-van-section');
+  if(dvEl){
+    if(!dv.length){
+      dvEl.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0;text-align:center">전일 등록된 밴링크 없음</div>';
+    } else {
+      dvEl.innerHTML=`
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:12px;font-weight:700;color:var(--blue)">${dvDate} 밴링크 ${dv.length}건</div>
+          <button class="btn btn-ghost btn-sm" onclick="copyDailyVan()">📋 복사</button>
+        </div>
+        ${dv.map(v=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <div><span style="font-weight:700">${v.nickname}</span> <span style="color:var(--text2);font-size:11px">@${v.id||''}</span></div>
+          <a href="${v.link}" target="_blank" style="font-size:11px;color:var(--blue)">바로가기 →</a>
+        </div>`).join('')}`;
+      window._dvList=dv;window._dvDate=dvDate;
+    }
+  }
+
   // 완료 미처리자 렌더링
   const dm=d.dailyMissing||[];
   const dmDate=d.dailyMissingDate||'';
@@ -552,7 +585,7 @@ async function loadHome(){
           <div style="font-size:12px;font-weight:700;color:var(--amber)">${dmDate} 완료 미처리 ${dm.length}명</div>
           <button class="btn btn-amber btn-sm" onclick="copyMissing()">📋 복사</button>
         </div>
-        ${dm.map(m=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">
+        ${dm.slice(0,20).map(m=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">
           <span style="font-weight:700">${m.nickname}</span>
           <span style="color:var(--text2)">@${m.id||''}</span>
         </div>`).join('')}`;
@@ -564,7 +597,7 @@ async function loadHome(){
   const el=document.getElementById('today-list');
   if(!pts.length){el.innerHTML='<div class="empty"><span class="empty-icon">👋</span>오늘 참여자 없음</div>';return;}
   el.innerHTML='<table><thead><tr><th>닉네임</th><th>아이디</th><th>유형</th><th>완료</th></tr></thead><tbody>'+
-    pts.map(t=>`<tr><td style="font-weight:700">${t.nickname}</td><td>@${t.id||''}</td><td>${bdg('blue',t.type||'●')}</td><td>${t.done?bdg('green','완료'):bdg('amber','대기')}</td></tr>`).join('')+
+    pts.slice(0,20).map(t=>`<tr><td style="font-weight:700">${t.nickname}</td><td>@${t.id||''}</td><td>${bdg('blue',t.type||'●')}</td><td>${t.done?bdg('green','완료'):bdg('amber','대기')}</td></tr>`).join('')+
   '</tbody></table>';
 }
 async function setHashtag(){
@@ -646,7 +679,7 @@ async function loadWeek(){
 function buildSvcCopy(warn,caution,nodone){
   const d=new Date();
   // 00~09시는 어제 날짜 기준
-  if(d.getHours()<9)d.setDate(d.getDate()-1);
+  if(d.getHours()<10)d.setDate(d.getDate()-1);
   const ds=`${d.getMonth()+1}월 ${d.getDate()}일`;
   const lines=[`🎈 열기구 방 — 봉사 안내 (${ds})`,'','봉사 처리: [봉사 참여] 유형 선택 후 참여+완료 체크','기한: 봉사 부여일 포함 3일 이내 (초과 시 계정 잠금)',''];
   if(warn.length){lines.push(`❌ 봉사 1회 대상 (주 0회 완료) — ${warn.length}명`);warn.forEach((r,i)=>lines.push(`  ${i+1}. ${r.nickname} (@${r.id||''})`));lines.push('');}
@@ -666,7 +699,7 @@ function copyGroup(key,label){
   if(!list.length){toast('복사할 명단이 없습니다','a');return;}
   const d=new Date();
   // 00~09시는 어제 날짜 기준
-  if(d.getHours()<9)d.setDate(d.getDate()-1);
+  if(d.getHours()<10)d.setDate(d.getDate()-1);
   const ds=`${d.getMonth()+1}월 ${d.getDate()}일`;
   const lines=[`🎈 열기구 방 — ${label} (${ds})`,``];
   list.forEach((r,i)=>lines.push(`  ${i+1}. ${r.nickname} (@${r.id||''})${r.service?` [봉사 ${r.service}회]`:''}${r.status==='locked'?' 🔒':''}`));
@@ -920,7 +953,7 @@ async function loadLogs(){
   if(!res.ok){el.innerHTML=`<div class="empty" style="color:var(--red)">${res.msg||'로드 실패'}</div>`;return;}
   const list=res.logs||[];
   if(!list.length){el.innerHTML='<div class="empty">로그 없음</div>';return;}
-  el.innerHTML=list.map(l=>`<div class="log-row"><span class="log-time">${(l.time||'').slice(5,16)}</span><span class="log-type">${l.type||''}</span><span class="log-msg">${l.msg||''}</span></div>`).join('');
+  el.innerHTML=list.map(l=>`<div class="log-row"><span class="log-time">${l.time||''}</span><span class="log-type">${l.type||''}</span><span class="log-msg">${l.msg||''}</span></div>`).join('');
 }
 
 // ── 초기화 ──
