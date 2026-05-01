@@ -252,8 +252,8 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 
       <!-- 상태 A: 오늘 미참여 → 참여등록 + 완료체크 -->
       <div id="action-before" class="main-btns">
-        <button class="main-btn btn-join" onclick="openOv('join')"><span class="mb-icon">✋</span><span class="mb-title">참여 등록</span><span class="mb-time">10:00 ~ 21:59</span></button>
-        <button class="main-btn btn-done" onclick="openOv('done')"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 09:00</span></button>
+        <button class="main-btn btn-join" onclick="openOv('join')"><span class="mb-icon">✋</span><span class="mb-title">참여 등록</span><span class="mb-time">11:00 ~ 22:00</span></button>
+        <button class="main-btn btn-done" onclick="openOv('done')"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 10:00</span></button>
       </div>
 
       <!-- 상태 B: 오늘 이미 참여함 → 밴링크 등록 + 완료체크만 -->
@@ -266,7 +266,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
           </div>
         </div>
         <div class="main-btns" style="margin-bottom:10px">
-          <button class="main-btn btn-done" onclick="openOv('done')" style="grid-column:span 2"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 09:00</span></button>
+          <button class="main-btn btn-done" onclick="openOv('done')" style="grid-column:span 2"><span class="mb-icon">✅</span><span class="mb-title">완료 체크</span><span class="mb-time">22:00 ~ 10:00</span></button>
         </div>
         <button class="sub-btn van-only-btn" id="van-only-btn" style="width:100%;margin-bottom:6px" onclick="openOv('van-only')"><span class="sub-icon">🔗</span>밴링크 등록</button>
         <div id="van-expired-msg" style="display:none;font-size:11px;color:#999;text-align:center;margin-bottom:10px">🔒 밴링크는 새벽 3시까지만 등록 가능합니다</div>
@@ -287,15 +287,15 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 </div>
 <div id="pg-rules" >
     <div class="rule-block"><div class="rb-head pink">참여 규칙</div>
-      <div class="ri"><span class="rn">①</span>참여 시간 10:00 ~ 22:00 / 완료 시간 22:00 ~ 다음날 09:00</div>
+      <div class="ri"><span class="rn">①</span>참여 시간 11:00 ~ 22:00 / 완료 시간 22:00 ~ 다음날 10:00</div>
       <div class="ri"><span class="rn">②</span>해시태그 복사 후 피드에 작성 → 앱에서 참여 등록</div>
       <div class="ri"><span class="rn">③</span>완료 시간에 해시태그 2~3회 재검색 후 꼼꼼히 좋아요 → 완료 체크</div>
       <div class="ri"><span class="rn">④</span>밴링크 등록은 15:00 ~ 새벽 3:00 (해시태그 미노출 시에만 등록)</div>
       <div class="ri"><span class="rn">⑤</span>주 2회 이상 완료 필수 (월~일 기준)</div>
     </div>
     <div class="rule-block"><div class="rb-head green">봉사 규칙</div>
-      <div class="ri"><span class="rn">①</span>주 완료 0회 또는 1회 → 봉사 1회 (매주 월요일 09:10 자동 부여)</div>
-      <div class="ri"><span class="rn">②</span>완료 체크 미처리 → 봉사 1회 (매일 09:01 자동 부여)</div>
+      <div class="ri"><span class="rn">①</span>주 완료 0회 또는 1회 → 봉사 1회 (매주 월요일 10:15 자동 부여)</div>
+      <div class="ri"><span class="rn">②</span>완료 체크 미처리 → 봉사 1회 (매일 10:10 자동 부여)</div>
       <div class="ri"><span class="rn">③</span>봉사 처리 방법: 참여 유형 [봉사 참여] 선택 → 참여 + 완료 체크</div>
       <div class="ri"><span class="rn">④</span>봉사 발생 후 3일 이내 미처리 → 계정 자동 잠금</div>
       <div class="ri"><span class="rn">⑤</span>봉사 3회 누적 → 계정 즉시 잠금 (운영진에게 문의)</div>
