@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -828,18 +828,28 @@ function updateTimeBasedUI(){
 
 // 1분마다 UI 업데이트 — 제거 (로드 시 1회만 체크)
 
+function copyAllDailyVan(){
+  const list=window._dailyVanList||[];
+  if(!list.length){toast('복사할 밴링크가 없어요','a');return;}
+  const lines=list.map((v,i)=>i+1+'. '+v.nickname+' / '+v.link);
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('전체복사 완료!','g')).catch(()=>toast('복사 실패','a'));
+}
 function renderDailyVan(list,date){
   const el=document.getElementById('daily-van-section');
   if(!el)return;
   const sv=Number(user?.service||0);
   if(!list.length&&sv<=0){el.style.display='none';return;}
   el.style.display='block';
+  window._dailyVanList=list;
   let html='';
   if(sv>0){
     html+='<div style="background:var(--red-bg);border:1px solid var(--red);border-radius:var(--r2);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--red-text);line-height:1.6">⚠️ 봉사 처리 전 전일 밴링크를 확인해주세요!</div>';
   }
   if(list.length){
-    html+='<div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">🔗 '+date+' 밴링크 ('+list.length+'건)</div>';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--text2)">🔗 '+date+' 밴링크 ('+list.length+'건)</div>'
+      +'<button onclick="copyAllDailyVan()" style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue);cursor:pointer;font-family:inherit">📋 전체복사</button>'
+      +'</div>';
     html+='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;max-height:180px;overflow-y:auto">';
     list.forEach(function(v,i){
       const border=i<list.length-1?'border-bottom:1px solid var(--border)':'';

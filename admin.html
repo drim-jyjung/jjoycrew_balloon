@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -293,7 +293,7 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div class="card">
             <div class="card-title">오늘 참여자 <span class="bdg bdg-blue" id="today-cnt">0명</span></div>
-            <div id="today-list" style="max-height:320px;overflow-y:auto"><div class="empty"><span class="empty-icon">👋</span>아직 참여자 없음</div></div>
+            <div id="today-list" style="max-height:500px;overflow-y:auto"><div class="empty"><span class="empty-icon">👋</span>아직 참여자 없음</div></div>
           </div>
           <div class="card" style="border-color:var(--amber-bd)">
             <div class="card-title">⚠️ 전일 완료 미처리 <span style="font-size:10px;color:var(--text3)">(매일 10:10 갱신)</span></div>
@@ -597,7 +597,7 @@ async function loadHome(){
   const el=document.getElementById('today-list');
   if(!pts.length){el.innerHTML='<div class="empty"><span class="empty-icon">👋</span>오늘 참여자 없음</div>';return;}
   el.innerHTML='<table><thead><tr><th>닉네임</th><th>아이디</th><th>유형</th><th>완료</th></tr></thead><tbody>'+
-    pts.slice(0,20).map(t=>`<tr><td style="font-weight:700">${t.nickname}</td><td>@${t.id||''}</td><td>${bdg('blue',t.type||'●')}</td><td>${t.done?bdg('green','완료'):bdg('amber','대기')}</td></tr>`).join('')+
+    pts.map(t=>`<tr><td style="font-weight:700">${t.nickname}</td><td>@${t.id||''}</td><td>${bdg('blue',t.type||'●')}</td><td>${t.done?bdg('green','완료'):bdg('amber','대기')}</td></tr>`).join('')+
   '</tbody></table>';
 }
 async function setHashtag(){
