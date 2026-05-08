@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -626,7 +626,7 @@ async function loadWeek(){
   const honorNicks=(honors.ok&&honors.honor)?honors.honor.map(h=>h.nickname):[];
   const mMap={};(mems.members||[]).forEach(m=>{mMap[m.nickname]=m;});
   const rows=(wk.data||[]).filter(r=>r.nickname);
-  const warn=[],caution=[],nodone=[],svAct=[],locked=[],honorL=[],ok2=[];
+  const warn=[],caution=[],svAct=[],locked=[],honorL=[],ok2=[];
   rows.forEach(r=>{
     const m=mMap[r.nickname]||{};
     const sv=Number(m.service||0);
@@ -639,15 +639,14 @@ async function loadWeek(){
     if(sv>0){svAct.push({...r,...m});return;}
     if(wj===0)warn.push({...r,...m});
     else if(wj===1)caution.push({...r,...m});
-    else if(!isDone&&wj>0)nodone.push({...r,...m});
     else ok2.push({...r,...m});
   });
-  wkCache={warn,caution,nodone,svAct,locked,honorL,ok:ok2};
-  buildSvcCopy(warn,caution,nodone);
+  wkCache={warn,caution,svAct,locked,honorL,ok:ok2};
+  buildSvcCopy(warn,caution);
   const groups=[
     {key:'warn',cls:'red',icon:'❌',title:'경고 대상',sub:'주 0회 완료 · 봉사 1회',list:warn},
     {key:'caution',cls:'amber',icon:'⚠️',title:'주의 대상',sub:'주 1회 완료 · 봉사 1회',list:caution},
-    {key:'nodone',cls:'amber',icon:'🕐',title:'완료 미처리',sub:'참여 후 완료투표 안 함 · 봉사 1회',list:nodone},
+    
     {key:'svAct',cls:'purple',icon:'🔧',title:'봉사 진행 중',sub:'봉사 차감 중 (3회 이상 자동 잠금)',list:svAct},
     {key:'locked',cls:'gray',icon:'🔒',title:'잠금 계정',sub:'로그인/참여 불가',list:locked},
     {key:'honorL',cls:'orange',icon:'🏅',title:'명예회원',sub:'좋아요·완료 면제',list:honorL},
@@ -676,7 +675,7 @@ async function loadWeek(){
       </div>
     </div>`).join('');
 }
-function buildSvcCopy(warn,caution,nodone){
+function buildSvcCopy(warn,caution){
   const d=new Date();
   // 00~09시는 어제 날짜 기준
   if(d.getHours()<10)d.setDate(d.getDate()-1);
@@ -684,9 +683,9 @@ function buildSvcCopy(warn,caution,nodone){
   const lines=[`🎈 열기구 방 — 봉사 안내 (${ds})`,'','봉사 처리: [봉사 참여] 유형 선택 후 참여+완료 체크','기한: 봉사 부여일 포함 3일 이내 (초과 시 계정 잠금)',''];
   if(warn.length){lines.push(`❌ 봉사 1회 대상 (주 0회 완료) — ${warn.length}명`);warn.forEach((r,i)=>lines.push(`  ${i+1}. ${r.nickname} (@${r.id||''})`));lines.push('');}
   if(caution.length){lines.push(`⚠️ 봉사 1회 대상 (주 1회 완료) — ${caution.length}명`);caution.forEach((r,i)=>lines.push(`  ${i+1}. ${r.nickname} (@${r.id||''})`));lines.push('');}
-  if(nodone.length){lines.push(`🕐 봉사 1회 대상 (완료 미처리) — ${nodone.length}명`);nodone.forEach((r,i)=>lines.push(`  ${i+1}. ${r.nickname} (@${r.id||''})`));lines.push('');}
-  if(!warn.length&&!caution.length&&!nodone.length)lines.push('✅ 이번 주 봉사 대상자 없음!');
-  else lines.push(`총 ${warn.length+caution.length+nodone.length}명`);
+
+  if(!warn.length&&!caution.length)lines.push('✅ 이번 주 봉사 대상자 없음!');
+  else lines.push(`총 ${warn.length+caution.length}명`);
   const box=document.getElementById('svc-copy-box');
   box.textContent=lines.join('\n');
 }
@@ -694,7 +693,7 @@ function copySvcList(){
   navigator.clipboard.writeText(document.getElementById('svc-copy-box').textContent).then(()=>toast('복사됐어요!','g')).catch(()=>toast('복사 실패','r'));
 }
 function copyGroup(key,label){
-  const map={warn:'warn',caution:'caution',nodone:'nodone',svAct:'svAct',locked:'locked',honorL:'honorL',ok:'ok'};
+  const map={warn:'warn',caution:'caution',svAct:'svAct',locked:'locked',honorL:'honorL',ok:'ok'};
   const list=wkCache[map[key]]||[];
   if(!list.length){toast('복사할 명단이 없습니다','a');return;}
   const d=new Date();
