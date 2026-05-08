@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -196,8 +196,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
     <div id="sv-banner" style="display:none;margin:12px 14px 0"></div>
     <!-- 명예권 배너 -->
     <div id="honor-banner" style="display:none;margin:8px 14px 0"></div>
-    <!-- 전일 밴링크 (완료 시간에 노출) -->
-    <div id="daily-van-section" style="display:none;margin:8px 14px 0"></div>
+    
     <div class="week-hero">
       <div class="user-status-row">
         <div class="user-left">
@@ -230,8 +229,11 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
     <!-- 명예권 배너 -->
     <div id="honor-banner" style="display:none;margin:12px 14px 0"></div>
 
-    <!-- 밴링크 섹션 -->
-    <div style="padding:0 14px 12px">
+    <!-- 전일 밴링크 -->
+    <div id="daily-van-section" style="display:none;margin:8px 14px 0"></div>
+
+    <!-- 오늘 밴링크 섹션 -->
+    <div style="padding:0 14px 12px; margin-top:10px">
       <div style="background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <div>
@@ -243,7 +245,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
             <button style="font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:100px;padding:4px 10px;cursor:pointer;font-family:inherit" onclick="loadVanLinks()">새로고침</button>
           </div>
         </div>
-        <div id="van-links-list" style="max-height:180px;overflow-y:auto"><div style="text-align:center;padding:10px;color:var(--text3);font-size:12px">불러오는 중...</div></div>
+        <div id="today-van-section"><div id="van-links-list" style="max-height:180px;overflow-y:auto"><div style="text-align:center;padding:10px;color:var(--text3);font-size:12px">불러오는 중...</div></div>
       </div>
     </div>
 
@@ -821,6 +823,9 @@ function updateTimeBasedUI(){
   const vanExpiredMsg=document.getElementById('van-expired-msg');
   if(vanOnlyBtn)vanOnlyBtn.style.display=showVan?'':'none';
   if(vanExpiredMsg)vanExpiredMsg.style.display=showVan?'none':'block';
+  // 오늘 밴링크 목록: 15시~03시만 표시 (카드는 항상 표시)
+  const todayVanList=document.getElementById('van-links-list');
+  if(todayVanList)todayVanList.style.display=showVan?'':'none';
   // 참여 등록 버튼: 10시~22시만
   const joinBtn=document.querySelector('.main-btn.join');
   if(joinBtn)joinBtn.style.display=(h>=11&&h<22)?'':'none';
@@ -838,7 +843,7 @@ function renderDailyVan(list,date){
   const el=document.getElementById('daily-van-section');
   if(!el)return;
   const sv=Number(user?.service||0);
-  if(!list.length&&sv<=0){el.style.display='none';return;}
+  if(!list.length){el.style.display='none';return;} // 밴링크 없으면 숨김
   el.style.display='block';
   window._dailyVanList=list;
   let html='';
@@ -956,4 +961,4 @@ window.onload=async()=>{
 };
 </script>
 </body>
-</html>
+</html<div class="card"
