@@ -646,8 +646,8 @@ function updateTimeBasedUI(){
   const vanExp=document.getElementById("van-expired-msg");
   if(vanBtn)vanBtn.style.display=showVanBtn?"":"none";
   if(vanExp)vanExp.style.display=showVanBtn?"none":"block";
-  // 오늘 밴링크 노출: 완료시간과 동일 (22~10시)
-  const showVan=h>=22||h<10;
+  // 오늘 밴링크 노출: 15:00 ~ 익일 10:00
+  const showVan = h>=15||h<10;
   const vanList=document.getElementById("van-links-list");
   if(vanList)vanList.style.display=showVan?"":"none";
 }
