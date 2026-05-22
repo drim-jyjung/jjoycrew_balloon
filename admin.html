@@ -535,47 +535,39 @@ async function setHashtag(){
 
 /* ── 주간현황 ── */
 async function loadWeek(){
-  pS();
-  const [wk,mems,honors]=await Promise.all([
-    api('getWeekData').catch(()=>({ok:false})),
-    api('getMembers').catch(()=>({ok:false})),
-    api('getHonorList').catch(()=>({ok:false}))
-  ]);
+  pS('주간 현황 불러오는 중...');
+  // ✅ API 3번 → 1번으로 통합
+  const res = await api('getWeekDashboard').catch(()=>({ok:false}));
   pE();
-  if(!wk.ok){
+  if(!res.ok){
     document.getElementById('svc-copy-box').textContent='주차 시트 설정을 확인해주세요.';
     document.getElementById('week-groups').innerHTML='<div class="empty">주간 데이터를 불러올 수 없어요.</div>';
     document.getElementById('week-sheet-label').textContent='설정 없음';
     return;
   }
 
-  // ✅ 주차명 동기화 — 다운로드 파일명에 사용
-  currentWeekSheetName = wk.weekSheet || '';
+  // ✅ 주차명 동기화
+  currentWeekSheetName = res.weekSheet || '';
   const sheetLabel = document.getElementById('week-sheet-label');
   if(sheetLabel) sheetLabel.textContent = currentWeekSheetName || '설정 없음';
-  // 주차 시트 탭의 cur-sheet-name도 함께 갱신
   const curName = document.getElementById('cur-sheet-name');
   if(curName && currentWeekSheetName) curName.textContent = currentWeekSheetName;
 
-  const honorNicks=(honors.ok&&honors.honor)?honors.honor.map(h=>h.nickname):[];
-  const mMap={}; (mems.members||[]).forEach(m=>{mMap[m.nickname.trim()]=m;});
-  const rows=(wk.data||[]).filter(r=>r.nickname);
+  const honorNicks = res.honorActiveNicks || [];
+  const rows = (res.data || []).filter(r => r.nickname);
   const warn=[],caution=[],svAct=[],locked=[],honorL=[],ok2=[];
 
   rows.forEach(r=>{
-    const nick=(r.nickname||'').trim();
-    const m=mMap[nick]||{};
-    const sv=Number(m.service||0), wj=Number(r.weekJoin||0);
+    const sv=Number(r.service||0), wj=Number(r.weekJoin||0);
     const isHonor=honorNicks.includes(r.nickname);
-    const status=(m.status||'active');
+    const status=(r.status||'active');
 
-    // 설계서 순서: 잠금 → 명예 → 봉사진행 → 경고(0회) → 주의(1회) → 정상
-    if(status==='locked'||status==='kick'){locked.push({...r,...m});return;}
-    if(isHonor){honorL.push({...r,...m});return;}
-    if(sv>0){svAct.push({...r,...m});return;}
-    if(wj===0) warn.push({...r,...m});
-    else if(wj===1) caution.push({...r,...m});
-    else ok2.push({...r,...m});
+    if(status==='locked'||status==='kick'){locked.push(r);return;}
+    if(isHonor){honorL.push(r);return;}
+    if(sv>0){svAct.push(r);return;}
+    if(wj===0) warn.push(r);
+    else if(wj===1) caution.push(r);
+    else ok2.push(r);
   });
 
   wkCache={warn,caution,svAct,locked,honorL,ok:ok2,weekSheet:currentWeekSheetName};
