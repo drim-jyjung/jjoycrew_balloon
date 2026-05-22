@@ -237,10 +237,15 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
           <div><h2>주간 현황</h2><p>이번 주 전체 크루 상태</p></div>
           <div class="ph-btns">
             <button class="btn btn-ghost" onclick="loadWeek()">새로고침</button>
+            <button class="btn btn-green" onclick="downloadWeekExcel()">📥 엑셀 다운로드</button>
             <button class="btn btn-amber" onclick="runClose()">주간 마감</button>
           </div>
         </div>
         <div class="alert" id="close-alert"></div>
+        <!-- 현재 주차 표시 -->
+        <div style="margin-bottom:12px;font-size:12px;color:var(--text2)">
+          현재 주차: <strong style="color:var(--blue)" id="week-sheet-label">불러오는 중...</strong>
+        </div>
         <div class="card">
           <div class="card-title">봉사 대상자 명단 <span class="bdg bdg-amber">카카오톡 공유용</span><button class="btn btn-amber btn-sm" onclick="copySvcList()" style="margin-left:auto">📋 전체 복사</button></div>
           <div class="copy-box" id="svc-copy-box">불러오는 중...</div>
@@ -351,6 +356,9 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbzG9cXLuYLqrvQ8griaR8vo2bdJPzb_Z9pREA1vgz7rGvtbh7ObpmLSWdykl8qwbFL7ag/exec';
 let adminId=null, allMems=[], wkCache={};
 
+// 현재 로드된 주차명 (다운로드 파일명에 사용)
+let currentWeekSheetName = '';
+
 /* ── 시간 포맷 ── */
 function fmtTime(val){
   if(!val) return '';
@@ -428,7 +436,7 @@ function copyDailyVan(){
   const list=window._dvList||[], date=window._dvDate||'';
   if(!list.length){toast('복사할 밴링크가 없어요','a');return;}
   const lines=[`🎈 열기구 방 — ${date} 밴링크 목록`,``];
-  list.forEach((v,i)=>lines.push(`${i+1}. ${v.nickname} (@${v.id||''}) / ${v.link}`));
+  list.forEach((v,i)=>lines.push(`${i+1}. ${v.nickname} (@${v.id||''}) / ${v.link||''}`));
   navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('복사됐어요!','g')).catch(()=>toast('복사 실패','r'));
 }
 function copyMissing(){
@@ -537,26 +545,42 @@ async function loadWeek(){
   if(!wk.ok){
     document.getElementById('svc-copy-box').textContent='주차 시트 설정을 확인해주세요.';
     document.getElementById('week-groups').innerHTML='<div class="empty">주간 데이터를 불러올 수 없어요.</div>';
+    document.getElementById('week-sheet-label').textContent='설정 없음';
     return;
   }
+
+  // ✅ 주차명 동기화 — 다운로드 파일명에 사용
+  currentWeekSheetName = wk.weekSheet || '';
+  const sheetLabel = document.getElementById('week-sheet-label');
+  if(sheetLabel) sheetLabel.textContent = currentWeekSheetName || '설정 없음';
+  // 주차 시트 탭의 cur-sheet-name도 함께 갱신
+  const curName = document.getElementById('cur-sheet-name');
+  if(curName && currentWeekSheetName) curName.textContent = currentWeekSheetName;
+
   const honorNicks=(honors.ok&&honors.honor)?honors.honor.map(h=>h.nickname):[];
-  const mMap={}; (mems.members||[]).forEach(m=>{mMap[m.nickname]=m;});
+  const mMap={}; (mems.members||[]).forEach(m=>{mMap[m.nickname.trim()]=m;});
   const rows=(wk.data||[]).filter(r=>r.nickname);
   const warn=[],caution=[],svAct=[],locked=[],honorL=[],ok2=[];
+
   rows.forEach(r=>{
-    const m=mMap[r.nickname]||{};
+    const nick=(r.nickname||'').trim();
+    const m=mMap[nick]||{};
     const sv=Number(m.service||0), wj=Number(r.weekJoin||0);
     const isHonor=honorNicks.includes(r.nickname);
-    const status=m.status||'active';
-    if(status==='locked'){locked.push({...r,...m});return;}
+    const status=(m.status||'active');
+
+    // 설계서 순서: 잠금 → 명예 → 봉사진행 → 경고(0회) → 주의(1회) → 정상
+    if(status==='locked'||status==='kick'){locked.push({...r,...m});return;}
     if(isHonor){honorL.push({...r,...m});return;}
     if(sv>0){svAct.push({...r,...m});return;}
     if(wj===0) warn.push({...r,...m});
     else if(wj===1) caution.push({...r,...m});
     else ok2.push({...r,...m});
   });
-  wkCache={warn,caution,svAct,locked,honorL,ok:ok2};
+
+  wkCache={warn,caution,svAct,locked,honorL,ok:ok2,weekSheet:currentWeekSheetName};
   buildSvcCopy(warn,caution);
+
   const groups=[
     {key:'warn',cls:'red',icon:'❌',title:'경고 대상',sub:'주 0회 완료 · 봉사 1회',list:warn},
     {key:'caution',cls:'amber',icon:'⚠️',title:'주의 대상',sub:'주 1회 완료 · 봉사 1회',list:caution},
@@ -614,6 +638,46 @@ function copyGroup(key,label){
   navigator.clipboard.writeText(lines.join('\n')).then(()=>toast(`${label} 복사 완료`,'g')).catch(()=>toast('복사 실패','r'));
 }
 
+function downloadWeekExcel(){
+  if(!wkCache||!Object.keys(wkCache).length){toast('주간현황을 먼저 불러와주세요','a');return;}
+  const groups=[
+    {key:'warn',label:'❌ 경고'},
+    {key:'caution',label:'⚠️ 주의'},
+    {key:'svAct',label:'🔧 봉사진행'},
+    {key:'locked',label:'🔒 잠금'},
+    {key:'honorL',label:'🏅 명예'},
+    {key:'ok',label:'✅ 정상'},
+  ];
+  const rows=[['그룹','닉네임','아이디','월','화','수','목','금','토','일','주완료','봉사','상태']];
+  groups.forEach(g=>{
+    (wkCache[g.key]||[]).forEach(r=>{
+      rows.push([
+        g.label,
+        r.nickname||'',
+        r.id||'',
+        ...(r.days||['','','','','','','']).map(d=>d||''),
+        r.weekJoin||0,
+        r.service||0,
+        r.status||'',
+      ]);
+    });
+  });
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const bom='\uFEFF';
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const d=new Date();
+  a.href=url;
+  // ✅ currentWeekSheetName 사용 — loadWeek() 시 항상 최신값으로 갱신됨
+  const sheetName=currentWeekSheetName||wkCache.weekSheet||'주차미설정';
+  a.download=`열기구방_${sheetName}_주간현황_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('다운로드 완료!','g');
+}
+
+/* ── ✅ 수정: async 선언 추가 ── */
 async function runClose(){
   if(!confirm('주간 마감을 실행하시겠습니까?\n완료 2회 미만 크루에게 봉사가 부여됩니다.')) return;
   pS('주간 마감 처리 중...');showAlert('close-alert','blue','처리 중...');
@@ -808,6 +872,8 @@ async function loadSheet(){
     const cur=res.settings?.current_week_sheet||'설정 없음';
     document.getElementById('cur-sheet-name').textContent=cur;
     document.getElementById('cur-sheet-input').value=cur!=='설정 없음'?cur:'';
+    // ✅ 설정 탭 로딩 시에도 currentWeekSheetName 동기화
+    if(cur!=='설정 없음') currentWeekSheetName=cur;
   }
 }
 
@@ -823,6 +889,12 @@ async function createSheet(){
   showAlert('sheet-alert','green',`"${name}" 생성 완료!${setCur==='yes'?' 현재 주차로 설정됐어요.':''}`);
   document.getElementById('sheet-name').value='';
   document.getElementById('cur-sheet-name').textContent=name;
+  // ✅ 시트 생성 후 currentWeekSheetName 즉시 반영
+  if(setCur==='yes'){
+    currentWeekSheetName=name;
+    const wsl=document.getElementById('week-sheet-label');
+    if(wsl) wsl.textContent=name;
+  }
 }
 
 async function setCurSheet(){
@@ -830,7 +902,13 @@ async function setCurSheet(){
   if(!name){showAlert('cur-sheet-alert','amber','시트명을 입력해주세요.');return;}
   const res=await api('setSetting',{key:'current_week_sheet',value:name}).catch(()=>({ok:false,msg:'오류'}));
   showAlert('cur-sheet-alert',res.ok?'green':'red',res.ok?`"${name}"으로 변경됐어요.`:res.msg);
-  if(res.ok) document.getElementById('cur-sheet-name').textContent=name;
+  if(res.ok){
+    document.getElementById('cur-sheet-name').textContent=name;
+    // ✅ 수동 변경 시에도 동기화
+    currentWeekSheetName=name;
+    const wsl=document.getElementById('week-sheet-label');
+    if(wsl) wsl.textContent=name;
+  }
 }
 
 /* ── 활동 로그 ── */
