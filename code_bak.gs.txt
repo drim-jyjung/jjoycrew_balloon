@@ -1,0 +1,1441 @@
+// ================================================================
+// 🎈 열기구 방 — Apps Script 백엔드
+// ================================================================
+
+const SPREADSHEET_ID = '19hGU51Q4m2scvOar3MXBZpBtQWWpAgxhTQDaR2Nt37Y';
+
+let _ss = null;
+function getSS() {
+  if (!_ss) _ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  return _ss;
+}
+
+const SN = {
+  MEMBERS:  '멤버명단',
+  HONOR:    '명예/휴가/입장',
+  SETTINGS: '설정',
+  ADMINS:   '운영진',
+  LOGS:     '로그',
+};
+
+// ================================================================
+// 날짜/시간 유틸
+// ================================================================
+function today() {
+  return Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd');
+}
+function todayMD() {
+  const now = new Date();
+  if (now.getHours() < 10) now.setDate(now.getDate() - 1);
+  return Utilities.formatDate(now, 'Asia/Seoul', 'M/d');
+}
+function nowTime() {
+  return Utilities.formatDate(new Date(), 'Asia/Seoul', 'MM/dd HH:mm');
+}
+function fmtDate(val) {
+  if (!val) return '';
+  if (val instanceof Date) return Utilities.formatDate(val, 'Asia/Seoul', 'yyyy-MM-dd');
+  return String(val).substring(0, 10);
+}
+function isHonorActive(expVal) {
+  if (!expVal) return true;
+  const expStr = expVal instanceof Date
+    ? Utilities.formatDate(expVal, 'Asia/Seoul', 'yyyy-MM-dd')
+    : String(expVal).substring(0, 10);
+  return expStr >= today();
+}
+function getWeekDates() {
+  const now = new Date();
+  if (now.getHours() < 10) now.setDate(now.getDate() - 1);
+  const day = now.getDay();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    dates.push(Utilities.formatDate(d, 'Asia/Seoul', 'M/d'));
+  }
+  return dates;
+}
+
+// ================================================================
+// 설정 — ✅ 최적화: 설정 시트를 한 번만 읽어 캐시
+// ================================================================
+
+// 요청 단위 설정 캐시 (요청 간 공유 안 됨 — Apps Script 특성상 안전)
+let _settingsCache = null;
+
+function _loadSettingsCache() {
+  if (_settingsCache) return _settingsCache;
+  const ws = getSS().getSheetByName(SN.SETTINGS);
+  if (!ws) { _settingsCache = {}; return _settingsCache; }
+  const data = ws.getDataRange().getValues();
+  _settingsCache = {};
+  for (let i = 1; i < data.length; i++) {
+    const key = data[i][0];
+    if (!key) continue;
+    const val = data[i][1];
+    _settingsCache[key] = val instanceof Date
+      ? Utilities.formatDate(val, 'Asia/Seoul', 'yyyy-MM-dd')
+      : val;
+  }
+  return _settingsCache;
+}
+
+function getCurrentWeekSheetName() {
+  const s = getSettingVal('current_week_sheet');
+  return (s && String(s).trim()) ? String(s).trim() : null;
+}
+
+function getSettingVal(key) {
+  const cache = _loadSettingsCache();
+  const val = cache[key];
+  return (val === undefined || val === null) ? null : val;
+}
+
+function setSetting(key, value) {
+  // 쓰기는 직접 시트에 — 캐시도 함께 갱신
+  const ws = getSS().getSheetByName(SN.SETTINGS);
+  if (!ws) return;
+  const data = ws.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === key) {
+      ws.getRange(i + 1, 2).setValue(value);
+      if (_settingsCache) _settingsCache[key] = value; // 캐시 동기화
+      return;
+    }
+  }
+  ws.appendRow([key, value]);
+  if (_settingsCache) _settingsCache[key] = value;
+}
+
+function getSettings() {
+  const obj = _loadSettingsCache();
+  return { ok: true, settings: obj };
+}
+
+function setSettingApi({ key, value, adminId }) {
+  if (adminId && !isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  if (!key) return { ok: false, msg: 'key 없음' };
+  setSetting(key, value || '');
+  return { ok: true };
+}
+
+function setHashtag({ hashtag, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  setSetting('hashtag', hashtag);
+  setSetting('hashtag_date', today());
+  addLog('설정', `해시태그 변경: ${hashtag}`, adminId);
+  return { ok: true, msg: '해시태그가 저장되었습니다.' };
+}
+
+// ================================================================
+// HTTP 라우터
+// ================================================================
+function doGet(e) {
+  return out({ ok: false, msg: 'GET not supported' });
+}
+function doPost(e) {
+  try {
+    const p = JSON.parse(e.postData.contents);
+    let result;
+    switch (p.action) {
+      case 'getSettings':          result = getSettings(); break;
+      case 'setSetting':           result = setSettingApi(p); break;
+      case 'getDashboard':         result = getDashboard(); break;
+      case 'getWeekDashboard':     result = getWeekDashboard(p); break; // ✅ 신규 통합 API
+      case 'checkMember':          result = checkMember(p); break;
+      case 'participate':          result = participate(p); break;
+      case 'complete':             result = complete(p); break;
+      case 'cancelParticipate':    result = cancelParticipate(p); break;
+      case 'submitReport':         result = submitReport(p); break;
+      case 'applyVacation':        result = applyVacation(p); break;
+      case 'myStatus':             result = myStatus(p); break;
+      case 'submitVanLink':        result = submitVanLink(p); break;
+      case 'adminLogin':           result = adminLogin(p); break;
+      case 'getMembers':           result = getMembers(p); break;
+      case 'addMember':            result = addMember(p); break;
+      case 'removeMember':         result = removeMember(p); break;
+      case 'updateMember':         result = updateMember(p); break;
+      case 'setHashtag':           result = setHashtag(p); break;
+      case 'setWeekSheet':         result = setWeekSheet(p); break;
+      case 'createWeekSheet':      result = createWeekSheet(p); break;
+      case 'getWeekData':          result = getWeekData(p); break;
+      case 'getHonorList':         result = getHonorList(p); break;
+      case 'getVacationList':      result = getVacationList(p); break;
+      case 'setHonorStatus':       result = setHonorStatus(p); break;
+      case 'processVacation':      result = processVacation(p); break;
+      case 'giveService':          result = giveService(p); break;
+      case 'resetService':         result = resetService(p); break;
+      case 'lockMember':           result = lockMember(p); break;
+      case 'unlockMember':         result = unlockMember(p); break;
+      case 'kickMember':           result = kickMember(p); break;
+      case 'banMember':            result = banMember(p); break;
+      case 'unkickMember':         result = unkickMember(p); break;
+      case 'checkAndAutoLock':     result = checkAndAutoLock(p); break;
+      case 'getReports':           result = getReports(p); break;
+      case 'resolveReport':        result = resolveReport(p); break;
+      case 'getLogs':              result = getLogs(p); break;
+      case 'runWeeklyClose':       result = runWeeklyClose(p); break;
+      default: result = { ok: false, msg: '알 수 없는 액션: ' + p.action };
+    }
+    return out(result);
+  } catch (err) {
+    return out({ ok: false, msg: err.message + '\n' + err.stack });
+  }
+}
+function out(data) {
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// ================================================================
+// ✅ 신규: 주간현황 통합 API — getWeekData + getMembers + getHonorList 를 한 번에
+// ================================================================
+function getWeekDashboard({ adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+
+  const weekSheet = getCurrentWeekSheetName();
+  if (!weekSheet) return { ok: false, msg: '현재 주차 시트가 설정되지 않았습니다.' };
+
+  // ── 1. 필요한 시트 전체를 한 번씩만 읽기 ──
+  const memberRows  = getSheetData(SN.MEMBERS);
+  const honorRows   = getSheetData(SN.HONOR);
+  const weekRows    = getWeekParticipation(weekSheet); // 주차 시트
+
+  // ── 2. 설정에서 service_date 일괄 추출 (캐시 활용) ──
+  const settingsMap = _loadSettingsCache();
+
+  // ── 3. 명예 활성 목록 (닉네임 → 건수 맵) ──
+  const honorCountMap = {};
+  const honorActiveNicks = [];
+  honorRows.forEach(r => {
+    if (r[0] === 'honor' && r[5] === '활성' && isHonorActive(r[4])) {
+      honorCountMap[r[1]] = (honorCountMap[r[1]] || 0) + 1;
+      if (!honorActiveNicks.includes(r[1])) honorActiveNicks.push(r[1]);
+    }
+  });
+
+  // ── 4. 멤버 맵 구성 (닉네임 → 멤버 객체) ──
+  const todayDate = today();
+  const now = new Date(), nowDay = now.getDay();
+  const nowMonday = new Date(now);
+  nowMonday.setDate(now.getDate() - (nowDay === 0 ? 6 : nowDay - 1));
+  nowMonday.setHours(0, 0, 0, 0);
+
+  const members = memberRows.map(r => {
+    const nick = r[1];
+    const serviceDate = settingsMap['service_date_' + nick] || '';
+    let joinDate = '';
+    if (r[7]) {
+      joinDate = r[7] instanceof Date
+        ? Utilities.formatDate(r[7], 'Asia/Seoul', 'yyyy-MM-dd')
+        : String(r[7]).substring(0, 10);
+    }
+    return {
+      no: r[0], nickname: nick, id: r[2],
+      weekJoin: r[3] || 0,
+      service: Number(r[4] || 0), // ✅ 봉사누적 (E열)
+      status: r[5] || 'active', note: r[6] || '',
+      joinDate, serviceDate,
+      honorCount: honorCountMap[nick] || 0,
+    };
+  });
+
+  // ── 5. 휴가 승인자 목록 ──
+  const vacNicks = honorRows
+    .filter(r => r[0] === 'vacation' && r[5] === '승인' && r[3] <= todayDate && r[4] >= todayDate)
+    .map(r => r[1]);
+
+  // ── 6. 주차 데이터에 멤버 정보 병합 ──
+  const mMap = {};
+  members.forEach(m => { mMap[m.nickname.trim()] = m; });
+
+  const weekData = weekRows.map(r => {
+    const m = mMap[(r.nickname || '').trim()] || {};
+    return {
+      ...r,
+      ...m,
+      weekJoin: r.weekJoin,       // ✅ 주차 시트 기준 weekJoin 보존
+      service: Number(m.service || 0), // ✅ 멤버명단 봉사누적 명시적으로 사용
+      status: m.status || 'active',
+      serviceDate: m.serviceDate || '',
+    };
+  });
+
+  return {
+    ok: true,
+    weekSheet,
+    dates: getWeekDates(),
+    data: weekData,
+    members,
+    honorActiveNicks,
+    vacNicks,
+  };
+}
+
+// ================================================================
+// 대시보드
+// ================================================================
+function getDashboard() {
+  const hashtag   = getSettingVal('hashtag') || '#해시태그없음';
+  const weekSheet = getCurrentWeekSheetName();
+  const dates     = getWeekDates();
+  const todayStr  = todayMD();
+  const h         = new Date().getHours();
+  const phase     = (h >= 10 && h < 22) ? 'participate' : 'complete';
+
+  const weekData  = getWeekParticipation(weekSheet);
+  const todayCol  = dates.indexOf(todayStr);
+  const todayJoins  = todayCol >= 0 ? weekData.filter(r => r.days[todayCol] && r.days[todayCol] !== '').length : 0;
+  const todayDone   = todayCol >= 0 ? weekData.filter(r => r.days[todayCol] && r.days[todayCol].includes('✓')).length : 0;
+  const serviceCount = weekData.filter(r => r.nickname && r.weekJoin < 2).length;
+
+  const dailyMissingDate = getSettingVal('daily_missing_date') || '';
+  let dailyMissing = [];
+  try { dailyMissing = JSON.parse(getSettingVal('daily_missing_list') || '[]'); } catch(e) { dailyMissing = []; }
+
+  const dailyVanDate = getSettingVal('daily_van_date') || '';
+  let dailyVan = [];
+  try { dailyVan = JSON.parse(getSettingVal('daily_van_list') || '[]'); } catch(e) { dailyVan = []; }
+
+  return {
+    ok: true, hashtag, dailyMissingDate, dailyMissing, dailyVanDate, dailyVan,
+    weekSheet, dates, phase, todayStr,
+    stats: {
+      totalMembers: weekData.filter(r => r.nickname).length,
+      todayJoins, todayDone,
+      todayUndone: todayJoins - todayDone,
+      serviceTarget: serviceCount,
+    },
+    todayParticipants: todayCol >= 0
+      ? weekData.filter(r => r.nickname && r.days[todayCol]).map(r => ({
+          nickname: r.nickname, id: r.id,
+          type: r.days[todayCol],
+          done: r.days[todayCol].includes('✓'),
+          vanLink: r.vanLink || '', vanTime: r.vanTime || '', memo: r.memo || ''
+        }))
+      : [],
+  };
+}
+
+// ================================================================
+// 멤버 확인 / 참여
+// ================================================================
+function checkMember({ nickname, instagramId }) {
+  const members = getSheetData(SN.MEMBERS);
+  const id   = (instagramId || '').replace('@', '').toLowerCase().trim();
+  const nick = (nickname || '').trim();
+  const found = members.find(r =>
+    (r[1] || '').trim() === nick &&
+    (r[2] || '').replace('@', '').toLowerCase().trim() === id
+  );
+  if (!found) return { ok: false, msg: '등록되지 않은 크루입니다. 운영진에게 등록 요청해주세요.' };
+  const status = found[5] || 'active';
+  if (status === 'kick' || status === 'locked') return { ok: false, msg: '계정이 잠금 처리되었습니다. 운영진에게 문의해주세요.' };
+
+  const honorList = getSheetData(SN.HONOR);
+  const activeHonors = honorList.filter(r =>
+    r[0] === 'honor' && (r[1] === nickname || r[2] === instagramId) &&
+    r[5] === '활성' && isHonorActive(r[4])
+  );
+  const isAdmin_ = isAdmin(instagramId);
+  const isHonor  = activeHonors.length > 0 || isAdmin_;
+  const todayDate = today();
+  const onVacation = honorList.some(r =>
+    r[0] === 'vacation' && (r[1] === nickname || r[2] === instagramId) &&
+    r[3] <= todayDate && r[4] >= todayDate && r[5] !== '거절'
+  );
+
+  return {
+    ok: true,
+    member: {
+      no: found[0], nickname: found[1], id: found[2],
+      weekJoin: found[3] || 0, service: found[4] || 0,
+      status, note: found[6] || '',
+      isHonor, honorCount: activeHonors.length,
+      honors: activeHonors.map(r => ({
+        grantDate: fmtDate(r[3]), expDate: fmtDate(r[4]),
+        daysLeft: r[4] ? Math.ceil(((r[4] instanceof Date ? r[4] : new Date(r[4])) - new Date()) / 864e5) : 99
+      })),
+      onVacation
+    }
+  };
+}
+
+function myStatus({ nickname, instagramId }) {
+  const check = checkMember({ nickname, instagramId });
+  if (!check.ok) return check;
+
+  const weekSheet = getCurrentWeekSheetName();
+  const dates     = getWeekDates();
+  const weekData  = getWeekParticipation(weekSheet);
+  const myRow     = weekData.find(r => r.nickname === check.member.nickname || r.id === instagramId);
+
+  const sv = Number(check.member.service || 0);
+  let serviceInfo = null;
+  if (sv > 0) {
+    const serviceDate = getSettingVal('service_date_' + check.member.nickname);
+    if (serviceDate) {
+      const deadline = new Date(serviceDate);
+      deadline.setDate(deadline.getDate() + 3);
+      const diffDays = Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24));
+      serviceInfo = {
+        serviceDate,
+        deadline: Utilities.formatDate(deadline, 'Asia/Seoul', 'M월 d일'),
+        daysLeft: diffDays,
+        isUrgent: diffDays <= 1,
+      };
+    }
+  }
+  return {
+    ok: true,
+    member: check.member,
+    thisWeek: myRow ? { days: myRow.days, dates, weekJoin: myRow.weekJoin, done: myRow.done } : null,
+    serviceInfo,
+  };
+}
+
+function participate({ nickname, instagramId, type, vanLink }) {
+  const check = checkMember({ nickname, instagramId });
+  if (!check.ok) return check;
+  const m = check.member;
+
+  const h = new Date().getHours();
+  if (h < 11 || h >= 22) {
+    addLog('경고', `${nickname} — 참여 시간 외 등록 시도`, nickname);
+    return { ok: false, warn: true, msg: '참여 시간(11:00~22:00)이 아닙니다.' };
+  }
+
+  const svCount = Number(m.service || 0);
+  if (svCount > 0 && type !== 'B' && type !== '명예') {
+    return { ok: false, warn: true, msg: `봉사 ${svCount}회가 있습니다. 봉사 참여 유형으로만 등록할 수 있어요.` };
+  }
+  if (m.onVacation) {
+    return { ok: true, warn: true, msg: '휴가 기간입니다. 참여 시 정상 처리됩니다.', skip: false };
+  }
+
+  const weekSheet   = getCurrentWeekSheetName();
+  const dates       = getWeekDates();
+  const todayStr    = todayMD();
+  const todayColIdx = dates.indexOf(todayStr);
+  if (todayColIdx < 0) return { ok: false, msg: '오늘 날짜가 주차 시트에 없습니다.' };
+
+  const existing = getWeekParticipation(weekSheet).find(
+    r => (r.nickname === m.nickname || r.id === m.id) && r.days[todayColIdx] && r.days[todayColIdx] !== ''
+  );
+  if (existing) {
+    if (vanLink) {
+      updateVanLink(weekSheet, m.nickname, m.id, vanLink);
+      addLog('밴링크', `${nickname} — 참여 링크 등록 (기존 참여 유지)`, nickname);
+      return { ok: true, msg: '참여 링크가 등록됐어요.' };
+    }
+    return { ok: false, warn: true, msg: '오늘 이미 참여 등록이 되어 있어요. 1인 1회만 가능합니다.' };
+  }
+
+  const result = writeParticipation(weekSheet, m.nickname, m.id, todayColIdx, type || '●', vanLink);
+  if (!result.ok) return result;
+
+  if (type === '명예') updateMemberWeekJoin(m.nickname, m.id, 1);
+  addLog('참여', `${nickname}(${instagramId}) — ${type || '●'} 참여 등록 (${todayStr})`, nickname);
+
+  const doneMsg = type === '명예'
+    ? `${nickname}님 참여 완료! (명예/운영진 — 완료 체크 면제)`
+    : `${nickname}님 참여 등록 완료! 완료 시간(22:00~)에 완료 체크를 잊지 마세요.`;
+  return { ok: true, msg: doneMsg };
+}
+
+function complete({ nickname, instagramId, late }) {
+  const check = checkMember({ nickname, instagramId });
+  if (!check.ok) return check;
+
+  const h = new Date().getHours();
+  if (h >= 10 && h < 22) return { ok: false, warn: true, msg: '완료 시간은 22:00~익일 10:00 입니다.' };
+
+  const weekSheet = getCurrentWeekSheetName();
+  const result = markComplete(weekSheet, check.member.nickname, check.member.id, late === 'yes');
+  if (!result.ok) return result;
+
+  return { ok: true, msg: `${nickname}님 완료 처리 완료!` };
+}
+
+function cancelParticipate({ nickname, instagramId }) {
+  const check = checkMember({ nickname, instagramId });
+  if (!check.ok) return check;
+  const h = new Date().getHours();
+  if (h >= 22) return { ok: false, msg: '완료 시간 이후에는 취소할 수 없습니다.' };
+
+  const weekSheet   = getCurrentWeekSheetName();
+  const dates       = getWeekDates();
+  const todayColIdx = dates.indexOf(todayMD());
+  if (todayColIdx < 0) return { ok: false, msg: '오늘 날짜 없음' };
+
+  const result = writeParticipation(weekSheet, check.member.nickname, check.member.id, todayColIdx, '', null);
+  if (result.ok) {
+    updateMemberWeekJoin(check.member.nickname, check.member.id, -1);
+    addLog('취소', `${nickname}(${instagramId}) — 참여 취소`, nickname);
+  }
+  return result.ok ? { ok: true, msg: '참여가 취소되었습니다.' } : result;
+}
+
+// ================================================================
+// 밴링크
+// ================================================================
+function submitVanLink({ nickname, instagramId, vanLink }) {
+  if (!vanLink) return { ok: false, msg: '링크를 입력해주세요.' };
+  const h = new Date().getHours();
+  if (!(h >= 15 || h < 3)) return { ok: false, msg: '밴링크는 15:00~03:00에만 등록 가능합니다.' };
+  const weekSheet = getCurrentWeekSheetName();
+  if (!weekSheet) return { ok: false, msg: '주차 시트 설정을 확인해주세요.' };
+  updateVanLink(weekSheet, nickname, instagramId, vanLink);
+  addLog('밴링크', `${nickname} — 밴링크 등록`, nickname);
+  return { ok: true, msg: '밴링크 등록 완료!' };
+}
+
+function updateVanLink(sheetName, nickname, id, vanLink) {
+  const ws = getSS().getSheetByName(sheetName);
+  if (!ws) return;
+  const data = ws.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][4] === nickname || data[i][5] === id) {
+      ws.getRange(i + 1, 16).setValue(vanLink);
+      ws.getRange(i + 1, 17).setValue(nowTime());
+      return;
+    }
+  }
+}
+
+// ================================================================
+// 신고
+// ================================================================
+function submitReport({ reporter, target, type, evidence }) {
+  if (!reporter || !target) return { ok: false, msg: '필수 항목 누락' };
+  if (reporter === target) return { ok: false, msg: '본인 신고 불가' };
+  const ss = getSS();
+  let ws = ss.getSheetByName('신고');
+  if (!ws) {
+    ws = ss.insertSheet('신고');
+    ws.appendRow(['접수시간', '신고자', '대상', '유형', '설명', '상태', '처리자', '처리시간', '신고자ID', '대상ID']);
+  }
+  const existing = ws.getDataRange().getValues().slice(1);
+  const isDup = existing.some(r => r[1] === reporter && r[2] === target && r[3] === type && r[5] === '검토중');
+  if (isDup) return { ok: false, msg: '이미 동일한 신고가 접수되어 있습니다.' };
+
+  const allMembers  = getSheetData(SN.MEMBERS);
+  const reporterRow = allMembers.find(r => r[1] === reporter);
+  const targetRow   = allMembers.find(r => r[1] === target);
+  ws.appendRow([nowTime(), reporter, target, type, evidence || '', '검토중', '', '', reporterRow ? reporterRow[2] : '', targetRow ? targetRow[2] : '']);
+  addLog('신고', `[신고] ${reporter} → ${target}: ${type}`, reporter);
+  return { ok: true, msg: '신고가 접수되었습니다.' };
+}
+
+function getReports({ adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  const ws = getSS().getSheetByName('신고');
+  if (!ws) return { ok: true, reports: [] };
+  const rows = ws.getDataRange().getValues().slice(1);
+  return {
+    ok: true,
+    reports: rows.map((r, i) => ({
+      idx: i,
+      time: r[0] instanceof Date ? Utilities.formatDate(r[0], 'Asia/Seoul', 'yyyy-MM-dd HH:mm') : String(r[0]),
+      reporter: r[1], reporterId: r[8] || '', target: r[2], targetId: r[9] || '',
+      type: r[3], evidence: r[4], status: r[5], resolver: r[6]
+    }))
+  };
+}
+
+function resolveReport({ idx, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  const ws = getSS().getSheetByName('신고');
+  if (!ws) return { ok: false, msg: '신고 시트 없음' };
+  ws.getRange(idx + 2, 6).setValue('처리완료');
+  ws.getRange(idx + 2, 7).setValue(adminId);
+  ws.getRange(idx + 2, 8).setValue(nowTime());
+  return { ok: true };
+}
+
+// ================================================================
+// 명예 / 휴가
+// ================================================================
+function applyVacation({ nickname, instagramId, startDate, endDate, reason }) {
+  const check = checkMember({ nickname, instagramId });
+  if (!check.ok) return check;
+  const ss = getSS();
+  let ws = ss.getSheetByName(SN.HONOR);
+  if (!ws) {
+    ws = ss.insertSheet(SN.HONOR);
+    ws.appendRow(['구분', '닉네임', '아이디', '시작일', '종료일', '상태', '사유', '신청시간']);
+  }
+  const existing = ws.getDataRange().getValues();
+  const isDup = existing.some(r => r[0] === 'vacation' && r[1] === nickname && r[3] === startDate && (r[5] === '대기' || r[5] === '승인'));
+  if (isDup) return { ok: false, msg: '이미 같은 기간으로 휴가 신청이 접수되어 있습니다.' };
+  ws.appendRow(['vacation', nickname, instagramId || '', startDate, endDate, '대기', reason || '', nowTime()]);
+  addLog('휴가신청', `${nickname} — 휴가 신청: ${startDate} ~ ${endDate}`, nickname);
+  return { ok: true, msg: `휴가 신청이 접수되었습니다 (${startDate} ~ ${endDate}). 운영진 승인 후 처리됩니다.` };
+}
+
+function getHonorList() {
+  const rows = getSheetData(SN.HONOR).filter(r => r[0] === 'honor' && r[5] === '활성');
+  const grouped = {};
+  rows.forEach(r => {
+    const nick = r[1];
+    const expDate = r[4] ? new Date(r[4]) : null;
+    const daysLeft = expDate ? Math.ceil((expDate - new Date()) / 864e5) : 99;
+    if (daysLeft > 0) {
+      if (!grouped[nick]) grouped[nick] = [];
+      grouped[nick].push({ grantDate: fmtDate(r[3]), expDate: fmtDate(r[4]), daysLeft });
+    }
+  });
+  const memberRows = getSheetData(SN.MEMBERS);
+  const honor = Object.keys(grouped).map(nick => {
+    const m = memberRows.find(r => r[1] === nick) || [];
+    return { nickname: nick, id: m[2] || '', honors: grouped[nick] };
+  });
+  return { ok: true, honor };
+}
+
+function getVacationList({ adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  const rows = getSheetData(SN.HONOR);
+  const list = rows.filter(r => r[0] === 'vacation').map((r, i) => ({
+    idx: i, nickname: r[1], id: r[2],
+    start: fmtDate(r[3]), end: fmtDate(r[4]),
+    status: r[5], reason: r[6],
+    appliedAt: r[7] instanceof Date ? Utilities.formatDate(r[7], 'Asia/Seoul', 'yyyy-MM-dd HH:mm') : String(r[7])
+  }));
+  return { ok: true, list };
+}
+
+function setHonorStatus({ nickname, instagramId, status, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  if (status === 'honor') {
+    const found = getSheetData(SN.MEMBERS).find(r => r[1] === nickname);
+    if (!found) return { ok: false, msg: `"${nickname}"은 등록되지 않은 크루입니다.` };
+  }
+  const ss = getSS();
+  let ws = ss.getSheetByName(SN.HONOR);
+  if (!ws) { ws = ss.insertSheet(SN.HONOR); ws.appendRow(['구분','닉네임','아이디','부여일','만료일','상태','사유','처리자']); }
+
+  if (status === 'honor') {
+    const expDate = new Date(); expDate.setDate(expDate.getDate() + 7);
+    const expStr  = Utilities.formatDate(expDate, 'Asia/Seoul', 'yyyy-MM-dd');
+    ws.appendRow(['honor', nickname, instagramId || '', today(), expStr, '활성', '운영진 수동 부여', adminId]);
+    addLog('명예부여', `${nickname} — 명예권 부여 (만료: ${expStr})`, adminId);
+    return { ok: true, msg: `${nickname} 명예권 부여 완료 (7일 유효)` };
+  }
+  if (status === 'remove_honor') {
+    const data = ws.getDataRange().getValues();
+    for (let i = data.length - 1; i >= 1; i--) {
+      if (data[i][0] === 'honor' && data[i][1] === nickname && data[i][5] === '활성') {
+        ws.getRange(i + 1, 6).setValue('회수');
+        addLog('명예회수', `${nickname} — 명예권 회수`, adminId);
+        return { ok: true, msg: `${nickname} 명예권 회수 완료` };
+      }
+    }
+    return { ok: false, msg: '활성 명예권이 없습니다.' };
+  }
+  return { ok: false, msg: '알 수 없는 상태값' };
+}
+
+function processVacation({ idx, status, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  const ws = getSS().getSheetByName(SN.HONOR);
+  if (!ws) return { ok: false, msg: '시트 없음' };
+  const data = ws.getDataRange().getValues();
+  const vacRows = [];
+  for (let i = 1; i < data.length; i++) { if (data[i][0] === 'vacation') vacRows.push(i); }
+  if (idx >= vacRows.length) return { ok: false, msg: '잘못된 인덱스' };
+  const rowIdx   = vacRows[idx];
+  const nickname = data[rowIdx][1];
+  const instId   = data[rowIdx][2];
+  ws.getRange(rowIdx + 1, 6).setValue(status);
+
+  if (status === '승인') {
+    const memberWs   = getSS().getSheetByName(SN.MEMBERS);
+    const memberData = memberWs ? memberWs.getDataRange().getValues() : [];
+    for (let j = 1; j < memberData.length; j++) {
+      if (memberData[j][1] === nickname || memberData[j][2] === instId) {
+        const curSv = Number(memberData[j][4] || 0);
+        const curStatus = memberData[j][5] || 'active';
+        if (curStatus === 'locked' || curStatus === 'kick') {
+          addLog('휴가승인', `${nickname} — 휴가 승인 (잠금 상태 유지)`, adminId);
+          break;
+        }
+        if (curSv > 0) {
+          memberWs.getRange(j + 1, 5).setValue(0);
+          memberWs.getRange(j + 1, 6).setValue('active');
+          setSetting('service_date_' + nickname, '');
+          addLog('휴가승인', `${nickname} — 휴가 승인 + 봉사 ${curSv}회 면제`, adminId);
+        } else {
+          addLog('휴가승인', `${nickname} — 휴가 승인`, adminId);
+        }
+        break;
+      }
+    }
+  } else {
+    addLog('휴가처리', `${nickname} — 휴가 ${status}`, adminId);
+  }
+  return { ok: true };
+}
+
+// ================================================================
+// 멤버 관리
+// ================================================================
+function getMembers({ adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+
+  const rows = getSheetData(SN.MEMBERS);
+  const honorRows = getSheetData(SN.HONOR).filter(r => r[0] === 'honor' && r[5] === '활성' && isHonorActive(r[4]));
+
+  // ✅ 명예 카운트 맵
+  const honorMap = {};
+  honorRows.forEach(r => { honorMap[r[1]] = (honorMap[r[1]] || 0) + 1; });
+
+  // ✅ 설정 캐시에서 service_date 일괄 추출 — getSettingVal 반복 호출 제거
+  const settingsMap = _loadSettingsCache();
+
+  return {
+    ok: true,
+    members: rows.map(r => {
+      const nick = r[1];
+      let joinDate = '';
+      if (r[7]) {
+        joinDate = r[7] instanceof Date
+          ? Utilities.formatDate(r[7], 'Asia/Seoul', 'yyyy-MM-dd')
+          : String(r[7]).substring(0, 10);
+      }
+      return {
+        no: r[0], nickname: nick, id: r[2],
+        weekJoin: r[3] || 0, service: r[4] || 0,
+        status: r[5] || 'active', note: r[6] || '',
+        joinDate,
+        serviceDate: settingsMap['service_date_' + nick] || '',
+        honorCount: honorMap[nick] || 0,
+      };
+    })
+  };
+}
+
+function addMember({ no, nickname, instagramId, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  const members = getSheetData(SN.MEMBERS);
+  if (members.find(r => r[1] === nickname || r[2] === instagramId)) {
+    return { ok: false, msg: '이미 등록된 닉네임 또는 아이디입니다.' };
+  }
+  getSS().getSheetByName(SN.MEMBERS).appendRow([no || '', nickname, instagramId || '', 0, 0, 'active', '', today()]);
+  const weekSheet = getCurrentWeekSheetName();
+  const weekWs    = weekSheet ? getSS().getSheetByName(weekSheet) : null;
+  if (weekWs) weekWs.appendRow(['', '', '', no || '', nickname, instagramId || '', '', '', '', '', '', '', '', 'N', 0, '']);
+  addLog('멤버추가', `${nickname}(${instagramId}) 멤버 추가`, adminId);
+  return { ok: true, msg: `${nickname} 멤버 추가 완료` };
+}
+
+function removeMember({ nickname, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  deleteSheetRow(SN.MEMBERS, 1, nickname);
+  addLog('멤버삭제', `${nickname} 멤버 삭제`, adminId);
+  return { ok: true };
+}
+
+function updateMember({ nickname, field, value, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  const colMap = { no:0, nickname:1, id:2, weekJoin:3, service:4, status:5, note:6 };
+  const col = colMap[field];
+  if (col === undefined) return { ok: false, msg: '잘못된 필드' };
+  updateSheetCell(SN.MEMBERS, 1, nickname, col + 1, value);
+  return { ok: true };
+}
+
+function updateMemberWeekJoin(nickname, id, delta) {
+  const ws = getSS().getSheetByName(SN.MEMBERS);
+  if (!ws) return;
+  const data = ws.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][1] === nickname || data[i][2] === id) {
+      ws.getRange(i + 1, 4).setValue(Math.max(0, Number(data[i][3] || 0) + delta));
+      return;
+    }
+  }
+}
+
+function giveService({ nickname, days, reason, adminId }) {
+  if (adminId !== 'AUTO' && adminId !== 'MANUAL' && !isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  const ws   = getSS().getSheetByName(SN.MEMBERS);
+  const data = ws.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][1] === nickname) {
+      const currentStatus = data[i][5] || 'active';
+      const newSv = Math.max(0, Number(data[i][4] || 0) + Number(days));
+      ws.getRange(i + 1, 5).setValue(newSv);
+      // ✅ locked/kick 상태에서도 봉사가 0이 되면 service_date는 청산
+      //    (기존엔 locked/kick일 때 이 블록 전체를 건너뛰어서 날짜가 영구 잔존,
+      //     이후 다른 경로로 해제될 때 오래된 날짜가 새 봉사에 잘못 적용되는 버그가 있었음)
+      if (newSv <= 0) setSetting('service_date_' + nickname, '');
+      if (currentStatus !== 'locked' && currentStatus !== 'kick') {
+        let status = 'active';
+        if (newSv >= 3) {
+          status = 'locked';
+          setSetting('service_date_' + nickname, today());
+          addLog('자동잠금', `${nickname} — 봉사 ${newSv}회 누적으로 계정 잠금`, adminId || 'AUTO');
+        } else if (newSv > 0) {
+          status = 'service';
+          if (!getSettingVal('service_date_' + nickname)) setSetting('service_date_' + nickname, today());
+        }
+        ws.getRange(i + 1, 6).setValue(status);
+      }
+      addLog('봉사', `${nickname} 봉사 ${days > 0 ? '+' : ''}${days}회 (${reason || '수동'}) → 누적 ${newSv}회`, adminId);
+      return { ok: true, newService: newSv, status: currentStatus };
+    }
+  }
+  return { ok: false, msg: '멤버를 찾을 수 없습니다.' };
+}
+
+function resetService({ nickname, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  updateSheetCell(SN.MEMBERS, 1, nickname, 5, 0);
+  updateSheetCell(SN.MEMBERS, 1, nickname, 6, 'active');
+  setSetting('service_date_' + nickname, '');
+  addLog('봉사초기화', `${nickname} 봉사 초기화`, adminId);
+  return { ok: true };
+}
+
+function lockMember({ nickname, reason, adminId }) {
+  if (adminId && !isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  updateSheetCell(SN.MEMBERS, 1, nickname, 6, 'locked');
+  setSetting('lock_date_' + nickname, today());
+  addLog('잠금', `${nickname} — 계정 잠금 (${reason || '봉사 미처리'})`, adminId || 'AUTO');
+  return { ok: true };
+}
+
+function unlockMember({ nickname, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  updateSheetCell(SN.MEMBERS, 1, nickname, 6, 'active');
+  setSetting('service_date_' + nickname, '');
+  setSetting('lock_date_' + nickname, '');
+  addLog('잠금해제', `${nickname} — 계정 잠금 해제`, adminId);
+  return { ok: true };
+}
+
+function kickMember({ nickname, reason, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  updateSheetCell(SN.MEMBERS, 1, nickname, 6, 'locked');
+  addLog('잠금', `${nickname} 잠금 처리 — ${reason || ''}`, adminId);
+  return { ok: true };
+}
+
+function banMember({ nickname, reason, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  updateSheetCell(SN.MEMBERS, 1, nickname, 6, 'kick');
+  addLog('전체차단', `★[전체차단]★ ${nickname} — ${reason || ''}`, adminId);
+  return { ok: true };
+}
+
+function unkickMember({ nickname, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  updateSheetCell(SN.MEMBERS, 1, nickname, 6, 'active');
+  addLog('잠금해제', `${nickname} — 잠금 해제`, adminId);
+  return { ok: true };
+}
+
+function checkAndAutoLock({ adminId } = {}) {
+  const ws = getSS().getSheetByName(SN.MEMBERS);
+  if (!ws) return { ok: false };
+  const data      = ws.getDataRange().getValues();
+  const todayDate = today();
+  const locked    = [];
+  for (let i = 1; i < data.length; i++) {
+    const nickname = data[i][1];
+    const status   = data[i][5];
+    const service  = Number(data[i][4] || 0);
+    if (!nickname || status === 'kick' || status === 'locked' || service <= 0) continue;
+    let serviceDate = getSettingVal('service_date_' + nickname);
+    if (!serviceDate) { setSetting('service_date_' + nickname, todayDate); serviceDate = todayDate; }
+    const diffDays = Math.floor((new Date(todayDate) - new Date(serviceDate)) / (1000 * 60 * 60 * 24));
+    if (diffDays >= 3) {
+      ws.getRange(i + 1, 6).setValue('locked');
+      addLog('자동잠금', `${nickname} — 봉사 미처리 ${diffDays}일 경과 → 자동 잠금`, 'AUTO');
+      locked.push({ nickname, diffDays });
+    }
+  }
+  return { ok: true, locked };
+}
+
+// ================================================================
+// 주차 시트
+// ================================================================
+function setWeekSheet({ sheetName, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  setSetting('current_week_sheet', sheetName);
+  addLog('설정', `현재 주차 시트 변경: ${sheetName}`, adminId);
+  return { ok: true };
+}
+
+function createWeekSheet({ sheetName, adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  const ss = getSS();
+  if (ss.getSheetByName(sheetName)) return { ok: false, msg: '이미 존재하는 시트명입니다.' };
+  const current = getCurrentWeekSheetName();
+  if (current) setSetting('prev_week_sheet', current);
+  const ws = ss.insertSheet(sheetName);
+  ws.appendRow(['주필참','주풀참','메모','번호','닉네임','아이디','월','화','수','목','금','토','일','완료','봉사횟수','참여링크','밴링크시간']);
+  getSheetData(SN.MEMBERS).forEach(m => {
+    if (m[1]) ws.appendRow(['','','',m[0],m[1],m[2],'','','','','','','','N',0,'','']);
+  });
+  setSetting('current_week_sheet', sheetName);
+  // ✅ daily_van_list, daily_missing_list는 초기화 안 함
+  // 둘 다 다음날 10:10 일마감에서 자동 갱신됨
+  addLog('시트생성', `${sheetName} 주차 시트 생성`, adminId);
+  return { ok: true, msg: `${sheetName} 시트가 생성되었습니다.` };
+}
+
+function getWeekData({ adminId }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  const weekSheet = getCurrentWeekSheetName();
+  if (!weekSheet) return { ok: false, msg: '현재 주차 시트가 설정되지 않았습니다.' };
+  return { ok: true, weekSheet, dates: getWeekDates(), data: getWeekParticipation(weekSheet) };
+}
+
+function getWeekParticipation(sheetName) {
+  const ws = getSS().getSheetByName(sheetName);
+  if (!ws) return [];
+  return ws.getDataRange().getValues().slice(1).map(r => {
+    const days = [r[6],r[7],r[8],r[9],r[10],r[11],r[12]];
+    return {
+      weekMustJoin: r[0], weekFullJoin: r[1], memo: r[2] || '',
+      no: r[3], nickname: r[4], id: r[5],
+      days,
+      done: r[13] === 'Y',
+      weekJoin: days.filter(v => v && typeof v === 'string' && v.includes('✓') && !v.startsWith('B')).length,
+      serviceDay: r[14] || 0,
+      vanLink: r[15] || '', vanTime: r[16] || '',
+    };
+  });
+}
+
+function writeParticipation(sheetName, nickname, id, dayColIdx, value, vanLink) {
+  const ws = getSS().getSheetByName(sheetName);
+  if (!ws) return { ok: false, msg: `${sheetName} 시트를 찾을 수 없습니다.` };
+  const data = ws.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][4] === nickname || data[i][5] === id) {
+      const col        = 7 + dayColIdx;
+      const finalValue = value === '명예' ? '명예✓' : value;
+      ws.getRange(i + 1, col).setValue(finalValue);
+      if (value === '명예') {
+        ws.getRange(i + 1, 14).setValue('Y');
+        const honorWs = getSS().getSheetByName(SN.HONOR);
+        if (honorWs) {
+          const hData = honorWs.getDataRange().getValues();
+          for (let h = 1; h < hData.length; h++) {
+            if (hData[h][0] === 'honor' && hData[h][1] === nickname && hData[h][5] === '활성') {
+              honorWs.getRange(h + 1, 6).setValue('사용'); break;
+            }
+          }
+        }
+      }
+      if (vanLink) {
+        ws.getRange(i + 1, 16).setValue(vanLink);
+        ws.getRange(i + 1, 17).setValue(nowTime());
+      }
+      return { ok: true };
+    }
+  }
+  return { ok: false, msg: '주차 시트에서 멤버를 찾을 수 없습니다.' };
+}
+
+function markComplete(sheetName, nickname, id, late) {
+  const ws = getSS().getSheetByName(sheetName);
+  if (!ws) return { ok: false, msg: `${sheetName} 시트 없음` };
+  const dates       = getWeekDates();
+  const todayStr    = todayMD();
+  const todayColIdx = dates.indexOf(todayStr);
+  const data        = ws.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][4] === nickname || data[i][5] === id) {
+      const todayVal = todayColIdx >= 0 ? String(data[i][6 + todayColIdx] || '') : '';
+      if (todayVal.includes('✓')) return { ok: false, msg: '이미 완료 처리된 계정입니다.' };
+      if (!todayVal || todayVal === '') return { ok: false, msg: '오늘 참여 기록이 없습니다.' };
+      if (todayColIdx >= 0) {
+        ws.getRange(i + 1, 7 + todayColIdx).setValue(todayVal + '✓');
+        ws.getRange(i + 1, 14).setValue('Y');
+        updateMemberWeekJoin(nickname, id, 1);
+      }
+      if (todayVal.startsWith('B')) {
+        const memberWs   = getSS().getSheetByName(SN.MEMBERS);
+        const memberData = memberWs ? memberWs.getDataRange().getValues() : [];
+        for (let j = 1; j < memberData.length; j++) {
+          if (memberData[j][1] === nickname || memberData[j][2] === id) {
+            const curSv = Number(memberData[j][4] || 0);
+            if (curSv > 0) {
+              const newSv = curSv - 1;
+              memberWs.getRange(j + 1, 5).setValue(newSv);
+              memberWs.getRange(j + 1, 6).setValue(newSv === 0 ? 'active' : 'service');
+              if (newSv === 0) setSetting('service_date_' + nickname, '');
+              addLog('봉사차감', `${nickname} — 봉사참여 완료로 봉사 ${curSv}→${newSv}회 차감`, nickname);
+            }
+            break;
+          }
+        }
+      }
+      if (late) {
+        const memo = data[i][2] || '';
+        ws.getRange(i + 1, 3).setValue(memo + (memo ? ' ' : '') + '[지각완료]');
+      }
+      addLog('완료', `${nickname}(${id}) — 완료 처리`, nickname);
+      return { ok: true };
+    }
+  }
+  return { ok: false, msg: '오늘 참여 기록이 없습니다.' };
+}
+
+// ================================================================
+// 주간 마감
+// ================================================================
+function runWeeklyClose({ adminId } = {}) {
+  if (adminId && !isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  // ✅ current_week_sheet 기준으로 주마감
+  // 10:15 주마감 시점엔 current = 이번 주 시트 (데이터 있음)
+  // 10:30 새 시트 생성 시 current → prev로 이동, 새 시트가 current가 됨
+  const weekSheet = getCurrentWeekSheetName();
+  if (!weekSheet) return { ok: false, msg: '현재 주차 시트가 설정되지 않았습니다.' };
+  const ws        = getSS().getSheetByName(weekSheet);
+  if (!ws) return { ok: false, msg: `${weekSheet} 시트 없음` };
+
+  const memberWs   = getSS().getSheetByName(SN.MEMBERS);
+  const memberData = memberWs ? memberWs.getDataRange().getValues() : [];
+  const data       = ws.getDataRange().getValues().slice(1);
+  const results    = { normal: [], miss1: [], miss0: [], honor: [] };
+
+  const honorNicks = getSheetData(SN.HONOR)
+    .filter(r => r[0] === 'honor' && r[5] === '활성' && isHonorActive(r[4])).map(r => r[1]);
+  const todayDate  = today();
+  const vacNicks   = getSheetData(SN.HONOR)
+    .filter(r => r[0] === 'vacation' && r[5] === '승인' && r[3] <= todayDate && r[4] >= todayDate).map(r => r[1]);
+
+  const now = new Date(), nowDay = now.getDay();
+  const nowMonday = new Date(now);
+  nowMonday.setDate(now.getDate() - (nowDay === 0 ? 6 : nowDay - 1));
+  nowMonday.setHours(0, 0, 0, 0);
+
+  data.forEach((row, idx) => {
+    const nickname = row[4];
+    if (!nickname) return;
+    const weekJoin = [row[6],row[7],row[8],row[9],row[10],row[11],row[12]]
+      .filter(v => v && typeof v === 'string' && v.includes('✓') && !v.startsWith('B')).length;
+
+    // ✅ D열(주참여수) 0 초기화 + 상태 불일치 보정을 모든 분기 공통으로 처리하는 헬퍼
+    //    (honor/vacation/newbie 분기는 매주 이 경로로 빠지면서 상태를 한 번도
+    //     점검받지 못해, 과거 봉사가 0으로 청산된 뒤에도 'service'가 잔존하는
+    //     케이스가 실제로 발견됨 — locked/kick은 의도된 제재이므로 절대 건드리지 않음)
+    const resetWeekJoinCol = () => {
+      if (!memberWs) return;
+      for (let j = 1; j < memberData.length; j++) {
+        if (memberData[j][1] === nickname) {
+          memberWs.getRange(j + 1, 4).setValue(0);
+          const curStatus = memberData[j][5] || 'active';
+          const curService = Number(memberData[j][4] || 0);
+          if (curService <= 0 && curStatus === 'service') {
+            memberWs.getRange(j + 1, 6).setValue('active');
+          }
+          break;
+        }
+      }
+    };
+
+    const memberRow = memberData.find(m => m[1] === nickname);
+    const joinDate  = memberRow ? (memberRow[7] || '') : '';
+    if (joinDate) {
+      const jDate = new Date(joinDate), jDay = jDate.getDay();
+      const jMonday = new Date(jDate);
+      jMonday.setDate(jDate.getDate() - (jDay === 0 ? 6 : jDay - 1));
+      jMonday.setHours(0, 0, 0, 0);
+      if (jMonday.getTime() === nowMonday.getTime()) {
+        results.honor.push({ nickname, weekJoin, isNewbie: true });
+        resetWeekJoinCol(); // ✅ 신규 면제자도 D열 초기화
+        return;
+      }
+    }
+
+    if (honorNicks.includes(nickname)) {
+      results.honor.push({ nickname, weekJoin });
+      resetWeekJoinCol(); // ✅ 명예 보유자도 D열 초기화 — 이게 빠져서 누적되던 버그
+      return;
+    }
+    if (vacNicks.includes(nickname)) {
+      results.normal.push({ nickname, weekJoin, vacation: true });
+      resetWeekJoinCol(); // ✅ 휴가자도 D열 초기화
+      return;
+    }
+
+    let svDays = 0;
+    if (weekJoin === 0)      { svDays = 1; results.miss0.push({ nickname, weekJoin }); }
+    else if (weekJoin === 1) { svDays = 1; results.miss1.push({ nickname, weekJoin }); }
+    else {
+      results.normal.push({ nickname, weekJoin });
+      if (weekJoin >= 7) {
+        const honorWs2 = getSS().getSheetByName(SN.HONOR);
+        if (honorWs2) {
+          const hData2 = honorWs2.getDataRange().getValues();
+          const already = hData2.some(r => r[0] === 'honor' && r[1] === nickname && r[5] === '활성' && isHonorActive(r[4]));
+          if (!already) {
+            const expAuto = new Date(); expAuto.setDate(expAuto.getDate() + 7);
+            honorWs2.appendRow(['honor', nickname, memberRow ? memberRow[2] : '', today(),
+              Utilities.formatDate(expAuto, 'Asia/Seoul', 'yyyy-MM-dd'), '활성', '주 7회 완료 자동 등록', 'AUTO']);
+            addLog('명예자동등록', `${nickname} — 주 7회 완료로 명예회원 자동 등록`, 'AUTO');
+          }
+        }
+      }
+    }
+
+    ws.getRange(idx + 2, 15).setValue(svDays);
+
+    if (memberWs) {
+      for (let j = 1; j < memberData.length; j++) {
+        if (memberData[j][1] === nickname) {
+          const currentStatus = memberData[j][5] || 'active';
+          if (currentStatus === 'locked' || currentStatus === 'kick') {
+            memberWs.getRange(j + 1, 4).setValue(0);
+            break;
+          }
+          if (svDays > 0) {
+            const newSv = Math.max(0, Number(memberData[j][4] || 0) + svDays);
+            memberWs.getRange(j + 1, 5).setValue(newSv);
+            if (newSv >= 3) {
+              memberWs.getRange(j + 1, 6).setValue('locked');
+              setSetting('lock_date_' + nickname, today()); // ✅ 자동잠금 시 lock_date 기록
+            } else if (newSv > 0) {
+              memberWs.getRange(j + 1, 6).setValue('service');
+              if (!getSettingVal('service_date_' + nickname)) setSetting('service_date_' + nickname, today());
+            }
+          } else if (currentStatus === 'service' && Number(memberData[j][4] || 0) <= 0) {
+            // ✅ 정상 참여자인데 과거 'service' 잔재 상태가 남아있는 경우 보정
+            memberWs.getRange(j + 1, 6).setValue('active');
+          }
+          memberWs.getRange(j + 1, 4).setValue(0);
+          break;
+        }
+      }
+    }
+  });
+
+  const honorWsClear = getSS().getSheetByName(SN.HONOR);
+  if (honorWsClear) {
+    const hRows = honorWsClear.getDataRange().getValues();
+    for (let i = hRows.length - 1; i >= 1; i--) {
+      if (hRows[i][0] === 'vacation') honorWsClear.deleteRow(i + 1);
+    }
+  }
+  const reportWs = getSS().getSheetByName('신고');
+  if (reportWs) {
+    const rRows = reportWs.getLastRow();
+    if (rRows > 1) reportWs.deleteRows(2, rRows - 1);
+  }
+  const logWs = getSS().getSheetByName(SN.LOGS);
+  if (logWs) {
+    const lRows = logWs.getLastRow();
+    if (lRows > 1) logWs.deleteRows(2, lRows - 1);
+  }
+
+  sendWeeklyEmail(weekSheet, results);
+  addLog('주간마감', `${weekSheet} 주간 마감 처리 완료`, adminId || 'AUTO');
+  return {
+    ok: true, weekSheet,
+    summary: { normal: results.normal.length, miss1: results.miss1.length, miss0: results.miss0.length, honor: results.honor.length },
+    miss0: results.miss0, miss1: results.miss1,
+  };
+}
+
+function sendWeeklyEmail(weekSheet, results) {
+  const email = getSettingVal('notify_email');
+  if (!email) return;
+  const d = today();
+  let body = `🎈 열기구 방 주간 마감 리포트 (${weekSheet} / ${d})\n\n`;
+  body += `✅ 정상: ${results.normal.length}명\n`;
+  body += `⚠️ 봉사 1회 대상 (주 1회 완료): ${results.miss1.length}명\n`;
+  body += `❌ 봉사 1회 대상 (주 0회 완료): ${results.miss0.length}명\n`;
+  body += `🏅 면제(명예/신규): ${results.honor.length}명\n\n`;
+  body += '봉사 처리: [봉사 참여] 유형 선택 → 참여 + 완료 체크\n처리 기한: 봉사 부여일 포함 3일 이내\n\n';
+  if (results.miss0.length) { body += `❌ 주 0회 — ${results.miss0.length}명:\n`; results.miss0.forEach((m,i) => body += `  ${i+1}. ${m.nickname}\n`); body += '\n'; }
+  if (results.miss1.length) { body += `⚠️ 주 1회 — ${results.miss1.length}명:\n`; results.miss1.forEach((m,i) => body += `  ${i+1}. ${m.nickname}\n`); body += '\n'; }
+  body += `총 봉사 대상: ${results.miss0.length + results.miss1.length}명\n`;
+  MailApp.sendEmail({ to: email, subject: `[열기구방] ${weekSheet} 주간 마감 리포트`, body });
+}
+
+// ================================================================
+// 일일 정산 (매일 10:10 트리거)
+// ================================================================
+function dailyMissingComplete() {
+  checkAndAutoLock();
+  const h = new Date().getHours();
+  if (h !== 10) return;
+  _runDailyMissing();
+}
+
+function dailyMissingCompleteManual() {
+  checkAndAutoLock();
+  _runDailyMissing();
+}
+
+// ================================================================
+// 테스트용 — 데이터 변경 없이 미처리자만 확인
+// ================================================================
+function testDailyMissing() {
+  const weekSheet = getCurrentWeekSheetName();
+  Logger.log('대상 시트: ' + weekSheet);
+
+  const ws = getSS().getSheetByName(weekSheet);
+  if (!ws) { Logger.log('시트 없음!'); return; }
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yMD  = Utilities.formatDate(yesterday, 'Asia/Seoul', 'M/d');
+  const yStr = Utilities.formatDate(yesterday, 'Asia/Seoul', 'M월 d일');
+  Logger.log('어제 날짜: ' + yMD + ' (' + yStr + ')');
+
+  const yDay    = yesterday.getDay();
+  const yMonday = new Date(yesterday);
+  yMonday.setDate(yesterday.getDate() - (yDay === 0 ? 6 : yDay - 1));
+  const yDates  = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(yMonday);
+    d.setDate(yMonday.getDate() + i);
+    yDates.push(Utilities.formatDate(d, 'Asia/Seoul', 'M/d'));
+  }
+  Logger.log('yDates: ' + JSON.stringify(yDates));
+
+  const yColIdx = yDates.indexOf(yMD);
+  Logger.log('yColIdx: ' + yColIdx);
+  if (yColIdx < 0) { Logger.log('날짜를 시트에서 찾을 수 없음!'); return; }
+
+  const data = ws.getDataRange().getValues().slice(1);
+  const honorNicks = getSheetData(SN.HONOR)
+    .filter(r => r[0] === 'honor' && r[5] === '활성' && isHonorActive(r[4])).map(r => r[1]);
+  const todayD = today();
+  const vacNicks = getSheetData(SN.HONOR)
+    .filter(r => r[0] === 'vacation' && r[5] === '승인' && r[3] <= todayD && r[4] >= todayD).map(r => r[1]);
+
+  const missed = [];
+  data.forEach(row => {
+    const nickname = row[4];
+    if (!nickname) return;
+    if (honorNicks.includes(nickname) || vacNicks.includes(nickname)) return;
+    const dayVal       = String(row[6 + yColIdx] || '');
+    const participated = dayVal !== '' && !dayVal.startsWith('B') && !dayVal.startsWith('명예');
+    const completed    = dayVal.includes('✓');
+    if (participated && !completed) missed.push(nickname + ' / ' + dayVal);
+  });
+
+  Logger.log('완료 미처리자 (' + missed.length + '명): ' + JSON.stringify(missed));
+}
+
+function _runDailyMissing() {
+  // ✅ 항상 current_week_sheet 사용
+  // 일요일 데이터도 이번 주(current) 시트에 있음
+  // prev는 새 시트 생성 후에 이번 주로 이동되므로 일마감 시점엔 의미없음
+  const weekSheet = getCurrentWeekSheetName();
+  if (!weekSheet) return;
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yMD  = Utilities.formatDate(yesterday, 'Asia/Seoul', 'M/d');
+  const yStr = Utilities.formatDate(yesterday, 'Asia/Seoul', 'M월 d일');
+
+  const yDay    = yesterday.getDay();
+  const yMonday = new Date(yesterday);
+  yMonday.setDate(yesterday.getDate() - (yDay === 0 ? 6 : yDay - 1));
+  const yDates  = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(yMonday);
+    d.setDate(yMonday.getDate() + i);
+    yDates.push(Utilities.formatDate(d, 'Asia/Seoul', 'M/d'));
+  }
+  const yColIdx = yDates.indexOf(yMD);
+
+  const ws2 = getSS().getSheetByName(weekSheet);
+  if (!ws2) {
+    setSetting('daily_van_date', yStr);
+    setSetting('daily_van_list', '[]');
+    return;
+  }
+
+  const data = ws2.getDataRange().getValues().slice(1);
+
+  const vanItems = data
+    .filter(row => row[15])
+    .map(row => ({ nickname: row[4], id: row[5], link: row[15] }))
+    .filter(v => v.link);
+  setSetting('daily_van_date', yStr);
+  setSetting('daily_van_list', JSON.stringify(vanItems));
+
+  if (yColIdx < 0) return;
+
+  const honorWs = getSS().getSheetByName(SN.HONOR);
+  if (honorWs) {
+    const hData = honorWs.getDataRange().getValues();
+    for (let h = 1; h < hData.length; h++) {
+      if (hData[h][0] === 'honor' && hData[h][5] === '활성' && hData[h][4] && hData[h][4] < today()) {
+        honorWs.getRange(h + 1, 6).setValue('만료');
+      }
+    }
+  }
+
+  const todayD     = today();
+  const vacNicks   = getSheetData(SN.HONOR)
+    .filter(r => r[0] === 'vacation' && r[5] === '승인' && r[3] <= todayD && r[4] >= todayD).map(r => r[1]);
+
+  const missedList = [];
+  data.forEach(row => {
+    const nickname = row[4];
+    if (!nickname) return;
+    if (vacNicks.includes(nickname)) return;
+    const dayVal       = String(row[6 + yColIdx] || '');
+    // ✅ 명예✓로 참여한 날만 완료 미처리 체크 면제 (명예권 보유 여부와 무관)
+    if (dayVal.startsWith('명예')) return;
+    const participated = dayVal !== '' && !dayVal.startsWith('B');
+    const completed    = dayVal.includes('✓');
+    if (participated && !completed) {
+      missedList.push({ nickname, id: row[5] || '' });
+      giveService({ nickname, days: 1, reason: '완료 투표 누락 (자동)', adminId: 'AUTO' });
+      addLog('자동봉사', `${nickname} — 완료 투표 누락으로 봉사 1회 자동 부여`, 'AUTO');
+    }
+  });
+
+  setSetting('daily_missing_date', yStr);
+  setSetting('daily_missing_list', JSON.stringify(missedList));
+
+  const lastRow = data.length;
+  if (lastRow > 0) {
+    ws2.getRange(2, 16, lastRow, 1).clearContent();
+    ws2.getRange(2, 17, lastRow, 1).clearContent();
+    ws2.getRange(2, 14, lastRow, 1).clearContent();
+  }
+  addLog('초기화', '밴링크 및 완료여부 일일 초기화 완료', 'AUTO');
+}
+
+// ================================================================
+// 운영진 로그인
+// ================================================================
+function adminLogin({ id, pw }) {
+  const found = getSheetData(SN.ADMINS).find(r => r[0] === id && r[1] === pw);
+  if (!found) return { ok: false, msg: '아이디 또는 비밀번호가 틀렸습니다.' };
+  addLog('로그인', `운영진 ${found[2] || id} 로그인`, id);
+  return { ok: true, name: found[2] || id, adminId: id };
+}
+function isAdmin(id) {
+  if (!id) return false;
+  return getSheetData(SN.ADMINS).some(r => r[0] === id);
+}
+
+// ================================================================
+// 로그
+// ================================================================
+function addLog(type, msg, actor) {
+  const ss = getSS();
+  let ws   = ss.getSheetByName(SN.LOGS);
+  if (!ws) { ws = ss.insertSheet(SN.LOGS); ws.appendRow(['시간','유형','내용','행위자','날짜']); }
+  ws.appendRow([nowTime(), type, msg, actor || '', today()]);
+}
+
+function getLogs({ adminId, limit = 1000 }) {
+  if (!isAdmin(adminId)) return { ok: false, msg: '권한 없음' };
+  const ws = getSS().getSheetByName(SN.LOGS);
+  if (!ws) return { ok: true, logs: [] };
+  const rows = ws.getDataRange().getValues().slice(1);
+  return {
+    ok: true,
+    logs: rows.slice(-limit).reverse().map(r => ({
+      time:  r[0] instanceof Date ? Utilities.formatDate(r[0], 'Asia/Seoul', 'yyyy-MM-dd HH:mm') : String(r[0]),
+      type:  r[1], msg: r[2], actor: r[3], date: r[4]
+    }))
+  };
+}
+
+// ================================================================
+// 유틸
+// ================================================================
+function getSheetData(sheetName) {
+  const ws = getSS().getSheetByName(sheetName);
+  if (!ws) return [];
+  return ws.getDataRange().getValues().slice(1);
+}
+function deleteSheetRow(sheetName, colIdx, value) {
+  const ws = getSS().getSheetByName(sheetName);
+  if (!ws) return;
+  const data = ws.getDataRange().getValues();
+  for (let i = data.length - 1; i >= 1; i--) {
+    if (data[i][colIdx] === value) { ws.deleteRow(i + 1); return; }
+  }
+}
+function updateSheetCell(sheetName, colIdx, value, targetCol, newValue) {
+  const ws = getSS().getSheetByName(sheetName);
+  if (!ws) return;
+  const data = ws.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][colIdx] === value) { ws.getRange(i + 1, targetCol).setValue(newValue); return; }
+  }
+}
+
+// ================================================================
+// 트리거 / 메뉴
+// ================================================================
+function setupTriggers() {
+  ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('runWeeklyClose')
+    .timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(10).nearMinute(15).create();
+  ScriptApp.newTrigger('dailyMissingComplete')
+    .timeBased().everyDays(1).atHour(10).nearMinute(10).create();
+  SpreadsheetApp.getUi().alert('트리거 등록 완료!\n- 매주 월요일 10:15: 주간 마감\n- 매일 10:10: 완료 미처리 체크');
+}
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('🎈 열기구방 관리')
+    .addItem('주간 마감 처리 (수동)', 'runWeeklyCloseManual')
+    .addItem('일일 정산 수동 실행', 'dailyMissingCompleteManual')
+    .addItem('완료미처리 테스트 (데이터변경없음)', 'testDailyMissing')
+    .addItem('트리거 등록 (최초 1회)', 'setupTriggers')
+    .addItem('다음 주 시트 생성', 'createNextWeekSheetManual')
+    .addSeparator()
+    .addItem('초기 시트 설정', 'setupInitialSheets')
+    .addToUi();
+}
+
+function runWeeklyCloseManual() {
+  const result = runWeeklyClose({ adminId: null });
+  SpreadsheetApp.getUi().alert(
+    `주간 마감 완료!\n정상:${result.summary?.normal}명 / 봉사1회:${result.summary?.miss1}명 / 봉사0회:${result.summary?.miss0}명`
+  );
+}
+
+function createNextWeekSheetManual() {
+  const ui  = SpreadsheetApp.getUi();
+  const res = ui.prompt('다음 주 시트명을 입력하세요 (예: 5월둘째주)');
+  if (res.getSelectedButton() !== ui.Button.OK) return;
+  const name = res.getResponseText().trim();
+  if (!name) return;
+  const result = createWeekSheet({ sheetName: name, adminId: 'MANUAL' });
+  ui.alert(result.msg || (result.ok ? '완료' : '실패'));
+}
+
+function setupInitialSheets() {
+  const ss   = getSS();
+  const defs = {
+    [SN.SETTINGS]: [
+      ['키','값'],['hashtag','#오늘의해시태그'],['hashtag_date',today()],
+      ['current_week_sheet',''],['notify_email','your@email.com'],
+      ['min_joins',2],['crew_access','registered'],
+    ],
+    [SN.ADMINS]:  [['아이디','비밀번호','이름'],['admin1','pass1234','운영진1']],
+    [SN.MEMBERS]: [['번호','닉네임','아이디','주참여수','봉사누적(회)','상태','메모','입장일']],
+    [SN.HONOR]:   [['구분','닉네임','아이디','시작/신청일','종료일','상태','사유','처리자']],
+    [SN.LOGS]:    [['시간','유형','내용','행위자','날짜']],
+    ['신고']:      [['접수시간','신고자','대상','유형','설명','상태','처리자','처리시간','신고자ID','대상ID']],
+  };
+  Object.entries(defs).forEach(([name, rows]) => {
+    let ws = ss.getSheetByName(name);
+    if (!ws) ws = ss.insertSheet(name); else ws.clearContents();
+    ws.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+  });
+  SpreadsheetApp.getUi().alert('초기 시트 설정 완료!');
+}
