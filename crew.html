@@ -286,7 +286,7 @@
       <div class="ri"><span class="rn">①</span>참여 시간 11:00 ~ 22:00 / 완료 시간 22:00 ~ 다음날 10:00</div>
       <div class="ri"><span class="rn">②</span>해시태그 복사 후 피드에 작성 → 앱에서 참여 등록</div>
       <div class="ri"><span class="rn">③</span>완료 시간에 해시태그 2~3회 재검색 후 꼼꼼히 좋아요 → 완료 체크</div>
-      <div class="ri"><span class="rn">④</span>밴링크 등록은 15:00 ~ 새벽 3:00 (해시태그 미노출 시에만)</div>
+      <div class="ri"><span class="rn">④</span>밴링크 등록은 11:00 ~ 새벽 3:00 (해시태그 미노출 시에만)</div>
       <div class="ri"><span class="rn">⑤</span>주 2회 이상 완료 필수 (월~일 기준)</div>
     </div>
     <div class="rule-block">
@@ -613,7 +613,7 @@ function updateTimeBasedUI(){
   const showHt=h>=11&&h<22;
   document.getElementById("ht-text-wrap").style.display=showHt?"block":"none";
   document.getElementById("ht-expired-msg").style.display=showHt?"none":"block";
-  const showVanBtn=h>=15||h<3;
+  const showVanBtn=h>=11||h<3;
   const vanBtn=document.getElementById("van-only-btn");
   const vanExp=document.getElementById("van-expired-msg");
   if(vanBtn)vanBtn.style.display=showVanBtn?"":"none";
