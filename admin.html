@@ -352,7 +352,8 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
 </div>
 
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbz3oTUS7dt52GBdHCDPEt2zX6GK8-svkjGM27xbouCGIfD3kaC_xdbp-k2Ly6gAwgyb/exec';et adminId=null, allMems=[], wkCache={}; 
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbz3oTUS7dt52GBdHCDPEt2zX6GK8-svkjGM27xbouCGIfD3kaC_xdbp-k2Ly6gAwgyb/exec';
+let adminId=null, allMems=[], wkCache={};
 
 let currentWeekSheetName = '';
 
@@ -368,7 +369,7 @@ function pS(msg){const o=document.getElementById('lov');o.querySelector('.lmsg')
 function pE(){document.getElementById('lov').classList.remove('on');}
 
 async function api(action,p={}){
-  const r=await fetch(SCRIPT_URL,{method:'POST',redirect:'follow',body:JSON.stringify({action,adminId,...p})});
+  const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,adminId,...p})});
   const text=await r.text();
   try{return JSON.parse(text);}catch{return {ok:false,msg:'응답 오류'};}
 }
@@ -404,7 +405,7 @@ async function doLogin(){
   if(!id||!pw){err.textContent='아이디와 비밀번호를 입력해주세요.';return;}
   const btn=document.getElementById('l-btn');
   btn.innerHTML='<span class="spin"></span>'; btn.disabled=true;
-  const res=await fetch(SCRIPT_URL,{method:'POST',redirect:'follow',body:JSON.stringify({action:'adminLogin',id,pw})}).then(r=>r.text()).then(t=>{try{return JSON.parse(t);}catch{return {ok:false,msg:'응답 오류'};}}).catch(()=>({ok:false,msg:'네트워크 오류'}));
+  const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'adminLogin',id,pw})}).then(r=>r.text()).then(t=>{try{return JSON.parse(t);}catch{return {ok:false,msg:'응답 오류'};}}).catch(()=>({ok:false,msg:'네트워크 오류'}));
   btn.innerHTML='로그인'; btn.disabled=false;
   if(!res.ok){err.textContent=res.msg||'로그인 실패';return;}
   adminId=id;
