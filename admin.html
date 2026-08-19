@@ -369,9 +369,12 @@ function pS(msg){const o=document.getElementById('lov');o.querySelector('.lmsg')
 function pE(){document.getElementById('lov').classList.remove('on');}
 
 async function api(action,p={}){
-  const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,adminId,...p})});
-  const text=await r.text();
-  try{return JSON.parse(text);}catch{return {ok:false,msg:'응답 오류'};}
+  try{
+    const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,adminId,...p})});
+    return r.json();
+  }catch(e){
+    return {ok:false,msg:'네트워크 오류. 잠시 후 다시 시도해주세요.'};
+  }
 }
 
 function toast(msg,type='',dur=3000){
@@ -405,7 +408,7 @@ async function doLogin(){
   if(!id||!pw){err.textContent='아이디와 비밀번호를 입력해주세요.';return;}
   const btn=document.getElementById('l-btn');
   btn.innerHTML='<span class="spin"></span>'; btn.disabled=true;
-  const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'adminLogin',id,pw})}).then(r=>r.text()).then(t=>{try{return JSON.parse(t);}catch{return {ok:false,msg:'응답 오류'};}}).catch(()=>({ok:false,msg:'네트워크 오류'}));
+  const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'adminLogin',id,pw})}).then(r=>r.json()).catch(()=>({ok:false,msg:'네트워크 오류'}));
   btn.innerHTML='로그인'; btn.disabled=false;
   if(!res.ok){err.textContent=res.msg||'로그인 실패';return;}
   adminId=id;
