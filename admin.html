@@ -242,7 +242,6 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
           </div>
         </div>
         <div class="alert" id="close-alert"></div>
-        <!-- 현재 주차 표시 -->
         <div style="margin-bottom:12px;font-size:12px;color:var(--text2)">
           현재 주차: <strong style="color:var(--blue)" id="week-sheet-label">불러오는 중...</strong>
         </div>
@@ -356,10 +355,8 @@ code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBra
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbz3oTUS7dt52GBdHCDPEt2zX6GK8-svkjGM27xbouCGIfD3kaC_xdbp-k2Ly6gAwgyb/exec';
 let adminId=null, allMems=[], wkCache={};
 
-// 현재 로드된 주차명 (다운로드 파일명에 사용)
 let currentWeekSheetName = '';
 
-/* ── 시간 포맷 ── */
 function fmtTime(val){
   if(!val) return '';
   const d=new Date(val);
@@ -368,24 +365,21 @@ function fmtTime(val){
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-/* ── 로딩 ── */
 function pS(msg){const o=document.getElementById('lov');o.querySelector('.lmsg').textContent=msg||'불러오는 중...';o.classList.add('on');}
 function pE(){document.getElementById('lov').classList.remove('on');}
 
-/* ── API ── */
 async function api(action,p={}){
-  const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,adminId,...p})});
-  return r.json();
+  const r=await fetch(SCRIPT_URL,{method:'POST',redirect:'follow',body:JSON.stringify({action,adminId,...p})});
+  const text=await r.text();
+  try{return JSON.parse(text);}catch{return {ok:false,msg:'응답 오류'};}
 }
 
-/* ── 토스트 ── */
 function toast(msg,type='',dur=3000){
   const el=document.getElementById('toast');
   el.textContent=msg; el.className='on'+(type?' '+type:'');
   clearTimeout(el._t); el._t=setTimeout(()=>el.className='',dur);
 }
 
-/* ── 알림 ── */
 function showAlert(id,type,msg){
   const el=document.getElementById(id); if(!el) return;
   const m={blue:'alert-blue',green:'alert-green',red:'alert-red',amber:'alert-amber'};
@@ -393,10 +387,8 @@ function showAlert(id,type,msg){
   if(type!=='blue') setTimeout(()=>{el.className='alert';},5000);
 }
 
-/* ── 배지 ── */
 function bdg(cls,txt){return `<span class="bdg bdg-${cls}">${txt}</span>`;}
 
-/* ── 탭 전환 ── */
 function sw(name,el){
   document.querySelectorAll('.pg').forEach(p=>p.className='pg');
   document.getElementById('pg-'+name).className='pg on';
@@ -406,7 +398,6 @@ function sw(name,el){
   if(loaders[name]) loaders[name]();
 }
 
-/* ── 로그인 ── */
 async function doLogin(){
   const id=document.getElementById('l-id').value.trim();
   const pw=document.getElementById('l-pw').value;
@@ -414,7 +405,7 @@ async function doLogin(){
   if(!id||!pw){err.textContent='아이디와 비밀번호를 입력해주세요.';return;}
   const btn=document.getElementById('l-btn');
   btn.innerHTML='<span class="spin"></span>'; btn.disabled=true;
-  const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'adminLogin',id,pw})}).then(r=>r.json()).catch(()=>({ok:false,msg:'네트워크 오류'}));
+  const res=await fetch(SCRIPT_URL,{method:'POST',redirect:'follow',body:JSON.stringify({action:'adminLogin',id,pw})}).then(r=>r.text()).then(t=>{try{return JSON.parse(t);}catch{return {ok:false,msg:'응답 오류'};}}).catch(()=>({ok:false,msg:'네트워크 오류'}));
   btn.innerHTML='로그인'; btn.disabled=false;
   if(!res.ok){err.textContent=res.msg||'로그인 실패';return;}
   adminId=id;
@@ -431,7 +422,6 @@ function doLogout(){
   document.getElementById('login-screen').style.display='flex';
 }
 
-/* ── 홈 ── */
 function copyDailyVan(){
   const list=window._dvList||[], date=window._dvDate||'';
   if(!list.length){toast('복사할 밴링크가 없어요','a');return;}
@@ -462,7 +452,6 @@ async function loadHome(){
   if(!document.getElementById('ht-input').value)
     document.getElementById('ht-input').value=d.hashtag||'';
 
-  // 전일 밴링크
   const dv=d.dailyVan||[], dvDate=d.dailyVanDate||'';
   const dvEl=document.getElementById('daily-van-section');
   if(dvEl){
@@ -482,7 +471,6 @@ async function loadHome(){
     }
   }
 
-  // 완료 미처리자
   const dm=d.dailyMissing||[], dmDate=d.dailyMissingDate||'';
   const dmEl=document.getElementById('daily-missing-section');
   if(dmEl){
@@ -502,7 +490,6 @@ async function loadHome(){
     }
   }
 
-  // 오늘 참여자
   const pts=d.todayParticipants||[];
   document.getElementById('today-cnt').textContent=pts.length+'명';
   const el=document.getElementById('today-list');
@@ -533,10 +520,8 @@ async function setHashtag(){
   if(res.ok) document.getElementById('ht-current').textContent=ht;
 }
 
-/* ── 주간현황 ── */
 async function loadWeek(){
   pS('주간 현황 불러오는 중...');
-  // ✅ API 3번 → 1번으로 통합
   const res = await api('getWeekDashboard').catch(()=>({ok:false}));
   pE();
   if(!res.ok){
@@ -546,7 +531,6 @@ async function loadWeek(){
     return;
   }
 
-  // ✅ 주차명 동기화
   currentWeekSheetName = res.weekSheet || '';
   const sheetLabel = document.getElementById('week-sheet-label');
   if(sheetLabel) sheetLabel.textContent = currentWeekSheetName || '설정 없음';
@@ -661,7 +645,6 @@ function downloadWeekExcel(){
   const a=document.createElement('a');
   const d=new Date();
   a.href=url;
-  // ✅ currentWeekSheetName 사용 — loadWeek() 시 항상 최신값으로 갱신됨
   const sheetName=currentWeekSheetName||wkCache.weekSheet||'주차미설정';
   a.download=`열기구방_${sheetName}_주간현황_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.csv`;
   a.click();
@@ -669,7 +652,6 @@ function downloadWeekExcel(){
   toast('다운로드 완료!','g');
 }
 
-/* ── ✅ 수정: async 선언 추가 ── */
 async function runClose(){
   if(!confirm('주간 마감을 실행하시겠습니까?\n완료 2회 미만 크루에게 봉사가 부여됩니다.')) return;
   pS('주간 마감 처리 중...');showAlert('close-alert','blue','처리 중...');
@@ -679,7 +661,6 @@ async function runClose(){
   if(res.ok) loadWeek();
 }
 
-/* ── 멤버 ── */
 async function loadMembers(){
   pS();
   const res=await api('getMembers').catch(()=>({ok:false}));
@@ -788,7 +769,6 @@ async function doUnhonor(nick,id){
   else toast(res.msg||'명예 회수 실패','r');
 }
 
-/* ── 신고 ── */
 async function loadReports(){
   pS();
   const res=await api('getReports').catch(()=>({ok:false}));
@@ -829,7 +809,6 @@ async function resolveRep(idx){
   if(res.ok){toast('처리 완료','g');loadReports();}else toast('실패','r');
 }
 
-/* ── 휴가 ── */
 async function loadVacation(){
   pS();
   const res=await api('getVacationList').catch(()=>({ok:false}));
@@ -857,14 +836,12 @@ function copyVac(){
   navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('휴가 명단 복사','g')).catch(()=>toast('복사 실패','r'));
 }
 
-/* ── 주차 시트 ── */
 async function loadSheet(){
   const res=await api('getSettings').catch(()=>null);
   if(res?.ok){
     const cur=res.settings?.current_week_sheet||'설정 없음';
     document.getElementById('cur-sheet-name').textContent=cur;
     document.getElementById('cur-sheet-input').value=cur!=='설정 없음'?cur:'';
-    // ✅ 설정 탭 로딩 시에도 currentWeekSheetName 동기화
     if(cur!=='설정 없음') currentWeekSheetName=cur;
   }
 }
@@ -881,7 +858,6 @@ async function createSheet(){
   showAlert('sheet-alert','green',`"${name}" 생성 완료!${setCur==='yes'?' 현재 주차로 설정됐어요.':''}`);
   document.getElementById('sheet-name').value='';
   document.getElementById('cur-sheet-name').textContent=name;
-  // ✅ 시트 생성 후 currentWeekSheetName 즉시 반영
   if(setCur==='yes'){
     currentWeekSheetName=name;
     const wsl=document.getElementById('week-sheet-label');
@@ -896,14 +872,12 @@ async function setCurSheet(){
   showAlert('cur-sheet-alert',res.ok?'green':'red',res.ok?`"${name}"으로 변경됐어요.`:res.msg);
   if(res.ok){
     document.getElementById('cur-sheet-name').textContent=name;
-    // ✅ 수동 변경 시에도 동기화
     currentWeekSheetName=name;
     const wsl=document.getElementById('week-sheet-label');
     if(wsl) wsl.textContent=name;
   }
 }
 
-/* ── 활동 로그 ── */
 async function loadLogs(){
   pS();
   const res=await api('getLogs',{limit:1000}).catch(()=>({ok:false}));
@@ -919,7 +893,6 @@ async function loadLogs(){
   </div>`).join('');
 }
 
-/* ── 초기화 ── */
 window.onload=()=>{
   const id=sessionStorage.getItem('aid');
   const name=sessionStorage.getItem('aname');
