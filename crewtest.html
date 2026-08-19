@@ -226,7 +226,7 @@
       <div style="background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <div>
-            <div style="font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.04em;text-transform:uppercase">오늘 밴링크</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.04em;text-transform:uppercase">오늘 참여</div>
             <div style="font-size:11px;color:var(--text3);margin-top:2px">밴 걸린 크루 게시물 — 클릭해서 좋아요 눌러주세요</div>
           </div>
           <div style="display:flex;gap:6px">
@@ -263,9 +263,9 @@
           </button>
         </div>
         <button class="sub-btn" id="van-only-btn" style="width:100%;margin-bottom:6px" onclick="openOv('van-only')">
-          <span class="sub-icon">🔗</span>밴링크 등록
+          <span class="sub-icon">🔗</span>참여 등록
         </button>
-        <div id="van-expired-msg" style="display:none;font-size:11px;color:#999;text-align:center;margin-bottom:10px">🔒 밴링크는 22:00까지만 등록 가능합니다</div>
+        <div id="van-expired-msg" style="display:none;font-size:11px;color:#999;text-align:center;margin-bottom:10px">🔒 참여는 22:00까지만 등록 가능합니다</div>
       </div>
       <div class="sub-btns" style="display:none">
         <button class="sub-btn" onclick="openOv('vac')"><span class="sub-icon">✈️</span>휴가 신청</button>
@@ -286,7 +286,7 @@
       <div class="ri"><span class="rn">①</span>참여 시간 11:00 ~ 22:00 / 완료 시간 22:00 ~ 다음날 10:00</div>
       <div class="ri"><span class="rn">②</span>해시태그 복사 후 피드에 작성 → 앱에서 참여 등록</div>
       <div class="ri"><span class="rn">③</span>완료 시간에 해시태그 2~3회 재검색 후 꼼꼼히 좋아요 → 완료 체크</div>
-      <div class="ri"><span class="rn">④</span>밴링크 등록은 11:00 ~ 22:00 (해시태그 미노출 시에만)</div>
+      <div class="ri"><span class="rn">④</span>참여 등록은 11:00 ~ 22:00 (해시태그 미노출 시에만)</div>
       <div class="ri"><span class="rn">⑤</span>주 2회 이상 완료 필수 (월~일 기준)</div>
     </div>
     <div class="rule-block">
@@ -296,7 +296,7 @@
       <div class="ri"><span class="rn">③</span>봉사 처리: 참여 유형 [봉사 참여] 선택 → 참여 + 완료 체크</div>
       <div class="ri"><span class="rn">④</span>봉사 발생 후 3일 이내 미처리 → 계정 자동 잠금</div>
       <div class="ri"><span class="rn">⑤</span>봉사 3회 누적 → 계정 즉시 잠금 (운영진 문의)</div>
-      <div class="ri"><span class="rn">⑥</span>허위 밴링크 등록 신고 처리 시 봉사 부여</div>
+      <div class="ri"><span class="rn">⑥</span>허위 참여 등록 신고 처리 시 봉사 부여</div>
     </div>
     <div class="rule-block">
       <div class="rb-head gray">참여 유형</div>
@@ -347,7 +347,7 @@
   <div class="sheet">
     <div class="sh-handle"></div>
     <div class="sh-title">✅ 완료 체크</div>
-    <div class="info-box green">해시태그 2~3회 재검색 후 꼼꼼히 좋아요 눌렀나요? 밴 링크도 챙겨주세요!</div>
+    <div class="info-box green">해시태그 2~3회 재검색 후 꼼꼼히 좋아요 눌렀나요?  링크도 챙겨주세요!</div>
     <button class="sh-btn green" id="done-sb" onclick="doDone()">완료 등록하기</button>
     <button class="sh-btn ghost" onclick="closeOv('ov-done')">취소</button>
   </div>
@@ -355,14 +355,14 @@
 <div class="overlay" id="ov-van-only" onclick="bgClose(event,'ov-van-only')">
   <div class="sheet">
     <div class="sh-handle"></div>
-    <div class="sh-title">🔗 밴링크 등록</div>
-    <div class="info-box" style="background:var(--amber-bg);color:var(--amber-text)">해시태그에 걸리지 않은(밴) 경우 링크를 등록해주세요.<br>등록된 밴링크는 다른 크루에게 공유됩니다.</div>
+    <div class="sh-title">🔗 참여 등록</div>
+    <div class="info-box" style="background:var(--amber-bg);color:var(--amber-text)">해시태그에 걸리지 않은(밴) 경우 링크를 등록해주세요.<br>등록된 참여는 다른 크루에게 공유됩니다.</div>
     <div class="sf">
-      <label>밴링크 (인스타그램 게시물 URL)</label>
+      <label>참여 (인스타그램 게시물 URL)</label>
       <input id="van-only-input" placeholder="https://www.instagram.com/p/..." type="url"/>
     </div>
     <div id="van-only-alert" style="display:none;padding:8px 12px;border-radius:var(--r3);font-size:12px;margin-bottom:10px"></div>
-    <button class="sh-btn amber" id="van-only-sb" onclick="doVanOnly()">밴링크 등록하기</button>
+    <button class="sh-btn amber" id="van-only-sb" onclick="doVanOnly()">참여 등록하기</button>
     <button class="sh-btn ghost" onclick="closeOv('ov-van-only')">취소</button>
   </div>
 </div>
@@ -399,7 +399,7 @@
   </div>
 </div>
 <script>
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbz3oTUS7dt52GBdHCDPEt2zX6GK8-svkjGM27xbouCGIfD3kaC_xdbp-k2Ly6gAwgyb/exec"; 
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwUiIEAv6HkaWPwOe-ZBFmAgdmdKoWXMEG-fjwsom6EerRGFADjfbw9kXqqbz7CMJB0/exec";
 const DAYS=["월","화","수","목","금","토","일"];
 let user=null, settings={}, myWeek=null;
 
@@ -636,10 +636,10 @@ async function loadVanLinks(){
       if(a.vanTime)return -1;if(b.vanTime)return 1;return 0;
     });
   window._vanItems=items;
-  if(!items.length){el.innerHTML='<div style="text-align:center;padding:10px;color:var(--text3);font-size:12px">오늘 등록된 밴링크 없음</div>';return;}
+  if(!items.length){el.innerHTML='<div style="text-align:center;padding:10px;color:var(--text3);font-size:12px">오늘 등록된 참여 없음</div>';return;}
   el.innerHTML=items.map((t,i)=>`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;${i<items.length-1?"border-bottom:1px solid var(--border)":""}">
-      <div><div style="font-size:13px;font-weight:700">${t.nickname}</div><div style="font-size:11px;color:var(--text3);margin-top:1px">밴링크</div></div>
+      <div><div style="font-size:13px;font-weight:700">${t.nickname}</div><div style="font-size:11px;color:var(--text3);margin-top:1px">참여</div></div>
       <div style="display:flex;gap:6px">
         <button style="padding:6px 11px;font-size:12px;font-weight:600;background:var(--blue-bg);color:var(--blue-text);border:1.5px solid rgba(59,130,246,.3);border-radius:100px;cursor:pointer;font-family:inherit" onclick="cpVan('${t.resolvedLink}')">링크 복사</button>
         <a href="${t.resolvedLink}" target="_blank" style="padding:6px 11px;font-size:12px;font-weight:600;background:var(--surface);color:var(--text2);border:1.5px solid var(--border2);border-radius:100px;text-decoration:none;display:inline-flex;align-items:center">바로가기 →</a>
@@ -651,20 +651,20 @@ function cpVan(url){navigator.clipboard.writeText(url).then(()=>toast("링크 �
 
 function copyAllVanLinks(){
   const items=window._vanItems||[];
-  if(!items.length){toast("복사할 밴링크가 없습니다","a");return;}
+  if(!items.length){toast("복사할 참여가 없습니다","a");return;}
   navigator.clipboard.writeText(items.map((t,i)=>`${i+1}. ${t.nickname}(@${t.id||""}) / ${t.resolvedLink||""}`).join("\n"))
-    .then(()=>toast("밴링크 전체 복사 완료!","g")).catch(()=>toast("복사 실패","a"));
+    .then(()=>toast("참여 전체 복사 완료!","g")).catch(()=>toast("복사 실패","a"));
 }
 
 function renderDailyVan(list,date){
   const el=document.getElementById("daily-van-section");
-  if(el)el.style.display="none";return; // ✅ 어제 밴링크 섹션 비활성화
+  if(el)el.style.display="none";return; // ✅ 어제 참여 섹션 비활성화
   window._dailyVanList=list;
   el.style.display="block";
   const sv=Number(user?.service||0);
-  let html=sv>0?'<div style="background:var(--red-bg);border:1px solid var(--red);border-radius:var(--r2);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--red-text);line-height:1.6">⚠️ 봉사 처리 전 전일 밴링크를 확인해주세요!</div>':"";
+  let html=sv>0?'<div style="background:var(--red-bg);border:1px solid var(--red);border-radius:var(--r2);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--red-text);line-height:1.6">⚠️ 봉사 처리 전 전일 참여를 확인해주세요!</div>':"";
   html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-    <div style="font-size:11px;font-weight:700;color:var(--text2)">🔗 ${date} 밴링크 (${list.length}건)</div>
+    <div style="font-size:11px;font-weight:700;color:var(--text2)">🔗 ${date} 참여 (${list.length}건)</div>
     <button onclick="copyAllDailyVan()" style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue);cursor:pointer;font-family:inherit">📋 전체복사</button>
   </div>
   <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;max-height:180px;overflow-y:auto">`;
@@ -683,7 +683,7 @@ function renderDailyVan(list,date){
 
 function copyAllDailyVan(){
   const list=window._dailyVanList||[];
-  if(!list.length){toast("복사할 밴링크가 없어요","a");return;}
+  if(!list.length){toast("복사할 참여가 없어요","a");return;}
   navigator.clipboard.writeText(list.map((v,i)=>`${i+1}. ${v.nickname} / ${v.link}`).join("\n"))
     .then(()=>toast("전체복사 완료!","g")).catch(()=>toast("복사 실패","a"));
 }
@@ -775,7 +775,7 @@ async function doVanOnly(){
   const btn=document.getElementById("van-only-sb");
   btn.innerHTML='<span class="spinner"></span> 등록 중...';btn.disabled=true;
   const res=await api("submitVanLink",{nickname:user.nick,instagramId:user.id,vanLink});
-  btn.innerHTML="밴링크 등록하기";btn.disabled=false;
+  btn.innerHTML="참여 등록하기";btn.disabled=false;
   if(res.ok){closeOv("ov-van-only");document.getElementById("van-only-input").value="";toast(res.msg,"g");await loadMain();}
   else{alertEl.style.display="block";alertEl.style.background="var(--red-bg)";alertEl.style.color="var(--red-text)";alertEl.textContent=res.msg;}
 }
@@ -811,7 +811,7 @@ window.onload=async()=>{
   const nick=localStorage.getItem("cn"),id=localStorage.getItem("ci");
   if(nick&&id){
     pStart("로그인 중...");
-    const res=await api("checkMember",{nickname:nick,instagramId:id});
+    const res=await api("checkMember",{nickname:nick,instagramId:id}); 
     pEnd();
     if(res.ok&&res.member?.status!=="locked"){
       user={nick,id,...res.member};
