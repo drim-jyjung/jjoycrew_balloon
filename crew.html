@@ -811,7 +811,7 @@ window.onload=async()=>{
   const nick=localStorage.getItem("cn"),id=localStorage.getItem("ci");
   if(nick&&id){
     pStart("로그인 중...");
-    const res=await api("checkMember",{nickname:nick,instagramId:id});
+    const res=await api("checkMember",{nickname:nick,instagramId:id}); 
     pEnd();
     if(res.ok&&res.member?.status!=="locked"){
       user={nick,id,...res.member};
