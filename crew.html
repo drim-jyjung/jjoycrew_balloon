@@ -269,7 +269,6 @@
       </div>
       <div class="sub-btns" style="display:none">
         <button class="sub-btn" onclick="openOv('vac')"><span class="sub-icon">✈️</span>휴가 신청</button>
-        <button class="sub-btn" onclick="openOv('report')"><span class="sub-icon">🚨</span>신고</button>
       </div>
     </div>
   </div>
@@ -376,26 +375,6 @@
     <div class="sf"><label>사유 (선택)</label><input id="v-reason" placeholder="여행, 개인 사정 등"/></div>
     <button class="sh-btn blue" onclick="doVac()">휴가 신청하기</button>
     <button class="sh-btn ghost" onclick="closeOv('ov-vac')">취소</button>
-  </div>
-</div>
-<div class="overlay" id="ov-report" onclick="bgClose(event,'ov-report')">
-  <div class="sheet">
-    <div class="sh-handle"></div>
-    <div class="sh-title">🚨 신고</div>
-    <div class="sf"><label>신고 대상 닉네임</label><input id="r-target" placeholder="닉네임"/></div>
-    <div class="sf">
-      <label>신고 유형</label>
-      <select id="r-type">
-        <option>좋아요 누락</option>
-        <option>밴 링크 누락</option>
-        <option>허위 밴 등록</option>
-        <option>완료 미등록 의심</option>
-        <option>해태/무임승차/먹튀 의심</option>
-      </select>
-    </div>
-    <div class="sf"><label>증거 / 설명 (선택)</label><input id="r-evidence" placeholder="링크 또는 상세 설명"/></div>
-    <button class="sh-btn amber" onclick="doReport()">신고 접수하기</button>
-    <button class="sh-btn ghost" onclick="closeOv('ov-report')">취소</button>
   </div>
 </div>
 <script>
@@ -791,19 +770,6 @@ async function doVac(){
   const res=await api("applyVacation",{nickname:user.nick,instagramId:user.id,startDate:start,endDate:end,reason});
   btn.innerHTML="휴가 신청하기";btn.disabled=false;
   if(res.ok){closeOv("ov-vac");toast(res.msg,"g",4000);}
-  else toast(res.msg,"r",4000);
-}
-
-async function doReport(){
-  const target=document.getElementById("r-target").value.trim();
-  const type=document.getElementById("r-type").value;
-  const evidence=document.getElementById("r-evidence").value.trim();
-  if(!target){toast("신고 대상 닉네임을 입력해주세요","a");return;}
-  const btn=document.querySelector("#ov-report .sh-btn.amber");
-  btn.innerHTML='<span class="spinner"></span> 접수 중...';btn.disabled=true;
-  const res=await api("submitReport",{reporter:user.nick,target,type,evidence});
-  btn.innerHTML="신고 접수하기";btn.disabled=false;
-  if(res.ok){closeOv("ov-report");document.getElementById("r-target").value="";document.getElementById("r-evidence").value="";toast(res.msg,"g");}
   else toast(res.msg,"r",4000);
 }
 
